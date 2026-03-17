@@ -28,12 +28,14 @@ const navGroups = [
     label: 'Delivery',
     items: [
       { title: 'Workshops', url: '/workshops', icon: Briefcase },
+      { title: 'Meetings', url: '/meetings', icon: CalendarDays },
     ],
   },
   {
     label: 'Commercial',
     items: [
       { title: 'Invoices', url: '/invoices', icon: FileText },
+      { title: 'Contracts', url: '/contracts', icon: FileSignature },
     ],
   },
   {
