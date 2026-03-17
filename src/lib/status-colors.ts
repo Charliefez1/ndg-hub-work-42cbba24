@@ -67,7 +67,7 @@ export type StatusEntity = keyof typeof entityColorMaps;
  * Returns a semantic colour token for a given entity + status.
  * Use in badge/tag components — never hard-code colours in JSX.
  */
-export function getStatusColor(entity: StatusEntity, status: string): string {
+export function getStatusColor(status: string, entity: StatusEntity): string {
   return entityColorMaps[entity]?.[status] ?? 'text-3';
 }
 
