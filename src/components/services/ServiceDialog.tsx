@@ -26,8 +26,8 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-const CATEGORIES = ['workshop', 'coaching', 'consultancy', 'assessment', 'keynote', 'other'];
-const NEURO_PHASES = ['Aware', 'Adjust', 'Thrive', 'Lead', null];
+const CATEGORIES = ['workshop', 'service'];
+const NEURO_PHASES = ['needs', 'engage', 'understand', 'realise', 'ongoing'];
 
 interface ServiceDialogProps {
   open: boolean;
