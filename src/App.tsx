@@ -38,6 +38,14 @@ const App = () => {
                 }
               />
               <Route
+                path="/services"
+                element={
+                  <RouteGuard allowedRoles={['admin', 'team']}>
+                    <Services />
+                  </RouteGuard>
+                }
+              />
+              <Route
                 path="/portal"
                 element={
                   <RouteGuard allowedRoles={['client']}>

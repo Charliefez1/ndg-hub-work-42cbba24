@@ -59,7 +59,7 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
         await updateService.mutateAsync({ id: service.id, ...values });
         toast.success('Service updated');
       } else {
-        await createService.mutateAsync(values);
+        await createService.mutateAsync({ name: values.name, category: values.category, price: values.price, ...values });
         toast.success('Service created');
       }
       onOpenChange(false);
