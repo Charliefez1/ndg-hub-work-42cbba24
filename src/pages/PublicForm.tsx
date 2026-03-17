@@ -26,7 +26,7 @@ export default function PublicForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await submitResponse.mutateAsync({ form_id: form.id, data: answers });
+      await submitResponse.mutateAsync({ formId: form.id, data: answers });
       setSubmitted(true);
     } catch (err: any) { toast.error(err.message); }
   };
