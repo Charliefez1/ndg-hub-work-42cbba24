@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,11 +10,11 @@ import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
 import { Link } from 'react-router-dom';
+import { ClipboardList } from 'lucide-react';
 
 export default function Portal() {
   const { profile, signOut, user } = useAuth();
 
-  // Get portal access to find org
   const { data: access } = useQuery({
     queryKey: ['portal-access', user?.id],
     enabled: !!user,
@@ -39,7 +41,7 @@ export default function Portal() {
     queryKey: ['portal-deliveries', orgIds],
     enabled: orgIds.length > 0,
     queryFn: async () => {
-      const { data, error } = await supabase.from('deliveries').select('*').in('organisation_id', orgIds).order('delivery_date', { ascending: false });
+      const { data, error } = await supabase.from('deliveries').select('*, feedback_form_id').in('organisation_id', orgIds).order('delivery_date', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -54,6 +56,26 @@ export default function Portal() {
       return data;
     },
   });
+
+  // Get active feedback forms for the client's deliveries
+  const { data: feedbackForms } = useQuery({
+    queryKey: ['portal-feedback-forms', orgIds],
+    enabled: orgIds.length > 0,
+    queryFn: async () => {
+      const deliveryIds = deliveries?.map((d) => d.id) ?? [];
+      if (!deliveryIds.length) return [];
+      const { data, error } = await supabase
+        .from('forms')
+        .select('*, deliveries(title, delivery_date)')
+        .eq('type', 'feedback')
+        .eq('active', true)
+        .in('delivery_id', deliveryIds);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const canSubmitForms = access?.some((a) => (a.permissions as any)?.can_submit_forms !== false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,6 +102,7 @@ export default function Portal() {
               <TabsTrigger value="projects">Projects ({projects?.length ?? 0})</TabsTrigger>
               <TabsTrigger value="workshops">Workshops ({deliveries?.length ?? 0})</TabsTrigger>
               <TabsTrigger value="invoices">Invoices ({invoices?.length ?? 0})</TabsTrigger>
+              {canSubmitForms && <TabsTrigger value="feedback">Feedback</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="projects" className="mt-md">
@@ -146,6 +169,36 @@ export default function Portal() {
                 </div>
               )}
             </TabsContent>
+
+            {canSubmitForms && (
+              <TabsContent value="feedback" className="mt-md">
+                {!feedbackForms?.length ? (
+                  <div className="text-center py-lg">
+                    <ClipboardList className="h-10 w-10 mx-auto text-text-3 mb-sm" strokeWidth={1.25} />
+                    <p className="text-text-2">No feedback forms available at the moment.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-xs">
+                    {feedbackForms.map((form) => (
+                      <Card key={form.id}>
+                        <CardContent className="pt-4 flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{form.title}</p>
+                            <p className="text-caption text-text-3">
+                              {(form as any).deliveries?.title ?? 'Workshop'} · {(form as any).deliveries?.delivery_date ?? ''}
+                            </p>
+                            {form.description && <p className="text-caption text-text-3 mt-1">{form.description}</p>}
+                          </div>
+                          <Button size="sm" asChild>
+                            <Link to={`/form/${form.id}`}>Submit Feedback</Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            )}
           </Tabs>
         )}
       </main>

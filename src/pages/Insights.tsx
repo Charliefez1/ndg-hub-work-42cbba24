@@ -5,7 +5,11 @@ import { useProjects } from '@/hooks/useProjects';
 import { useDeliveries } from '@/hooks/useDeliveries';
 import { useInvoices } from '@/hooks/useInvoices';
 import { useTasks } from '@/hooks/useTasks';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useInsightsPersonal } from '@/hooks/useInsights';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, LineChart, Line, Legend,
+} from 'recharts';
 
 const PIE_COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--muted))', 'hsl(var(--secondary))', '#94a3b8', '#64748b'];
 
@@ -14,6 +18,7 @@ export default function Insights() {
   const { data: deliveries } = useDeliveries();
   const { data: invoices } = useInvoices();
   const { data: tasks } = useTasks();
+  const { data: personalData } = useInsightsPersonal();
 
   const projectsByStatus = Object.entries(
     (projects ?? []).reduce<Record<string, number>>((acc, p) => { acc[p.status] = (acc[p.status] || 0) + 1; return acc; }, {})
@@ -29,6 +34,13 @@ export default function Insights() {
     revenueByMonth[month] = (revenueByMonth[month] || 0) + Number(i.total);
   });
   const revenueData = Object.entries(revenueByMonth).sort().slice(-6).map(([month, total]) => ({ month, total }));
+
+  // Personal insights from edge function
+  const personal = personalData?.data;
+  const energyOverTime = personal?.energyOverTime ?? [];
+  const focusByDay = personal?.focusByDay ?? [];
+  const recovery = personal?.recovery;
+  const optimalWindow = personal?.optimalWindow;
 
   return (
     <AppShell>
@@ -83,11 +95,77 @@ export default function Insights() {
           </TabsContent>
 
           <TabsContent value="personal" className="mt-md">
-            <Card>
-              <CardContent className="pt-6 text-center text-text-2">
-                <p>Personal insights (energy tracking, focus patterns) coming in Phase 2.</p>
-              </CardContent>
-            </Card>
+            <div className="space-y-lg">
+              {/* Optimal window insight */}
+              {optimalWindow && (
+                <Card className="border-primary/30 bg-primary/5">
+                  <CardContent className="pt-4">
+                    <p className="text-body font-medium">💡 {optimalWindow}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg">
+                {/* Energy over time */}
+                <Card>
+                  <CardHeader><CardTitle className="text-body">Energy & Focus (30 days)</CardTitle></CardHeader>
+                  <CardContent className="h-64">
+                    {energyOverTime.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={energyOverTime}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" tickFormatter={(d: string) => d.substring(5)} />
+                          <YAxis domain={[0, 10]} />
+                          <Tooltip />
+                          <Legend />
+                          <Line type="monotone" dataKey="energy" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                          <Line type="monotone" dataKey="focus" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : <p className="text-text-2 text-center pt-20">Log your daily energy to see trends.</p>}
+                  </CardContent>
+                </Card>
+
+                {/* Focus by day of week */}
+                <Card>
+                  <CardHeader><CardTitle className="text-body">Focus by Day of Week</CardTitle></CardHeader>
+                  <CardContent className="h-64">
+                    {focusByDay.some((d: any) => d.avgFocus !== null) ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={focusByDay}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="day" />
+                          <YAxis domain={[0, 10]} />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="avgEnergy" name="Avg Energy" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="avgFocus" name="Avg Focus" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : <p className="text-text-2 text-center pt-20">Not enough data yet.</p>}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Recovery stats */}
+              {recovery && (recovery.avgEnergyDeliveryDays !== null || recovery.avgEnergyNonDeliveryDays !== null) && (
+                <Card>
+                  <CardHeader><CardTitle className="text-body">Recovery: Delivery vs Non-Delivery Days</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-md">
+                      <div className="text-center p-md bg-background rounded border">
+                        <p className="text-section-title">{recovery.avgEnergyDeliveryDays ?? '—'}</p>
+                        <p className="text-caption text-text-3">Avg energy on delivery days ({recovery.deliveryDaysCount} days)</p>
+                      </div>
+                      <div className="text-center p-md bg-background rounded border">
+                        <p className="text-section-title">{recovery.avgEnergyNonDeliveryDays ?? '—'}</p>
+                        <p className="text-caption text-text-3">Avg energy on rest days ({recovery.nonDeliveryDaysCount} days)</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>

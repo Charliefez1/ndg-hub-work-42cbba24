@@ -1,7 +1,7 @@
 import {
   Home, CalendarCheck, FolderKanban, CheckSquare, Users, BarChart3,
   Package, FileText, ClipboardList, Globe, Settings, Bot, Briefcase, LogOut,
-  CalendarDays, FileSignature, Handshake, BookOpen,
+  CalendarDays, FileSignature, Handshake, BookOpen, Mail, BookTemplate,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { NavLink } from '@/components/NavLink';
@@ -29,6 +29,7 @@ const navGroups = [
     items: [
       { title: 'Workshops', url: '/workshops', icon: Briefcase },
       { title: 'Meetings', url: '/meetings', icon: CalendarDays },
+      { title: 'Curriculum', url: '/curriculum', icon: BookTemplate },
     ],
   },
   {
@@ -42,6 +43,7 @@ const navGroups = [
     label: 'Engage',
     items: [
       { title: 'Forms', url: '/forms', icon: ClipboardList },
+      { title: 'Emails', url: '/emails', icon: Mail },
       { title: 'Client Portal', url: '/portal', icon: Globe },
     ],
   },
