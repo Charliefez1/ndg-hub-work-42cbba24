@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const LOVABLE_API_URL = "https://ai-gateway.lovable.dev/api/v1/chat/completions";
+const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 const AGENT_PROMPTS: Record<string, string> = {
   general: `You are NDG Hub AI, the intelligent assistant for Neurodiversity Global's internal work management platform. You help with project management, workshop planning, client relations, and data analysis. Be concise, practical, and neurodiversity-informed in your responses.`,
