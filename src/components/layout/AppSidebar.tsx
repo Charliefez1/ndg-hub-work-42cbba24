@@ -67,7 +67,7 @@ export function AppSidebar() {
       </div>
       <SidebarContent>
         {navGroups.map((group) => (
-          <SidebarGroup key={group.label} defaultOpen>
+          <SidebarGroup key={group.label}>
             <SidebarGroupLabel className="text-overline text-text-3 px-3">
               {!collapsed && group.label}
             </SidebarGroupLabel>
