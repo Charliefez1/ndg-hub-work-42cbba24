@@ -29,6 +29,7 @@ const navGroups = [
     items: [
       { title: 'Workshops', url: '/workshops', icon: Briefcase },
       { title: 'Meetings', url: '/meetings', icon: CalendarDays },
+      { title: 'Curriculum', url: '/curriculum', icon: BookTemplate },
     ],
   },
   {
