@@ -1,23 +1,47 @@
 import { useParams, Link } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { useProject } from '@/hooks/useProjects';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useProject, useAdvanceProjectStatus } from '@/hooks/useProjects';
 import { useDeliveries } from '@/hooks/useDeliveries';
 import { useTasks } from '@/hooks/useTasks';
 import { ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
+import { toast } from 'sonner';
+import { BillingTab } from '@/components/projects/BillingTab';
+import { FormsTab } from '@/components/projects/FormsTab';
+import { NotesTab } from '@/components/projects/NotesTab';
+import { DocumentsTab } from '@/components/projects/DocumentsTab';
+import { UpdatesTab } from '@/components/projects/UpdatesTab';
+
+const STATUS_ORDER = ['contracting', 'project_planning', 'session_planning', 'content_review', 'delivery', 'feedback_analytics', 'closed'];
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: project, isLoading } = useProject(id);
   const { data: deliveries } = useDeliveries(id);
   const { data: tasks } = useTasks({ projectId: id });
+  const advanceStatus = useAdvanceProjectStatus();
 
   if (isLoading) return <AppShell><Skeleton className="h-8 w-64" /></AppShell>;
   if (!project) return <AppShell><p className="text-text-2">Project not found.</p></AppShell>;
+
+  const currentIdx = STATUS_ORDER.indexOf(project.status);
+  const nextStatus = currentIdx < STATUS_ORDER.length - 1 ? STATUS_ORDER[currentIdx + 1] : null;
+
+  const handleAdvance = async () => {
+    if (!nextStatus || !id) return;
+    try {
+      await advanceStatus.mutateAsync({ projectId: id, newStatus: nextStatus });
+      toast.success(`Project moved to ${nextStatus.replace(/_/g, ' ')}`);
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
 
   return (
     <AppShell>
@@ -25,7 +49,12 @@ export default function ProjectDetail() {
         <div className="flex items-center gap-md">
           <Link to="/projects" className="text-text-3 hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
           <h1 className="text-page-title">{project.name}</h1>
-          <Badge className={getStatusBadgeClasses(project.status, 'project')}>{project.status.replace('_', ' ')}</Badge>
+          <Badge className={getStatusBadgeClasses(project.status, 'project')}>{project.status.replace(/_/g, ' ')}</Badge>
+          {nextStatus && project.status !== 'closed' && (
+            <Button size="sm" variant="outline" onClick={handleAdvance} disabled={advanceStatus.isPending}>
+              Advance to {nextStatus.replace(/_/g, ' ')}
+            </Button>
+          )}
         </div>
 
         <Tabs defaultValue="overview">
@@ -86,11 +115,25 @@ export default function ProjectDetail() {
             )}
           </TabsContent>
 
-          {['billing', 'forms', 'notes', 'documents', 'updates'].map((tab) => (
-            <TabsContent key={tab} value={tab} className="mt-md">
-              <p className="text-text-2 text-center py-lg capitalize">{tab} — coming soon.</p>
-            </TabsContent>
-          ))}
+          <TabsContent value="billing" className="mt-md">
+            <BillingTab projectId={id!} budget={project.budget ? Number(project.budget) : null} />
+          </TabsContent>
+
+          <TabsContent value="forms" className="mt-md">
+            <FormsTab projectId={id!} />
+          </TabsContent>
+
+          <TabsContent value="notes" className="mt-md">
+            <NotesTab projectId={id!} />
+          </TabsContent>
+
+          <TabsContent value="documents" className="mt-md">
+            <DocumentsTab projectId={id!} />
+          </TabsContent>
+
+          <TabsContent value="updates" className="mt-md">
+            <UpdatesTab projectId={id!} projectName={project.name} projectStatus={project.status} />
+          </TabsContent>
         </Tabs>
       </div>
     </AppShell>

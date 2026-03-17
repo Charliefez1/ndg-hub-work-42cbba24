@@ -58,3 +58,57 @@ export function useUpdateProject() {
     },
   });
 }
+
+// --- Edge Function hooks ---
+
+interface ScaffoldProjectInput {
+  organisationId: string;
+  name: string;
+  deliveries: Array<Record<string, unknown>>;
+  intendedNeuroPhase: string;
+  budget: number;
+  startDate: string;
+  endDate: string;
+  notes?: string;
+}
+
+export function useScaffoldProject() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: ScaffoldProjectInput) => {
+      const { data, error } = await supabase.functions.invoke('scaffold-project', {
+        body: input,
+      });
+      if (error) throw error;
+      return data as { project: Project; deliveries: unknown[]; sessions: unknown[]; forms: unknown[] };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEY });
+      qc.invalidateQueries({ queryKey: ['deliveries'] });
+      qc.invalidateQueries({ queryKey: ['sessions'] });
+      qc.invalidateQueries({ queryKey: ['forms'] });
+    },
+  });
+}
+
+interface AdvanceProjectStatusInput {
+  projectId: string;
+  newStatus: string;
+}
+
+export function useAdvanceProjectStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: AdvanceProjectStatusInput) => {
+      const { data, error } = await supabase.functions.invoke('advance-project-status', {
+        body: input,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: KEY });
+      qc.invalidateQueries({ queryKey: ['project', vars.projectId] });
+    },
+  });
+}

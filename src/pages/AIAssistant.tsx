@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { getRemainingCalls } from '@/hooks/useAI';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
@@ -60,6 +61,8 @@ export default function AIAssistant() {
       <div className="flex flex-col h-[calc(100vh-theme(spacing.12)-theme(spacing.lg)*2)]">
         <div className="flex items-center justify-between mb-md">
           <h1 className="text-page-title">AI Assistant</h1>
+          <div className="flex items-center gap-sm">
+          <Badge variant="outline" className="text-xs">{getRemainingCalls()} / 20 calls remaining</Badge>
           <Select value={agent} onValueChange={(v) => setAgent(v as Agent)}>
             <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -70,6 +73,7 @@ export default function AIAssistant() {
               ))}
             </SelectContent>
           </Select>
+          </div>
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-md pr-2">
