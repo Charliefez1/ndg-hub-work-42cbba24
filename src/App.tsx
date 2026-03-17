@@ -30,6 +30,8 @@ import AIAssistant from './pages/AIAssistant';
 import Settings from './pages/Settings';
 import Meetings from './pages/Meetings';
 import Contracts from './pages/Contracts';
+import Partners from './pages/Partners';
+import KnowledgeBase from './pages/KnowledgeBase';
 import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
