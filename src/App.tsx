@@ -28,6 +28,8 @@ import DailyBrief from './pages/DailyBrief';
 import Insights from './pages/Insights';
 import AIAssistant from './pages/AIAssistant';
 import Settings from './pages/Settings';
+import Meetings from './pages/Meetings';
+import Contracts from './pages/Contracts';
 import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
