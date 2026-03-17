@@ -12,7 +12,7 @@ export function StatusBadge({ entity, status, className }: StatusBadgeProps) {
     <span
       className={cn(
         'inline-flex items-center rounded-full px-2 py-0.5 text-overline',
-        getStatusBadgeClasses(entity, status),
+        getStatusBadgeClasses(status, entity),
         className
       )}
     >
