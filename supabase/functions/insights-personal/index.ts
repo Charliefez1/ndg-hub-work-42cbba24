@@ -108,7 +108,7 @@ Deno.serve(async (req: Request) => {
           energyOverTime: (energyData || []).map((d) => ({
             date: d.date,
             energy: d.energy_level,
-            focus: d.focus_score,
+            focus: d.focus_level,
           })),
           focusByDay,
           recovery: {
