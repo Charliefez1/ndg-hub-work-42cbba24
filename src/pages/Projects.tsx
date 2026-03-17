@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
 
-const PROJECT_STATUSES = ['contracting', 'planning', 'in_progress', 'review', 'complete', 'on_hold', 'cancelled'];
+const PROJECT_STATUSES = ['contracting', 'project_planning', 'session_planning', 'content_review', 'delivery', 'feedback_analytics', 'closed'];
 
 export default function Projects() {
   const { data: projects, isLoading } = useProjects();

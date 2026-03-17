@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
 
-const DELIVERY_STATUSES = ['planning', 'content_ready', 'scheduled', 'delivered', 'feedback_received', 'cancelled'];
+const DELIVERY_STATUSES = ['planning', 'scheduled', 'in_progress', 'delivered', 'follow_up', 'complete', 'cancelled'];
 
 export default function Workshops() {
   const { data: deliveries, isLoading } = useDeliveries();
