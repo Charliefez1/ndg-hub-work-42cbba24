@@ -151,3 +151,27 @@ export function useDeleteAgendaItem() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['agenda'] }),
   });
 }
+
+// --- Edge Function hooks ---
+
+interface AdvanceDeliveryStatusInput {
+  deliveryId: string;
+  newStatus: string;
+}
+
+export function useAdvanceDeliveryStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: AdvanceDeliveryStatusInput) => {
+      const { data, error } = await supabase.functions.invoke('advance-delivery-status', {
+        body: input,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['deliveries'] });
+      qc.invalidateQueries({ queryKey: ['delivery', vars.deliveryId] });
+    },
+  });
+}

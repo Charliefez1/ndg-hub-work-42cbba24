@@ -58,3 +58,69 @@ export function useUpdateInvoice() {
     },
   });
 }
+
+// --- Edge Function hooks ---
+
+interface GenerateInvoiceInput {
+  projectId: string;
+  deliveryIds: string[];
+}
+
+export function useGenerateInvoice() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: GenerateInvoiceInput) => {
+      const { data, error } = await supabase.functions.invoke('generate-invoice', {
+        body: input,
+      });
+      if (error) throw error;
+      return data as { invoice: Invoice; items: unknown[] };
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+  });
+}
+
+export function useSendInvoice() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ invoiceId }: { invoiceId: string }) => {
+      const { data, error } = await supabase.functions.invoke('send-invoice', {
+        body: { invoiceId },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+  });
+}
+
+export function useMarkInvoicePaid() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ invoiceId }: { invoiceId: string }) => {
+      const { data, error } = await supabase.functions.invoke('mark-invoice-paid', {
+        body: { invoiceId },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+  });
+}
+
+export function useRecalculateInvoice() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ invoiceId }: { invoiceId: string }) => {
+      const { data, error } = await supabase.functions.invoke('recalculate-invoice', {
+        body: { invoiceId },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: KEY });
+      qc.invalidateQueries({ queryKey: ['invoice', vars.invoiceId] });
+    },
+  });
+}
