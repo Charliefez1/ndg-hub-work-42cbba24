@@ -28,6 +28,10 @@ import DailyBrief from './pages/DailyBrief';
 import Insights from './pages/Insights';
 import AIAssistant from './pages/AIAssistant';
 import Settings from './pages/Settings';
+import Meetings from './pages/Meetings';
+import Contracts from './pages/Contracts';
+import Partners from './pages/Partners';
+import KnowledgeBase from './pages/KnowledgeBase';
 import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
@@ -68,6 +72,10 @@ const App = () => {
               <Route path="/insights" element={<Guard><Insights /></Guard>} />
               <Route path="/ai" element={<Guard><AIAssistant /></Guard>} />
               <Route path="/settings" element={<Guard><Settings /></Guard>} />
+              <Route path="/meetings" element={<Guard><Meetings /></Guard>} />
+              <Route path="/contracts" element={<Guard><Contracts /></Guard>} />
+              <Route path="/partners" element={<Guard><Partners /></Guard>} />
+              <Route path="/knowledge" element={<Guard><KnowledgeBase /></Guard>} />
 
               {/* Client portal */}
               <Route path="/portal" element={<RouteGuard allowedRoles={['client']}><Portal /></RouteGuard>} />
