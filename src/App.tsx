@@ -78,6 +78,8 @@ const App = () => {
               <Route path="/contracts" element={<Guard><Contracts /></Guard>} />
               <Route path="/partners" element={<Guard><Partners /></Guard>} />
               <Route path="/knowledge" element={<Guard><KnowledgeBase /></Guard>} />
+              <Route path="/emails" element={<Guard><Emails /></Guard>} />
+              <Route path="/curriculum" element={<Guard><CurriculumTemplates /></Guard>} />
 
               {/* Client portal */}
               <Route path="/portal" element={<RouteGuard allowedRoles={['client']}><Portal /></RouteGuard>} />

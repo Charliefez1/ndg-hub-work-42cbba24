@@ -43,6 +43,7 @@ const navGroups = [
     label: 'Engage',
     items: [
       { title: 'Forms', url: '/forms', icon: ClipboardList },
+      { title: 'Emails', url: '/emails', icon: Mail },
       { title: 'Client Portal', url: '/portal', icon: Globe },
     ],
   },
