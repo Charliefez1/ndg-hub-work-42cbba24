@@ -19,7 +19,7 @@ export default function Home() {
   const { data: invoices } = useInvoices();
 
   const today = new Date().toISOString().split('T')[0];
-  const activeProjects = projects?.filter((p) => p.status === 'in_progress').length ?? 0;
+  const activeProjects = projects?.filter((p) => p.status !== 'closed').length ?? 0;
   const pendingTasks = tasks?.filter((t) => t.status !== 'done').length ?? 0;
   const overdueTasks = tasks?.filter((t) => t.due_date && t.due_date < today && t.status !== 'done') ?? [];
   const upcomingWorkshops = deliveries?.filter((d) => d.delivery_date && d.delivery_date >= today).slice(0, 3) ?? [];
