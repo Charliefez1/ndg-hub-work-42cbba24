@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { FileText, Plus, Trash2, ExternalLink } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FileText, Plus, Trash2, ExternalLink, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface DocumentsTabProps {
@@ -19,6 +20,8 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   const { data: documents } = useQuery({
     queryKey: ['documents', projectId],
@@ -54,6 +57,38 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
     },
   });
 
+  const handleFileUpload = async (file: File) => {
+    if (!user?.id) return;
+    setUploading(true);
+    try {
+      const filePath = `project/${projectId}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      const { error } = await supabase.from('documents').insert({
+        name: file.name,
+        url: urlData.publicUrl,
+        entity_type: 'project',
+        entity_id: projectId,
+        uploaded_by: user.id,
+      });
+      if (error) throw error;
+
+      qc.invalidateQueries({ queryKey: ['documents', projectId] });
+      toast.success('File uploaded');
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const deleteDocument = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('documents').delete().eq('id', id);
@@ -67,9 +102,30 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
 
   return (
     <div className="space-y-md">
-      <Button size="sm" onClick={() => setDialogOpen(true)}>
-        <Plus className="h-4 w-4 mr-1" /> Add Document
-      </Button>
+      <div className="flex gap-sm">
+        <Button size="sm" onClick={() => setDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-1" /> Link URL
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+        >
+          {uploading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
+          Upload File
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFileUpload(file);
+            e.target.value = '';
+          }}
+        />
+      </div>
 
       {!documents?.length ? (
         <div className="text-center py-lg">
@@ -111,7 +167,7 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add Document</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Link Document URL</DialogTitle></DialogHeader>
           <div className="space-y-md">
             <div>
               <Label>Name *</Label>
