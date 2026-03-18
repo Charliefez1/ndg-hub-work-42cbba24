@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NDG Hub v2 — Unified Platform Spec</title>
+<style>
+  :root {
+    --bg: #0c0e14; --surface: #151821; --surface2: #1c2030; --border: #252a3a;
+    --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+    --green: #10B981; --purple: #8b5cf6; --amber: #f59e0b; --blue: #3b82f6;
+    --red: #ef4444; --pink: #ec4899; --cyan: #06b6d4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  .app { display: flex; height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: 260px; min-width: 260px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  .sidebar-header { padding: 20px 16px 12px; border-bottom: 1px solid var(--border); }
+  .sidebar-header h1 { font-size: 15px; color: var(--green); font-weight: 700; }
+  .sidebar-header p { font-size: 10px; color: var(--text3); margin-top: 2px; }
+  .sidebar-scroll { flex: 1; overflow-y: auto; }
+  .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+  .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .sidebar-section { padding: 6px 0; }
+  .sidebar-section-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); padding: 8px 16px 3px; font-weight: 600; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 6px 16px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; border-left: 3px solid transparent; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: #10B98112; color: var(--green); border-left-color: var(--green); font-weight: 600; }
+  .nav-item .icon { width: 16px; text-align: center; font-size: 13px; }
+  .nav-item .badge { margin-left: auto; font-size: 9px; padding: 1px 6px; border-radius: 8px; font-weight: 600; }
+  .badge-p1 { background: #10B98120; color: var(--green); }
+  .badge-p2 { background: #8b5cf620; color: var(--purple); }
+  .badge-p3 { background: #f59e0b20; color: var(--amber); }
+
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; }
+  .main::-webkit-scrollbar { width: 6px; }
+  .main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .main-header { padding: 24px 32px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
+  .main-header h2 { font-size: 22px; font-weight: 700; }
+  .main-header .sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+  .main-header .route { font-size: 11px; color: var(--text3); font-family: 'SF Mono', monospace; margin-top: 4px; background: var(--surface); display: inline-block; padding: 2px 8px; border-radius: 4px; }
+  .content { padding: 24px 32px 60px; }
+
+  /* COMPONENTS */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .card:hover { border-color: #3a4060; }
+  .card h4 { font-size: 13px; font-weight: 600; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+  .card p { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 600; margin-right: 3px; }
+  .tag-green { background: #10B98118; color: var(--green); }
+  .tag-purple { background: #8b5cf618; color: var(--purple); }
+  .tag-blue { background: #3b82f618; color: var(--blue); }
+  .tag-amber { background: #f59e0b18; color: var(--amber); }
+  .tag-red { background: #ef444418; color: var(--red); }
+  .tag-cyan { background: #06b6d418; color: var(--cyan); }
+
+  .section-head { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); font-weight: 600; margin-bottom: 10px; margin-top: 6px; display: flex; align-items: center; gap: 8px; }
+  .section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .tab-bar { display: flex; gap: 0; margin-bottom: 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .tab { padding: 7px 14px; font-size: 12px; color: var(--text3); cursor: default; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 600; }
+
+  .spec-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+  .spec-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); padding: 7px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  .spec-table td { font-size: 12px; padding: 7px 10px; border-bottom: 1px solid #1a1e2e; color: var(--text2); vertical-align: top; }
+  .spec-table tr:hover td { background: var(--surface); }
+  .spec-table code { font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 3px; color: var(--cyan); font-family: 'SF Mono', monospace; }
+
+  .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .flow-step { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 11px; font-weight: 600; }
+  .flow-arrow { color: var(--text3); font-size: 12px; }
+
+  .info-box { background: #10B98108; border: 1px solid #10B98130; border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .info-box strong { color: var(--green); }
+  .info-box.warn { background: #f59e0b08; border-color: #f59e0b30; }
+  .info-box.warn strong { color: var(--amber); }
+  .info-box.new { background: #3b82f608; border-color: #3b82f630; }
+  .info-box.new strong { color: var(--blue); }
+  .info-box.fix { background: #ef444408; border-color: #ef444430; }
+  .info-box.fix strong { color: var(--red); }
+
+  .entity-list { list-style: none; margin-bottom: 14px; }
+  .entity-list li { font-size: 12px; color: var(--text2); padding: 3px 0 3px 16px; position: relative; line-height: 1.5; }
+  .entity-list li::before { content: "→"; position: absolute; left: 0; color: var(--green); }
+
+  .views-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .view-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; font-size: 11px; color: var(--text2); }
+  .view-chip.primary { border-color: var(--green); color: var(--green); }
+
+  .diff { display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 4px; font-weight: 700; margin-left: 4px; }
+  .diff-fix { background: #ef444420; color: var(--red); }
+  .diff-new { background: #3b82f620; color: var(--blue); }
+  .diff-changed { background: #f59e0b20; color: var(--amber); }
+
+  .page { display: none; }
+  .page.visible { display: block; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h1>NDG Hub v2 — Unified</h1>
+    <p>V2 PRD + corrected data model + AI integration + dual audit</p>
+  </div>
+  <div class="sidebar-scroll">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Core</div>
+      <div class="nav-item active" data-page="overview">🏠 Overview</div>
+      <div class="nav-item" data-page="home"><span class="icon">🏠</span> Home<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="daily"><span class="icon">☀️</span> Daily Brief<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="projects"><span class="icon">📁</span> Projects<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="tasks"><span class="icon">✅</span> Tasks<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="clients"><span class="icon">🏢</span> Clients<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="insights"><span class="icon">📊</span> Insights<span class="badge badge-p1">P1</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Delivery</div>
+      <div class="nav-item" data-page="workshops"><span class="icon">🎤</span> Workshops<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="meetings"><span class="icon">📅</span> Meetings<span class="badge badge-p2">P2</span></div>
+      <div class="nav-item" data-page="partners"><span class="icon">🤝</span> Partners<span class="badge badge-p2">P2</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Knowledge</div>
+      <div class="nav-item" data-page="knowledge"><span class="icon">📚</span> Knowledge Hub<span class="badge badge-p2">P2</span></div>
+      <div class="nav-item" data-page="curriculum"><span class="icon">🎓</span> Curriculum Hub<span class="badge badge-p2">P2</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Commercial</div>
+      <div class="nav-item" data-page="contracts"><span class="icon">📝</span> Contracts<span class="badge badge-p2">P2</span></div>
+      <div class="nav-item" data-page="invoices"><span class="icon">💷</span> Invoices<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="emails"><span class="icon">✉️</span> Emails<span class="badge badge-p2">P2</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Engage</div>
+      <div class="nav-item" data-page="forms"><span class="icon">📋</span> Forms<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="portal"><span class="icon">🌐</span> Client Portal<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="reporting"><span class="icon">📈</span> Reporting<span class="badge badge-p3">P3</span></div>
+      <div class="nav-item" data-page="notifications"><span class="icon">🔔</span> Notifications<span class="badge badge-p2">P2</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Admin</div>
+      <div class="nav-item" data-page="templates"><span class="icon">📄</span> Templates<span class="badge badge-p3">P3</span></div>
+      <div class="nav-item" data-page="services"><span class="icon">🛠</span> Services<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="ai"><span class="icon">🤖</span> AI Assistant<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="settings"><span class="icon">⚙️</span> Settings<span class="badge badge-p1">P1</span></div>
+      <div class="nav-item" data-page="integrations"><span class="icon">🔗</span> Integrations<span class="badge badge-p3">P3</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Architecture</div>
+      <div class="nav-item" data-page="design-system"><span class="icon">🎯</span> Design System</div>
+      <div class="nav-item" data-page="ai-arch"><span class="icon">🧠</span> AI Architecture</div>
+      <div class="nav-item" data-page="entity-model"><span class="icon">🧬</span> Entity Model</div>
+      <div class="nav-item" data-page="database"><span class="icon">🗄</span> Database Schema</div>
+      <div class="nav-item" data-page="edge"><span class="icon">⚡</span> Edge Functions</div>
+      <div class="nav-item" data-page="automations"><span class="icon">⚙️</span> Automations</div>
+      <div class="nav-item" data-page="phases"><span class="icon">🗺</span> Build Phases</div>
+      <div class="nav-item" data-page="ux-patterns"><span class="icon">🎨</span> UX Patterns</div>
+      <div class="nav-item" data-page="build-prompt"><span class="icon">🚀</span> Build Prompt</div>
+      <div class="nav-item" data-page="fixes"><span class="icon">🔧</span> What We Fixed</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ===================== OVERVIEW ===================== -->
+<div id="page-overview" class="page visible">
+  <div class="main-header"><h2>NDG Hub v2 — Unified Spec</h2><div class="sub">Source of truth. V2 PRD data model + corrected from 10-point audit + full AI integration.</div></div>
+  <div class="content">
+    <div class="info-box"><strong>What this is:</strong> The single document a developer needs to build NDG Hub v2. The V2 PRD is the data model source of truth. The previous platform map's UI/UX patterns are kept but the underlying architecture is corrected. This spec has been through two audits: (1) 10-point data model audit, (2) dual UI/UX + PM audit covering 17 fixes + UX patterns.</div>
+
+    <div class="section-head">Key Decisions Locked</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--green);"><h4>Entity Hierarchy</h4><p>Organisation → Project → Delivery (UI: "Workshop") → Session → AgendaItems. Delivery is the parent. Session is a block within it.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4>Naming Convention</h4><p>UI says "Workshops." Database says <code>deliveries</code>. Backend says <code>deliveries</code>. The sidebar page is "Workshops" but the table is <code>deliveries</code>.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4>Pricing Model</h4><p>Per-workshop and per-service. NOT day rates. No <code>day_rate</code> or <code>total_days</code> on projects table. <span class="diff diff-fix">AUDIT FIX</span> Services catalogue has fixed prices. Invoice = sum of service prices for delivered workshops.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4>3-Axis Placement</h4><p><code>status</code> on projects (7 stages). <code>neuro_phase</code> on deliveries (primary). <code>kirkpatrick_level</code> on deliveries + forms. Projects get <code>intended_neuro_phase</code> as metadata only.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4>Contacts</h4><p>Tab on Client Detail only. Not a standalone page. Managed in context of their organisation.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4>Agenda Builder</h4><p>Keep it. Sessions have timed agenda blocks (intro, activity, break, debrief, energiser). Core to delivery planning.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>AI Architecture <span class="diff diff-new">NEW</span></h4><p>Claude API via Edge Functions (not Gemini). Sonnet for generation, Haiku for extraction. Dedicated /ai page + inline actions + contextual copilot drawer. Unified <code>useAI</code> hook. Persistent threads.</p></div>
+      <div class="card" style="border-left: 3px solid var(--cyan);"><h4>Design System <span class="diff diff-new">NEW</span></h4><p>Token-driven semantic theming. Satoshi headings, General Sans body, JetBrains Mono code. 5 accent themes (steel default). Light/dark/system. shadcn/ui base. ADHD-friendly: clear status signals, restrained motion, fast scanning. Notion/Linear-inspired.</p></div>
+    </div>
+
+    <div class="section-head">Operational Status (7 stages — V2 PRD)</div>
+    <div class="flow">
+      <div class="flow-step">Contracting</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Project Planning</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Session Planning</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Content Review</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Delivery</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Feedback &amp; Analytics</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Closed</div>
+    </div>
+
+    <div class="section-head">Entity Hierarchy</div>
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; font-family: 'SF Mono', monospace; font-size: 12px; line-height: 2; color: var(--text2); margin-bottom: 20px; overflow-x: auto;">
+      <span style="color: var(--green);">Organisation</span> (client company)<br>
+      &nbsp;&nbsp;├── <span style="color: var(--cyan);">Contact</span> (person at the org) — tab on Client Detail<br>
+      &nbsp;&nbsp;└── <span style="color: var(--green);">Project</span> (engagement after verbal acceptance)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── status: contracting → ... → closed <span style="color: var(--amber);">[Axis 1]</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── intended_neuro_phase: metadata only <span style="color: var(--amber);">[Axis 2 hint]</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color: var(--purple);">Delivery 1</span> (UI: "Workshop") — e.g. "Awareness Workshop Day 1"<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── neuro_phase: engage <span style="color: var(--amber);">[Axis 2 — LIVES HERE]</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── kirkpatrick_level: 1 <span style="color: var(--amber);">[Axis 3 — LIVES HERE]</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── service_id → Services catalogue (price comes from here)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color: var(--blue);">Session 1a</span> (AM block)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── AgendaItems [intro, activity, break, ...]<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── <span style="color: var(--blue);">Session 1b</span> (PM block)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── AgendaItems [...]<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color: var(--purple);">Delivery 2</span> — e.g. "Manager Champions Workshop"<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── neuro_phase: understand<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;├── kirkpatrick_level: 2<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── Sessions [...]<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color: var(--pink);">Form</span> (Post-workshop feedback, L1)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── FormResponses [...]<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span style="color: var(--amber);">Invoice</span> (covers Delivery 1 + 2)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── InvoiceItems [service_price per delivery]
+    </div>
+
+    <div class="section-head">Pricing Model</div>
+    <div class="info-box new"><strong>Per-workshop / per-service pricing.</strong> Your services catalogue defines fixed prices:<br><br>
+    <strong>Workshops:</strong> Awareness, Champions, Managers, Leaders — each has a set price.<br>
+    <strong>Services:</strong> Content Design, Consultancy, Policy Design, etc. — each has a set price.<br><br>
+    When a delivery is created, you pick a service from the catalogue. The price comes with it. Invoice generation = sum up the service prices of all delivered workshops. No day rates, no time tracking needed for billing.</div>
+  </div>
+</div>
+
+<!-- ===================== HOME ===================== -->
+<div id="page-home" class="page">
+  <div class="main-header"><h2>Home / Dashboard</h2><div class="sub">Executive overview + fast actions</div><div class="route">/</div></div>
+  <div class="content">
+    <div class="section-head">KPI Cards</div>
+    <div class="card-grid">
+      <div class="card"><h4>Active Projects</h4><p>Count of projects where status ≠ closed.</p></div>
+      <div class="card"><h4>Overdue Tasks</h4><p>Tasks where due_date < today AND status ≠ done.</p></div>
+      <div class="card"><h4>Outstanding Invoices</h4><p>Unpaid invoice total.</p></div>
+      <div class="card"><h4>Revenue This Month</h4><p>Sum of paid invoices this month.</p></div>
+    </div>
+    <div class="section-head">Page Components</div>
+    <ul class="entity-list">
+      <li>Greeting + date</li>
+      <li>Quick action pills: New Project, Daily Brief, New Invoice</li>
+      <li>Overdue alert banner</li>
+      <li>Energy card (daily_states check-in)</li>
+      <li>Needs Attention list (overdue tasks, unconfirmed deliveries, unpaid invoices)</li>
+      <li>Workshops This Week</li>
+      <li>Charts: revenue trend, delivery satisfaction</li>
+      <li><strong>🤖 AI Narrative <span class="tag tag-purple">P2</span></strong> — "What changed this week? What needs attention? Which projects are at risk?" Natural language on top of metrics.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== DAILY BRIEF ===================== -->
+<div id="page-daily" class="page">
+  <div class="main-header"><h2>Daily Brief</h2><div class="sub">Personal daily execution view — ADHD-first design</div><div class="route">/daily</div></div>
+  <div class="content">
+    <div class="info-box"><strong>Everything for today on one screen.</strong> No clicking around. Check things off. Energy forecast tells you when to do deep work vs. admin. ADHD-first: one glanceable dashboard, colour-coded priorities, checkable task list. Uses <code>var(--success)</code> for completed, <code>var(--destructive)</code> for overdue, <code>var(--warning)</code> for due today.</div>
+    <div class="section-head">Quick Stats</div>
+    <div class="card-grid">
+      <div class="card"><h4>Workshops Today</h4><p>Deliveries where date = today.</p></div>
+      <div class="card"><h4>Tasks Due</h4><p>Tasks due today.</p></div>
+      <div class="card"><h4>Overdue</h4><p>All overdue tasks.</p></div>
+      <div class="card"><h4>Energy Level</h4><p>Today's check-in from daily_states.</p></div>
+    </div>
+    <div class="section-head">Sections</div>
+    <ul class="entity-list">
+      <li><strong>Today's Schedule</strong> — Deliveries + meetings, time-ordered</li>
+      <li><strong>Focus: Today's Tasks</strong> — Checkable list, due today + overdue, by priority</li>
+      <li><strong>Workshops This Week</strong> — Next 7 days with client/facilitator</li>
+      <li><strong>Energy Forecast</strong> — "You usually peak at 10am on Mondays"</li>
+      <li><strong>Red Flags</strong> — Overdue tasks, unconfirmed deliveries, unsigned contracts, unpaid invoices</li>
+    </ul>
+    <div class="section-head">Edge Function</div>
+    <table class="spec-table">
+      <tr><td><code>dailyBrief({userId})</code></td><td>Returns: tasks today + overdue, deliveries today + this week, energy + pattern, red flags</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== PROJECTS ===================== -->
+<div id="page-projects" class="page">
+  <div class="main-header"><h2>Projects</h2><div class="sub">Central hub — project and task management core</div><div class="route">/projects → /projects/:id</div></div>
+  <div class="content">
+    <div class="section-head">Top Controls</div>
+    <ul class="entity-list">
+      <li>Search, New Project, New from Plan, Import CSV</li>
+      <li>Filter: All Projects | Needs Action</li>
+    </ul>
+
+    <div class="section-head">Views</div>
+    <div class="views-row">
+      <div class="view-chip primary">Board</div>
+      <div class="view-chip">Pipeline</div>
+      <div class="view-chip">List</div>
+      <div class="view-chip">Table</div>
+    </div>
+
+    <div class="section-head">3-Axis Model <span class="diff diff-fix">FIXED</span></div>
+    <table class="spec-table">
+      <tr><th>Axis</th><th>Field</th><th>Lives On</th><th>Values</th></tr>
+      <tr><td>1. Operational</td><td><code>status</code></td><td><code>projects</code></td><td>contracting → project_planning → session_planning → content_review → delivery → feedback_analytics → closed</td></tr>
+      <tr><td>2. Methodology</td><td><code>neuro_phase</code></td><td><code>deliveries</code> (primary)<br/><code>projects.intended_neuro_phase</code> (hint only)</td><td>needs → engage → understand → realise → ongoing</td></tr>
+      <tr><td>3. Impact</td><td><code>kirkpatrick_level</code></td><td><code>deliveries</code> + <code>forms</code></td><td>1 (Reaction) → 2 (Learning) → 3 (Behaviour) → 4 (Results)</td></tr>
+    </table>
+    <div class="info-box fix"><strong>Why neuro_phase lives on deliveries, not projects:</strong> A single project can have deliveries in different neuro-phases simultaneously. An "Engage" awareness workshop and an "Understand" manager session in the same project. The old spec put it on projects — that was wrong.</div>
+
+    <div class="section-head">Project Detail Tabs</div>
+    <div class="tab-bar">
+      <div class="tab active">Overview</div>
+      <div class="tab">Workshops</div>
+      <div class="tab">Tasks</div>
+      <div class="tab">Billing</div>
+      <div class="tab">Forms</div>
+      <div class="tab">Notes</div>
+      <div class="tab">Documents</div>
+      <div class="tab">Updates</div>
+    </div>
+    <div class="card-grid">
+      <div class="card"><h4>Overview</h4><p>Stats cards, progress ring, NEURO phase timeline (aggregated from deliveries), financial summary, activity feed.</p></div>
+      <div class="card"><h4>Workshops (Deliveries)</h4><p>All deliveries for this project. Each shows: title, date, neuro_phase badge, kirkpatrick badge, facilitator, status, sessions count. Click → Delivery detail with sessions + agenda.</p></div>
+      <div class="card"><h4>Tasks</h4><p>Project tasks. List/Timeline/Calendar sub-views. Subtask hierarchy.</p></div>
+      <div class="card"><h4>Billing</h4><p>Budget vs invoiced. Linked invoices + POs. Each delivery shows its service price. Generate Invoice button here.</p></div>
+      <div class="card"><h4>Forms</h4><p>Feedback forms linked to deliveries. Response counts, satisfaction scores per delivery.</p></div>
+      <div class="card"><h4>Notes</h4><p>Scratchpad. Add/edit/delete. Timestamps.</p></div>
+      <div class="card"><h4>Documents</h4><p>File attachments + linked docs (proposals, contracts, POs, invoices).</p></div>
+      <div class="card"><h4>Updates</h4><p>Status updates / progress comms. Manual + AI-drafted.</p></div>
+    </div>
+
+    <div class="section-head">AI on This Page <span class="diff diff-new">NEW</span></div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Generate Update <span class="tag tag-green">P1</span></h4><p>AI drafts status update from live project data (tasks, deliveries, milestones). Uses <code>ai-assistant</code> with agent <code>pm</code>.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Create from Plan <span class="tag tag-green">P1</span></h4><p>Paste a brief/proposal → <code>ai-extract</code> (Haiku) parses JSON → preview → create project + deliveries + tasks in one go.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Contextual Copilot <span class="tag tag-purple">P2</span></h4><p>Floating AI button → slide-out copilot drawer with full project context. Ask questions, generate docs, suggest next actions.</p></div>
+    </div>
+
+    <div class="section-head">Project Relationships</div>
+    <table class="spec-table">
+      <tr><th>Child Entity</th><th>FK</th><th>Notes</th></tr>
+      <tr><td><code>deliveries</code></td><td><code>deliveries.project_id</code></td><td>1-60 per project. Each has neuro_phase + kirkpatrick</td></tr>
+      <tr><td><code>sessions</code></td><td><code>sessions.project_id</code></td><td>Via deliveries. Each delivery has 1+ sessions</td></tr>
+      <tr><td><code>tasks</code></td><td><code>tasks.project_id</code></td><td>Nullable — NULL = internal task</td></tr>
+      <tr><td><code>forms</code></td><td><code>forms.project_id</code></td><td>Feedback, surveys, booking forms</td></tr>
+      <tr><td><code>invoices</code></td><td><code>invoices.project_id</code></td><td>Generated from delivery service prices</td></tr>
+      <tr><td><code>contracts</code></td><td><code>contracts.project_id</code></td><td>MSAs, POs, SOWs</td></tr>
+      <tr><td><code>notes</code></td><td><code>notes.project_id</code></td><td>Scratchpad</td></tr>
+      <tr><td><code>emails</code></td><td><code>emails.project_id</code></td><td>Gmail threads linked</td></tr>
+      <tr><td><code>documents</code></td><td>polymorphic</td><td>File attachments</td></tr>
+      <tr><td><code>project_updates</code> <span class="diff diff-new">NEW</span></td><td><code>project_updates.project_id</code></td><td>Status updates — manual + AI-drafted</td></tr>
+    </table>
+
+    <div class="section-head">Edge Function</div>
+    <table class="spec-table">
+      <tr><td><code>scaffold-project({organisationId, name, deliveries[{service_id, ...}]})</code> <span class="diff diff-fix">FIXED</span></td><td>Creates project + deliveries (each with service_id) + default sessions + default feedback form in one transaction. No service_type on project — service lives on each delivery.</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== WORKSHOPS (DELIVERIES) ===================== -->
+<div id="page-workshops" class="page">
+  <div class="main-header"><h2>Workshops</h2><div class="sub">All deliveries across all projects — the delivery operations board</div><div class="route">/workshops → /workshops/:id</div></div>
+  <div class="content">
+    <div class="info-box"><strong>UI says "Workshops." Database says <code>deliveries</code>.</strong> A delivery = a day/block of client-facing work. Each delivery has sessions within it. Sessions have agenda items.</div>
+
+    <div class="section-head">Views</div>
+    <div class="views-row">
+      <div class="view-chip primary">Board (Kanban)</div>
+      <div class="view-chip">List</div>
+      <div class="view-chip">Table</div>
+      <div class="view-chip">Calendar</div>
+    </div>
+
+    <div class="section-head">Delivery Status</div>
+    <div class="flow">
+      <div class="flow-step">Planning</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Scheduled</div><span class="flow-arrow">→</span>
+      <div class="flow-step">In Progress</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Delivered</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Follow Up</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Complete</div>
+    </div>
+
+    <div class="section-head">Delivery Fields <span class="diff diff-fix">FIXED from V2 PRD</span></div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>title</td><td>TEXT</td><td>e.g. "Awareness Workshop Day 1"</td></tr>
+      <tr><td>project_id</td><td>UUID NOT NULL</td><td>→ projects</td></tr>
+      <tr><td>organisation_id</td><td>UUID NOT NULL</td><td>→ organisations (denormalised for queries)</td></tr>
+      <tr><td>service_id</td><td>UUID</td><td>→ services catalogue. <strong>Price comes from here.</strong></td></tr>
+      <tr><td>status</td><td>delivery_status ENUM</td><td>planning|scheduled|in_progress|delivered|follow_up|complete|cancelled</td></tr>
+      <tr><td>neuro_phase</td><td>neuro_phase ENUM</td><td><strong>Axis 2 LIVES HERE.</strong> needs|engage|understand|realise|ongoing</td></tr>
+      <tr><td>kirkpatrick_level</td><td>SMALLINT 1-4</td><td><strong>Axis 3 LIVES HERE.</strong></td></tr>
+      <tr><td>delivery_date</td><td>DATE</td><td></td></tr>
+      <tr><td>duration_minutes</td><td>INT</td><td>Good to know for scheduling, not for billing</td></tr>
+      <tr><td>delegate_count</td><td>INT</td><td></td></tr>
+      <tr><td>location</td><td>TEXT</td><td>Venue or "Online"</td></tr>
+      <tr><td>facilitator_id</td><td>UUID</td><td>→ auth.users (Rich/Charlie/Associate)</td></tr>
+      <tr><td>feedback_form_id</td><td>UUID nullable</td><td>→ forms</td></tr>
+      <tr><td>satisfaction_score</td><td>NUMERIC(3,1)</td><td>Computed from feedback</td></tr>
+      <tr><td>notes</td><td>TEXT</td><td></td></tr>
+      <tr><td>sort_order <span class="diff diff-new">NEW</span></td><td>INT DEFAULT 0</td><td>Drag-to-reorder within project</td></tr>
+    </table>
+
+    <div class="section-head">Workshop Detail (/workshops/:id)</div>
+    <div class="tab-bar">
+      <div class="tab active">Overview</div>
+      <div class="tab">Sessions</div>
+      <div class="tab">Feedback</div>
+      <div class="tab">Documents</div>
+    </div>
+    <div class="card-grid">
+      <div class="card"><h4>Overview</h4><p>3-axis badges, client/project link, facilitator, date, location, delegate count, service type + price, satisfaction score.</p></div>
+      <div class="card"><h4>Sessions</h4><p>Sessions within this delivery. Each session has the <strong>Agenda Builder</strong> with timed blocks: intro, activity, break, debrief, energiser. Content status: draft → ready_for_review → approved → delivered.</p></div>
+      <div class="card"><h4>Feedback</h4><p>Linked feedback form. Response count + aggregated satisfaction. Individual responses viewable.</p></div>
+      <div class="card"><h4>Documents</h4><p>Slide decks, handouts, materials for this delivery.</p></div>
+    </div>
+
+    <div class="section-head">Sessions (children of deliveries)</div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>delivery_id</td><td>UUID NOT NULL</td><td>→ deliveries</td></tr>
+      <tr><td>project_id</td><td>UUID NOT NULL</td><td>→ projects (denormalised)</td></tr>
+      <tr><td>title</td><td>TEXT</td><td>e.g. "AM Block" or "Workshop Session 1"</td></tr>
+      <tr><td>session_type</td><td>TEXT</td><td>workshop | coaching | meeting</td></tr>
+      <tr><td>session_date</td><td>TIMESTAMPTZ</td><td></td></tr>
+      <tr><td>duration_minutes</td><td>INT DEFAULT 90</td><td></td></tr>
+      <tr><td>neuro_phase</td><td>neuro_phase nullable</td><td>Optional override — inherits from delivery if null</td></tr>
+      <tr><td>facilitator_id</td><td>UUID</td><td>→ auth.users</td></tr>
+      <tr><td>content_status</td><td>TEXT</td><td>draft | ready_for_review | approved | delivered</td></tr>
+      <tr><td>sort_order <span class="diff diff-new">NEW</span></td><td>INT DEFAULT 0</td><td>Drag-to-reorder within delivery</td></tr>
+    </table>
+
+    <div class="section-head">Session Agenda Items</div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>session_id</td><td>UUID NOT NULL</td><td>→ sessions</td></tr>
+      <tr><td>title</td><td>TEXT</td><td></td></tr>
+      <tr><td>type</td><td>TEXT</td><td>intro | activity | break | debrief | energiser</td></tr>
+      <tr><td>duration_minutes</td><td>INT</td><td></td></tr>
+      <tr><td>position</td><td>INT</td><td>Sort order</td></tr>
+      <tr><td>method</td><td>TEXT</td><td>How this block is delivered</td></tr>
+      <tr><td>description</td><td>TEXT</td><td></td></tr>
+      <tr><td>materials</td><td>TEXT</td><td>What's needed</td></tr>
+    </table>
+
+    <div class="info-box"><strong>When moved to "Delivered":</strong> Auto-trigger feedback form link. <strong>When moved to "Complete":</strong> Satisfaction score calculated, project NEURO phase hint updated.</div>
+
+    <div class="section-head">AI on This Page <span class="diff diff-new">NEW</span></div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Plan Session <span class="tag tag-green">P1</span></h4><p>AI generates agenda items from delivery context (neuro_phase, service_type, delegate_count, duration). <code>ai-session-planner</code> (Sonnet).</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Generate Content <span class="tag tag-purple">P2</span></h4><p>Session materials, facilitator brief, handouts. <code>ai-content-generator</code>.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Draft Follow-Up <span class="tag tag-purple">P2</span></h4><p>Post-delivery client email from session outcomes + feedback data.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TASKS ===================== -->
+<div id="page-tasks" class="page">
+  <div class="main-header"><h2>Tasks</h2><div class="sub">Global task management — 5 views</div><div class="route">/tasks</div></div>
+  <div class="content">
+    <div class="views-row">
+      <div class="view-chip primary">Board</div><div class="view-chip">List</div><div class="view-chip">Table</div><div class="view-chip">Timeline</div><div class="view-chip">Calendar</div>
+    </div>
+    <div class="section-head">Task Fields</div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>title</td><td>TEXT</td><td></td></tr>
+      <tr><td>status</td><td>ENUM</td><td>todo | in_progress | blocked | review | done</td></tr>
+      <tr><td>priority</td><td>ENUM</td><td>low | medium | high | urgent</td></tr>
+      <tr><td>project_id</td><td>UUID nullable</td><td>NULL = internal</td></tr>
+      <tr><td>delivery_id</td><td>UUID nullable</td><td>Optional link to specific delivery</td></tr>
+      <tr><td>assignee</td><td>UUID</td><td>→ auth.users</td></tr>
+      <tr><td>due_date</td><td>DATE</td><td></td></tr>
+      <tr><td>parent_task_id</td><td>UUID nullable</td><td>Subtask hierarchy</td></tr>
+      <tr><td>description</td><td>TEXT</td><td>Markdown</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== CLIENTS ===================== -->
+<div id="page-clients" class="page">
+  <div class="main-header"><h2>Clients</h2><div class="sub">Organisation directory — DB table is <code>organisations</code></div><div class="route">/clients → /clients/:id</div></div>
+  <div class="content">
+    <div class="info-box"><strong>UI says "Clients." Database says <code>organisations</code></strong> (matching V2 PRD). Not a full CRM — Clarify handles sales. Contacts are a tab, not a standalone page.</div>
+    <div class="section-head">Client Detail Tabs</div>
+    <div class="tab-bar">
+      <div class="tab active">Profile</div><div class="tab">Contacts</div><div class="tab">Projects</div><div class="tab">Contracts</div><div class="tab">Invoices</div><div class="tab">Emails</div><div class="tab">Activity</div>
+    </div>
+    <div class="section-head">Relationships</div>
+    <table class="spec-table">
+      <tr><td><code>contacts</code></td><td><code>contacts.organisation_id</code></td><td>People at this org</td></tr>
+      <tr><td><code>projects</code></td><td><code>projects.organisation_id</code></td><td>All engagements</td></tr>
+      <tr><td><code>contracts</code></td><td><code>contracts.organisation_id</code></td><td>MSAs, POs</td></tr>
+      <tr><td><code>invoices</code></td><td><code>invoices.organisation_id</code></td><td>All billing</td></tr>
+      <tr><td><code>emails</code></td><td><code>emails.organisation_id</code></td><td>Gmail threads</td></tr>
+    </table>
+
+    <div class="section-head">AI on This Page <span class="diff diff-new">NEW</span></div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Relationship Summary <span class="tag tag-purple">P2</span></h4><p>Latest activity, key stakeholders, risks/opportunities. "What should I do next for this client?"</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Contextual Copilot <span class="tag tag-purple">P2</span></h4><p>Floating AI button with full client context. Ask about contracts, invoices, project status.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== INSIGHTS ===================== -->
+<div id="page-insights" class="page">
+  <div class="main-header"><h2>Insights</h2><div class="sub">Business feedback + Personal neuro-tracking</div><div class="route">/insights</div></div>
+  <div class="content">
+    <div class="section-head">Tab 1: Business</div>
+    <div class="card-grid">
+      <div class="card"><h4>CSAT Trend</h4><p>satisfaction_score from deliveries over time. Target: 9.7.</p></div>
+      <div class="card"><h4>By Client</h4><p>Average satisfaction per organisation.</p></div>
+      <div class="card"><h4>By Service Type</h4><p>Which service types score highest.</p></div>
+      <div class="card"><h4>Kirkpatrick Distribution</h4><p>Responses at each K-level.</p></div>
+    </div>
+    <div class="section-head">Tab 2: Personal</div>
+    <div class="card-grid">
+      <div class="card"><h4>Energy Over Time</h4><p>daily_states.energy_level plotted.</p></div>
+      <div class="card"><h4>Focus Patterns</h4><p>By day of week / time.</p></div>
+      <div class="card"><h4>Recovery Tracking</h4><p>Energy after delivery days vs admin days.</p></div>
+      <div class="card"><h4>🤖 Recommendations</h4><p>AI-generated from energy + focus patterns. "You usually peak at 10am on Mondays — schedule deep work then."</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SERVICES ===================== -->
+<div id="page-services" class="page">
+  <div class="main-header"><h2>Services</h2><div class="sub">Your service catalogue — drives pricing</div><div class="route">/services</div></div>
+  <div class="content">
+    <div class="info-box"><strong>This is where prices live.</strong> When you create a delivery, you pick a service. Its price flows through to invoice generation.</div>
+    <div class="section-head">Service Types</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--green);"><h4>Workshops</h4><p>Awareness Workshop, Champions Workshop, Managers Workshop, Leaders Workshop. Each has a fixed price.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>Services</h4><p>Content Design, Consultancy, Policy Design, etc. Each has a fixed price.</p></div>
+    </div>
+    <div class="section-head">Services Table</div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>name</td><td>TEXT</td><td>e.g. "Awareness Workshop"</td></tr>
+      <tr><td>category</td><td>ENUM</td><td>workshop | service</td></tr>
+      <tr><td>price</td><td>NUMERIC(10,2)</td><td>Fixed price per delivery</td></tr>
+      <tr><td>description</td><td>TEXT</td><td></td></tr>
+      <tr><td>default_duration_minutes</td><td>INT</td><td>Typical duration</td></tr>
+      <tr><td>default_neuro_phase</td><td>neuro_phase nullable</td><td>Suggested phase</td></tr>
+      <tr><td>active</td><td>BOOLEAN</td><td></td></tr>
+    </table>
+    <div class="info-box warn"><strong>Invoice generation:</strong> <code>generate-invoice</code> Edge Function sums <code>services.price</code> for each uninvoiced delivery in a project. No day rates. No time tracking.</div>
+  </div>
+</div>
+
+<!-- ===================== INVOICES ===================== -->
+<div id="page-invoices" class="page">
+  <div class="main-header"><h2>Invoices</h2><div class="sub">Billing — generated from delivery service prices</div><div class="route">/invoices</div></div>
+  <div class="content">
+    <div class="section-head">KPI Cards</div>
+    <div class="card-grid">
+      <div class="card"><h4>Outstanding</h4><p>Unpaid total.</p></div>
+      <div class="card"><h4>Paid This Month</h4><p>Revenue collected.</p></div>
+      <div class="card"><h4>Overdue</h4><p>Past due date.</p></div>
+    </div>
+    <div class="section-head">Invoice Generation Flow <span class="diff diff-fix">FIXED</span></div>
+    <div class="flow">
+      <div class="flow-step">Project</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Select uninvoiced deliveries</div><span class="flow-arrow">→</span>
+      <div class="flow-step">service.price per delivery</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Invoice Items</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Subtotal + VAT = Total</div>
+    </div>
+    <div class="section-head">Invoice Table</div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>invoice_number</td><td>TEXT</td><td>Auto: NDG-YYYYMM-NNN</td></tr>
+      <tr><td>organisation_id</td><td>UUID</td><td></td></tr>
+      <tr><td>project_id</td><td>UUID</td><td></td></tr>
+      <tr><td>contract_id</td><td>UUID nullable</td><td>PO this invoices against</td></tr>
+      <tr><td>status</td><td>ENUM</td><td>draft | sent | viewed | paid | overdue</td></tr>
+      <tr><td>subtotal</td><td>NUMERIC(12,2)</td><td>Sum of invoice_items</td></tr>
+      <tr><td>vat_rate</td><td>NUMERIC(4,2)</td><td>UK VAT</td></tr>
+      <tr><td>vat_amount</td><td>NUMERIC(12,2)</td><td></td></tr>
+      <tr><td>total</td><td>NUMERIC(12,2)</td><td></td></tr>
+      <tr><td>issue_date, due_date, paid_date</td><td>DATE</td><td></td></tr>
+      <tr><td>quickbooks_id</td><td>TEXT nullable</td><td>Sync ref</td></tr>
+    </table>
+    <div class="section-head">Invoice Items Table <span class="diff diff-new">WAS MISSING</span></div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>invoice_id</td><td>UUID</td><td>→ invoices</td></tr>
+      <tr><td>delivery_id</td><td>UUID</td><td>→ deliveries (which workshop)</td></tr>
+      <tr><td>service_id</td><td>UUID</td><td>→ services (which service)</td></tr>
+      <tr><td>description</td><td>TEXT</td><td>Auto: "Awareness Workshop — NHS Trust — 15 Mar 2026"</td></tr>
+      <tr><td>quantity</td><td>INT DEFAULT 1</td><td></td></tr>
+      <tr><td>unit_price</td><td>NUMERIC(10,2)</td><td>Copied from services.price at time of invoice</td></tr>
+      <tr><td>total</td><td>NUMERIC(10,2)</td><td>quantity × unit_price</td></tr>
+    </table>
+    <div class="section-head">Edge Functions</div>
+    <table class="spec-table">
+      <tr><td><code>generate-invoice({projectId, deliveryIds[]})</code></td><td>Creates invoice + items from delivery service prices. Auto-generates invoice number.</td></tr>
+      <tr><td><code>recalculate-invoice({invoiceId})</code></td><td>Re-sums items after manual edit. Recalculates VAT + total.</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== FORMS ===================== -->
+<div id="page-forms" class="page">
+  <div class="main-header"><h2>Forms</h2><div class="sub">Feedback, surveys, booking — with Kirkpatrick levels</div><div class="route">/forms → /forms/:id → /form/:formId (public)</div></div>
+  <div class="content">
+    <div class="section-head">Form Templates</div>
+    <div class="card-grid">
+      <div class="card"><h4>Post-Workshop Feedback (L1)</h4><p>Satisfaction, what worked, improvements. kirkpatrick_level = 1.</p></div>
+      <div class="card"><h4>Pre-Session Survey</h4><p>Needs assessment before delivery.</p></div>
+      <div class="card"><h4>90-Day Follow-Up (L3)</h4><p>Behaviour change tracking. kirkpatrick_level = 3.</p></div>
+      <div class="card"><h4>Booking Form</h4><p>External form for workshop requests.</p></div>
+    </div>
+    <div class="section-head">Form Fields <span class="diff diff-fix">FIXED — Kirkpatrick + delivery link + type enum</span></div>
+    <table class="spec-table">
+      <tr><td>title</td><td>TEXT</td></tr>
+      <tr><td>type <span class="diff diff-fix">DEFINED</span></td><td>ENUM: <code>feedback</code> (post-workshop L1/L2) | <code>survey</code> (pre-session needs) | <code>booking</code> (external workshop request) | <code>follow_up</code> (90-day L3/L4) | <code>assessment</code> (knowledge check)</td></tr>
+      <tr><td>description, fields JSONB, active</td><td>Standard form builder fields</td></tr>
+      <tr><td><code>kirkpatrick_level</code></td><td>SMALLINT 1-4. Which K-level this form measures.</td></tr>
+      <tr><td><code>delivery_id</code></td><td>→ deliveries. Which delivery this form is for.</td></tr>
+      <tr><td><code>project_id</code></td><td>→ projects.</td></tr>
+    </table>
+    <div class="section-head">Edge Function</div>
+    <table class="spec-table">
+      <tr><td><code>process-form-response({formId, data})</code></td><td>Saves response, sets kirkpatrick_level, calculates satisfaction_score, updates delivery.satisfaction_score</td></tr>
+    </table>
+
+    <div class="section-head">AI on This Page <span class="diff diff-new">NEW</span></div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Summarise Feedback <span class="tag tag-green">P1</span></h4><p>Cluster open-text responses, identify themes, sentiment analysis. <code>ai-impact-reporter</code> (Sonnet).</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Impact Report <span class="tag tag-purple">P2</span></h4><p>Full Kirkpatrick-level impact report from form responses + delivery data. Exportable PDF.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CLIENT PORTAL ===================== -->
+<div id="page-portal" class="page">
+  <div class="main-header"><h2>Client Portal</h2><div class="sub">Client-facing view — project visibility + feedback submission</div><div class="route">/portal → /portal/:orgId</div></div>
+  <div class="content">
+    <div class="section-head">What Clients See</div>
+    <ul class="entity-list">
+      <li>Their organisation's projects</li>
+      <li>Project status (Axis 1), upcoming deliveries, completed with satisfaction scores</li>
+      <li>Feedback form submission</li>
+      <li>Documents (Phase 2)</li>
+      <li>Messaging (Phase 2+)</li>
+    </ul>
+    <div class="section-head">Auth</div>
+    <ul class="entity-list">
+      <li>Magic link authentication</li>
+      <li>RLS: client role sees only their org's data via <code>client_portal_access</code></li>
+    </ul>
+    <div class="section-head">AI on This Page <span class="diff diff-new">NEW</span></div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Portal Q&amp;A <span class="tag tag-amber">P3</span></h4><p>AI assistant scoped to client's own projects, docs, invoices, updates. Permission-scoped via RLS. High perceived value.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MEETINGS ===================== -->
+<div id="page-meetings" class="page">
+  <div class="main-header"><h2>Meetings</h2><div class="sub">2-way Google Calendar sync — non-delivery meetings</div><div class="route">/meetings</div></div>
+  <div class="content">
+    <div class="info-box"><strong>Meetings ≠ Workshops.</strong> Meetings are non-delivery: sales calls, planning calls, internal syncs. Workshops (deliveries) have their own page. Meetings sync 2-way with Google Calendar.</div>
+    <div class="section-head">Views</div>
+    <div class="views-row">
+      <div class="view-chip primary">Calendar</div>
+      <div class="view-chip">List</div>
+      <div class="view-chip">Table</div>
+    </div>
+    <div class="section-head">Filter Tabs</div>
+    <div class="tab-bar"><div class="tab active">All</div><div class="tab">Client Meetings</div><div class="tab">Internal</div><div class="tab">Sales</div></div>
+    <div class="section-head">Meetings Table <span class="diff diff-new">NEW — from audit</span></div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>title</td><td>TEXT</td><td></td></tr>
+      <tr><td>meeting_type</td><td>ENUM</td><td>client | internal | sales</td></tr>
+      <tr><td>organisation_id</td><td>UUID nullable</td><td>→ organisations (if client meeting)</td></tr>
+      <tr><td>project_id</td><td>UUID nullable</td><td>→ projects (if project-related)</td></tr>
+      <tr><td>contact_id</td><td>UUID nullable</td><td>→ contacts (primary attendee)</td></tr>
+      <tr><td>scheduled_at</td><td>TIMESTAMPTZ</td><td></td></tr>
+      <tr><td>duration_minutes</td><td>INT DEFAULT 30</td><td></td></tr>
+      <tr><td>location</td><td>TEXT</td><td>Venue, Zoom link, or "Phone"</td></tr>
+      <tr><td>gcal_event_id</td><td>TEXT nullable</td><td>Google Calendar sync ref</td></tr>
+      <tr><td>notes</td><td>TEXT</td><td>Meeting notes / agenda</td></tr>
+      <tr><td>attendees</td><td>JSONB</td><td>[{name, email, role}]</td></tr>
+      <tr><td>created_by</td><td>UUID</td><td>→ auth.users</td></tr>
+    </table>
+    <div class="section-head">GCal Sync</div>
+    <div class="info-box new"><strong>2-way sync via <code>gcal-sync</code> Edge Function (Phase 2).</strong> New meeting in Hub → creates GCal event. New event in GCal → creates meeting row. Updates propagate both ways. Uses <code>gcal_event_id</code> as the link.</div>
+  </div>
+</div>
+
+<!-- ===================== CONTRACTS ===================== -->
+<div id="page-contracts" class="page">
+  <div class="main-header"><h2>Contracts</h2><div class="sub">MSA → PO → Invoice chain</div><div class="route">/contracts</div></div>
+  <div class="content">
+    <div class="section-head">Commercial Chain</div>
+    <div class="flow">
+      <div class="flow-step" style="border-color:var(--green)">Client</div><span class="flow-arrow">→</span>
+      <div class="flow-step" style="border-color:var(--purple)">MSA</div><span class="flow-arrow">→</span>
+      <div class="flow-step" style="border-color:var(--purple)">PO(s)</div><span class="flow-arrow">→</span>
+      <div class="flow-step" style="border-color:var(--green)">Project</div><span class="flow-arrow">→</span>
+      <div class="flow-step" style="border-color:var(--amber)">Invoice(s)</div><span class="flow-arrow">→</span>
+      <div class="flow-step" style="border-color:var(--text3)">QuickBooks</div>
+    </div>
+    <div class="section-head">Contracts Table</div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>title</td><td>TEXT</td><td></td></tr>
+      <tr><td>type</td><td>ENUM</td><td>msa | po | sow</td></tr>
+      <tr><td>organisation_id</td><td>UUID</td><td></td></tr>
+      <tr><td>project_id</td><td>UUID nullable</td><td>POs/SOWs link to project</td></tr>
+      <tr><td>parent_contract_id</td><td>UUID nullable</td><td>POs sit under MSA (self-ref)</td></tr>
+      <tr><td>status</td><td>ENUM</td><td>draft | sent | signed | expired | cancelled</td></tr>
+      <tr><td>value</td><td>NUMERIC(12,2)</td><td></td></tr>
+      <tr><td>start_date, end_date</td><td>DATE</td><td></td></tr>
+      <tr><td>document_url</td><td>TEXT</td><td>Link to doc</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== REMAINING PAGES (lighter specs) ===================== -->
+<div id="page-emails" class="page">
+  <div class="main-header"><h2>Emails</h2><div class="sub">Gmail 2-way sync, linked to projects/clients</div><div class="route">/emails</div></div>
+  <div class="content">
+    <div class="info-box new"><strong>Not a full email client.</strong> Gmail sync. Threads linked to projects/clients by matching sender → contact email. Compose from project context with AI draft assist.</div>
+    <div class="section-head">AI on This Page <span class="diff diff-new">NEW</span></div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Draft Reply <span class="tag tag-purple">P2</span></h4><p>AI-drafted email response from project/client context. Uses <code>ai-content-generator</code>.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>🤖 Extract Actions <span class="tag tag-purple">P2</span></h4><p>Parse email thread → extract action items → suggest tasks. Uses <code>ai-extract</code> (Haiku).</p></div>
+    </div>
+  </div>
+</div>
+
+<div id="page-partners" class="page">
+  <div class="main-header"><h2>Partners</h2><div class="sub">EDI/wellbeing white-label resellers</div><div class="route">/partners</div></div>
+  <div class="content"><ul class="entity-list"><li>name, type (EDI|wellbeing), commission_rate</li><li>Assigned curriculum workshops for white-labelling</li></ul></div>
+</div>
+
+<div id="page-knowledge" class="page">
+  <div class="main-header"><h2>Knowledge Hub</h2><div class="sub">Searchable internal knowledge base</div><div class="route">/knowledge</div></div>
+  <div class="content"><ul class="entity-list"><li>Articles with title, content, category, tags</li><li>Full-text search</li></ul></div>
+</div>
+
+<div id="page-curriculum" class="page">
+  <div class="main-header"><h2>Curriculum Hub</h2><div class="sub">50+ workshop templates — your IP library</div><div class="route">/curriculum</div></div>
+  <div class="content">
+    <div class="info-box"><strong>Link to deliveries:</strong> When creating a delivery, you can optionally select a curriculum template. Materials + default agenda are copied from the template to the new delivery's sessions.</div>
+    <table class="spec-table">
+      <tr><th>Field</th><th>Notes</th></tr>
+      <tr><td>title</td><td>Template name</td></tr>
+      <tr><td>service_id</td><td>→ services. Links to pricing.</td></tr>
+      <tr><td>neuro_phase</td><td>Default phase for this workshop type</td></tr>
+      <tr><td>materials JSONB</td><td>{slides, notes, handouts, audio}</td></tr>
+      <tr><td>default_agenda JSONB</td><td>Default session agenda items — copied when delivery created</td></tr>
+      <tr><td>partner_variants JSONB</td><td>White-label versions keyed by partner_id</td></tr>
+    </table>
+  </div>
+</div>
+
+<div id="page-reporting" class="page">
+  <div class="main-header"><h2>Reporting</h2><div class="sub">Analytics dashboards + exports</div><div class="route">/reporting</div></div>
+  <div class="content"><div class="card-grid">
+    <div class="card"><h4>Revenue by Month</h4><p>From invoices (paid).</p></div>
+    <div class="card"><h4>Pipeline by Stage</h4><p>Project values by status.</p></div>
+    <div class="card"><h4>Invoice Aging</h4><p>Current, 30d, 60d, 90d+.</p></div>
+    <div class="card"><h4>Delivery Satisfaction</h4><p>CSAT from deliveries.satisfaction_score.</p></div>
+  </div></div>
+</div>
+
+<div id="page-notifications" class="page">
+  <div class="main-header"><h2>Notifications</h2><div class="sub">In-app + Telegram push</div><div class="route">/notifications</div></div>
+  <div class="content">
+    <div class="section-head">Notification Events</div>
+    <ul class="entity-list"><li>Task assigned/overdue</li><li>Delivery status change</li><li>Invoice overdue</li><li>Contract needs signature</li><li>Form response received</li><li>Project status advanced</li><li>Meeting reminder (30 min before)</li></ul>
+    <div class="section-head">Trigger Mechanism <span class="diff diff-new">NEW — from audit</span></div>
+    <div class="info-box new"><strong>How notifications are created:</strong><br><br>
+    <strong>Option A (P1):</strong> Edge Functions create notification rows as a side-effect. E.g. <code>advance-project-status</code> inserts into <code>notifications</code> table after status change. <code>process-form-response</code> notifies project owner.<br><br>
+    <strong>Option B (P2):</strong> Postgres triggers + pg_notify for real-time. <code>AFTER UPDATE ON tasks</code> trigger fires when <code>status</code> changes. Supabase Realtime subscription pushes to connected clients.<br><br>
+    <strong>Telegram:</strong> Edge Function <code>send-telegram</code> called from notification insert trigger. Uses bot token + chat_id stored in user settings.</div>
+  </div>
+</div>
+
+<div id="page-templates" class="page">
+  <div class="main-header"><h2>Templates</h2><div class="sub">Reusable project/delivery/form templates</div><div class="route">/templates</div></div>
+  <div class="content"><ul class="entity-list"><li>Project templates: pre-defined deliveries + tasks</li><li>Form templates: feedback, surveys</li><li>Email templates</li></ul></div>
+</div>
+
+<div id="page-ai" class="page">
+  <div class="main-header"><h2>AI Assistant</h2><div class="sub">Context-aware AI with Claude API — dedicated page + inline actions across platform</div><div class="route">/ai</div></div>
+  <div class="content">
+    <div class="info-box"><strong>AI is NOT just a chat tab.</strong> V2 has two AI surfaces: (1) a dedicated <code>/ai</code> assistant page for strategic/exploratory conversations, and (2) inline AI actions embedded throughout the platform — "Generate update", "Summarise this", "Draft reply", "Suggest tasks". Both use the same unified backend.</div>
+
+    <div class="section-head">Dedicated AI Page (/ai) <span class="diff diff-fix">UPGRADED from V1</span></div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>Multi-Agent Chat</h4><p>4 agent modes: <strong>Project Mgmt</strong>, <strong>Insights</strong>, <strong>Client Mgr</strong>, <strong>Business Mgr</strong>. Agent switch resets conversation. Streaming markdown responses.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>Context-Aware</h4><p><code>useAIContext()</code> hook injects current page/entity data. If user was on ProjectDetail before opening /ai, the assistant knows that project's data.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>Persistent Threads <span class="diff diff-new">NEW</span></h4><p>V1 had no saved history. V2 saves threads in <code>ai_conversations</code> table. Resume previous conversations.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>Structured Outputs</h4><p>AI can return JSON for action creation (tasks, projects, deliveries). "Create a task from this" → structured JSON → preview → create records.</p></div>
+    </div>
+
+    <div class="section-head">Inline AI Actions (embedded across pages) <span class="diff diff-new">NEW</span></div>
+    <table class="spec-table">
+      <tr><th>Page</th><th>AI Action</th><th>What It Does</th><th>Phase</th></tr>
+      <tr><td>Project Detail</td><td>Generate Update</td><td>Builds status update from live project data (tasks, deliveries, milestones). Uses agent <code>pm</code>.</td><td>P1</td></tr>
+      <tr><td>Projects</td><td>Create from Plan</td><td>Paste a brief/proposal → AI extracts structured JSON → preview → creates project + deliveries + tasks. Uses agent <code>setup</code>.</td><td>P1</td></tr>
+      <tr><td>Workshop Detail</td><td>Plan Session</td><td>Generates agenda items from delivery context (neuro_phase, service_type, delegate_count). <code>ai-session-planner</code>.</td><td>P1</td></tr>
+      <tr><td>Workshop Detail</td><td>Generate Content</td><td>Session materials, facilitator brief, handouts from agenda + context. <code>ai-content-generator</code>.</td><td>P2</td></tr>
+      <tr><td>Workshop Detail</td><td>Draft Follow-Up</td><td>Post-delivery client email from session outcomes + feedback. <code>ai-content-generator</code>.</td><td>P2</td></tr>
+      <tr><td>Forms / Insights</td><td>Summarise Feedback</td><td>Cluster open-text responses, identify themes, sentiment analysis. <code>ai-impact-reporter</code>.</td><td>P1</td></tr>
+      <tr><td>Forms / Insights</td><td>Impact Report</td><td>Full Kirkpatrick-level impact report from form responses + delivery data. <code>ai-impact-reporter</code>.</td><td>P2</td></tr>
+      <tr><td>Tasks</td><td>Suggest Tasks</td><td>AI task breakdown from project scope. "Suggest next 5 actions for this project."</td><td>P2</td></tr>
+      <tr><td>Tasks</td><td>Risk Detection</td><td>Flag overdue clusters, blocked dependencies, resourcing gaps.</td><td>P2</td></tr>
+      <tr><td>Client Detail</td><td>Relationship Summary</td><td>Latest activity, key stakeholders, risks/opportunities. "What should I do next for this client?"</td><td>P2</td></tr>
+      <tr><td>Dashboard</td><td>AI Narrative</td><td>Natural language layer on metrics: "What changed this week? What needs attention? Which projects are at risk?"</td><td>P2</td></tr>
+      <tr><td>Emails</td><td>Draft Reply</td><td>AI-drafted email response from project/client context.</td><td>P2</td></tr>
+      <tr><td>Notes / Documents</td><td>Generate Summary</td><td>Client-ready summaries, internal handover notes, proposal drafts.</td><td>P2</td></tr>
+      <tr><td>Client Portal</td><td>Portal Q&amp;A <span class="diff diff-new">NEW</span></td><td>AI assistant scoped to client's own projects, docs, invoices. Permission-scoped via RLS.</td><td>P3</td></tr>
+    </table>
+
+    <div class="section-head">Contextual Copilot Drawer <span class="diff diff-new">NEW</span></div>
+    <div class="info-box new"><strong>Bringing back AIChatPanel as contextual copilot.</strong> V1 had an orphaned <code>AIChatPanel</code> component — a slide-out chat drawer. V2 intentionally deploys this as a contextual copilot on key pages (Project Detail, Workshop Detail, Client Detail, Forms). It inherits page context automatically, supports streaming, and can trigger structured actions. Accessible via a floating AI button.</div>
+
+    <div class="section-head">Voice Input <span class="diff diff-new">NEW</span></div>
+    <div class="info-box new"><strong>VoiceInput wired in where it matters.</strong> V1 had speech-to-text + text-to-speech but orphaned. V2 deploys voice for: meeting notes capture, mobile quick updates, dictating project/client updates. Phase 2.</div>
+
+    <div class="section-head">AI Edge Functions (all via Claude API)</div>
+    <table class="spec-table">
+      <tr><th>Function</th><th>Model</th><th>What It Does</th><th>Phase</th></tr>
+      <tr><td><code>ai-assistant</code></td><td>Sonnet</td><td>Main conversational agent. Routes to agent prompts (pm, insights, clients, setup, business). Streaming SSE. Auth + rate limiting.</td><td>P1</td></tr>
+      <tr><td><code>ai-session-planner</code></td><td>Sonnet</td><td>Input: delivery context (neuro_phase, service_type, delegate_count, duration). Output: structured agenda items JSON.</td><td>P1</td></tr>
+      <tr><td><code>ai-content-generator</code></td><td>Sonnet</td><td>Input: session/delivery context. Output: materials, facilitator brief, follow-up emails, proposals, reports.</td><td>P2</td></tr>
+      <tr><td><code>ai-smart-assistant</code></td><td>Sonnet</td><td>Claude tool_use to query DB directly. Can "create task", "draft invoice", "schedule session". Full action layer.</td><td>P2</td></tr>
+      <tr><td><code>ai-impact-reporter</code></td><td>Sonnet</td><td>Input: form_responses + kirkpatrick data + delivery data. Output: impact analysis, theme clustering, sentiment, narrative report.</td><td>P1</td></tr>
+      <tr><td><code>ai-extract</code></td><td>Haiku</td><td>Lightweight extraction: parse plan text → project JSON, parse email → action items, parse feedback → sentiment scores.</td><td>P1</td></tr>
+    </table>
+
+    <div class="section-head">Architecture Rules</div>
+    <ul class="entity-list">
+      <li><strong>Claude API only.</strong> V1 used Lovable AI Gateway with Gemini. V2 uses Claude API via Edge Functions. Sonnet for generation, Haiku for extraction.</li>
+      <li><strong>Unified <code>useAI</code> hook.</strong> V1 had duplicated streaming/fetch logic across AIAssistant, ProjectDetail, CreateProjectFromPlanDialog, AIChatPanel. V2 consolidates into one shared hook.</li>
+      <li><strong>Rate limit:</strong> 20 calls/user/hour.</li>
+      <li><strong>Cache:</strong> <code>ai_generations</code> table stores AI outputs with entity context for reuse.</li>
+      <li><strong>Threads:</strong> <code>ai_conversations</code> table persists chat history. Team-shared threads optional.</li>
+      <li><strong>Context injection:</strong> <code>useAIContext()</code> hook passes current page entity data to any AI call.</li>
+    </ul>
+  </div>
+</div>
+
+<div id="page-settings" class="page">
+  <div class="main-header"><h2>Settings</h2><div class="sub">Profile + appearance + notification preferences</div><div class="route">/settings</div></div>
+  <div class="content">
+    <div class="section-head">Profile</div>
+    <ul class="entity-list"><li>Display name, email, avatar upload</li><li>Role display (admin/team/client) — read-only</li><li>Telegram chat_id — for push notifications</li></ul>
+    <div class="section-head">Appearance <span class="diff diff-new">EXPANDED</span></div>
+    <ul class="entity-list">
+      <li><strong>Theme mode:</strong> Light / Dark / System toggle. Stored in <code>localStorage('ndg-theme')</code>. Applied via <code>data-theme</code> on <code>&lt;html&gt;</code>.</li>
+      <li><strong>Accent picker:</strong> Steel (default) / Sky / Mint / Amber / Purple. Visual swatches. Stored in <code>localStorage('ndg-accent')</code>. Applied via <code>data-accent</code>.</li>
+      <li><strong>Sidebar density:</strong> Comfortable (default) / Compact. Adjusts nav item padding.</li>
+    </ul>
+    <div class="section-head">Notifications</div>
+    <ul class="entity-list">
+      <li>Toggle per notification type: task assigned, delivery reminder, invoice overdue, form response, project status change</li>
+      <li>Channel toggles: in-app (always on), email, Telegram</li>
+    </ul>
+  </div>
+</div>
+
+<div id="page-integrations" class="page">
+  <div class="main-header"><h2>Integrations</h2><div class="sub">API connections</div><div class="route">/integrations</div></div>
+  <div class="content"><div class="card-grid">
+    <div class="card"><h4><span class="tag tag-amber">API</span> Perplexity</h4><p>AI research.</p></div>
+    <div class="card"><h4><span class="tag tag-amber">API</span> Firecrawl</h4><p>Web scraping.</p></div>
+    <div class="card"><h4><span class="tag tag-amber">API</span> ElevenLabs</h4><p>Audio generation.</p></div>
+    <div class="card"><h4><span class="tag tag-amber">API</span> n8n</h4><p>Workflow automation.</p></div>
+    <div class="card"><h4><span class="tag tag-blue">SYNC</span> Clarify CRM</h4><p>Client sync.</p></div>
+    <div class="card"><h4><span class="tag tag-blue">SYNC</span> Google Calendar</h4><p>2-way meetings.</p></div>
+    <div class="card"><h4><span class="tag tag-blue">SYNC</span> Gmail</h4><p>Email threads.</p></div>
+    <div class="card"><h4><span class="tag tag-blue">SYNC</span> QuickBooks</h4><p>Invoice sync.</p></div>
+    <div class="card"><h4><span class="tag tag-purple">PUSH</span> Telegram</h4><p>Notifications.</p></div>
+  </div></div>
+</div>
+
+<!-- ===================== DESIGN SYSTEM ===================== -->
+<div id="page-design-system" class="page">
+  <div class="main-header"><h2>Design System</h2><div class="sub">Visual language, tokens, typography, component patterns — the styling source of truth <span class="diff diff-new">NEW</span></div></div>
+  <div class="content">
+
+    <div class="info-box"><strong>Design philosophy:</strong> Minimalist workspace UI inspired by <strong>Notion / Linear / HelloBonsai / Monday.com</strong>. Clean, low-noise, productivity-first. "ADHD-friendly" — clear status signals, restrained visual noise, fast scanning. Professional, calm, structured, modern. Softened enterprise look, not bold editorial or decorative.</div>
+
+    <!-- ===== DESIGN PRINCIPLES ===== -->
+    <div class="section-head">Design Principles</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--green);"><h4>Clarity Over Cleverness</h4><p>Every element earns its place. No decorative chrome. Status is visible at a glance. Whitespace is generous. Hierarchy is enforced by size + weight, not colour alone.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>ADHD-First Scanning</h4><p>Key information in the top-left of every view. Status badges, not paragraphs. One primary action per screen. Colour-coded categories. No walls of text in tables.</p></div>
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4>Consistent Density</h4><p>Comfortable spacing throughout — not cramped, not wasteful. Card padding 14-16px. Row height 40-44px. Gap 12-16px. Sidebar 260px. Content max-width 1200px.</p></div>
+      <div class="card" style="border-left: 3px solid var(--amber);"><h4>Token-Driven, Not Hard-Coded</h4><p>Every colour, radius, shadow, and spacing value comes from CSS custom properties or Tailwind config. Zero raw hex values in components. Theme switch changes everything.</p></div>
+    </div>
+
+    <!-- ===== COLOR SYSTEM ===== -->
+    <div class="section-head">Colour System — Semantic Tokens</div>
+    <div class="info-box new"><strong>All colours via CSS custom properties in <code>src/index.css</code>.</strong> Components reference tokens like <code>var(--background)</code>, <code>var(--primary)</code>, never raw hex. Light/dark mode swap the token values. Accent themes overlay additional hue shifts.</div>
+    <table class="spec-table">
+      <tr><th>Token</th><th>Light Mode</th><th>Dark Mode</th><th>Usage</th></tr>
+      <tr><td><code>--background</code></td><td><code>#F1F1F1</code> (soft off-white)</td><td><code>#1A1A2E</code> (deep navy)</td><td>Page background, workspace area</td></tr>
+      <tr><td><code>--surface</code></td><td><code>#FFFFFF</code></td><td><code>#252540</code></td><td>Cards, sidebar, modals, popovers</td></tr>
+      <tr><td><code>--surface-2</code></td><td><code>#F8F8FA</code></td><td><code>#1E1E36</code></td><td>Nested surfaces, input backgrounds, code blocks</td></tr>
+      <tr><td><code>--border</code></td><td><code>#E2E8F0</code></td><td><code>#2D2D4A</code></td><td>Card borders, dividers, table rows</td></tr>
+      <tr><td><code>--text</code></td><td><code>#1A1A2E</code></td><td><code>#E2E8F0</code></td><td>Primary text, headings</td></tr>
+      <tr><td><code>--text-2</code></td><td><code>#64748B</code></td><td><code>#94A3B8</code></td><td>Secondary text, descriptions, metadata</td></tr>
+      <tr><td><code>--text-3</code></td><td><code>#94A3B8</code></td><td><code>#64748B</code></td><td>Tertiary text, placeholders, disabled</td></tr>
+      <tr><td><code>--primary</code></td><td colspan="2">From accent theme (default: steel/sera blue)</td><td>Primary buttons, active nav, links, focus rings</td></tr>
+      <tr><td><code>--success</code></td><td colspan="2"><code>#10B981</code> (emerald)</td><td>Positive status, complete, active, online</td></tr>
+      <tr><td><code>--warning</code></td><td colspan="2"><code>#F59E0B</code> (amber)</td><td>Caution, pending, needs attention</td></tr>
+      <tr><td><code>--destructive</code></td><td colspan="2"><code>#EF4444</code> (red)</td><td>Errors, overdue, delete, danger</td></tr>
+      <tr><td><code>--info</code></td><td colspan="2"><code>#3B82F6</code> (blue)</td><td>Information, links, neutral highlights</td></tr>
+      <tr><td><code>--muted</code></td><td><code>#F1F5F9</code></td><td><code>#1E293B</code></td><td>Muted backgrounds, disabled states, subtle fills</td></tr>
+    </table>
+
+    <div class="section-head">Accent Themes</div>
+    <div class="info-box new"><strong>5 selectable accent themes</strong> applied via <code>data-accent</code> attribute on <code>&lt;html&gt;</code>. Each theme overrides <code>--primary</code> and its hover/active variants. User picks in Settings. Persisted in <code>localStorage</code>.</div>
+    <table class="spec-table">
+      <tr><th>Accent</th><th>Primary Hex</th><th>Character</th></tr>
+      <tr><td><strong>Steel</strong> (default)</td><td><code>#4A7CBA</code> — Sera Blue-leaning</td><td>Professional, trustworthy. NDG brand-adjacent.</td></tr>
+      <tr><td><strong>Sky</strong></td><td><code>#0EA5E9</code></td><td>Fresh, open. Good for light mode.</td></tr>
+      <tr><td><strong>Mint</strong></td><td><code>#10B981</code></td><td>Calm, growth-oriented. Matches success token.</td></tr>
+      <tr><td><strong>Amber</strong></td><td><code>#F59E0B</code></td><td>Warm, energetic. High visibility.</td></tr>
+      <tr><td><strong>Purple</strong></td><td><code>#8B5CF6</code></td><td>Creative, modern. Pairs well with dark mode.</td></tr>
+    </table>
+
+    <!-- ===== TYPOGRAPHY ===== -->
+    <div class="section-head">Typography</div>
+    <table class="spec-table">
+      <tr><th>Role</th><th>Font</th><th>Weight</th><th>Usage</th></tr>
+      <tr><td><strong>Headings</strong></td><td>Satoshi</td><td>700 (Bold)</td><td>Page titles, section titles, card headings. Clean geometric sans.</td></tr>
+      <tr><td><strong>Body / UI</strong></td><td>General Sans</td><td>400 (Regular), 500 (Medium), 600 (Semibold)</td><td>All body text, buttons, labels, nav items, form inputs.</td></tr>
+      <tr><td><strong>Mono / Code</strong></td><td>JetBrains Mono</td><td>400, 500</td><td>Code snippets, API routes, database field names, technical values.</td></tr>
+    </table>
+    <div class="section-head">Type Scale — Utility Classes</div>
+    <table class="spec-table">
+      <tr><th>Class</th><th>Size</th><th>Font</th><th>Usage</th></tr>
+      <tr><td><code>.text-page-title</code></td><td>22px / 700</td><td>Satoshi</td><td>Main page heading (one per page)</td></tr>
+      <tr><td><code>.text-section-title</code></td><td>14px / 600 uppercase</td><td>General Sans</td><td>Section dividers within a page</td></tr>
+      <tr><td><code>.text-card-title</code></td><td>13-14px / 600</td><td>General Sans</td><td>Card headings, list item titles</td></tr>
+      <tr><td><code>.text-body</code></td><td>13px / 400</td><td>General Sans</td><td>Default body text, descriptions</td></tr>
+      <tr><td><code>.text-caption</code></td><td>11px / 400</td><td>General Sans</td><td>Timestamps, metadata, secondary info</td></tr>
+      <tr><td><code>.text-overline</code></td><td>9-10px / 600 uppercase tracking-wide</td><td>General Sans</td><td>Section labels, sidebar group titles, badge text</td></tr>
+      <tr><td><code>.text-mono</code></td><td>11-12px / 400</td><td>JetBrains Mono</td><td>Routes, field names, code references</td></tr>
+    </table>
+
+    <!-- ===== SPACING & LAYOUT ===== -->
+    <div class="section-head">Spacing &amp; Layout</div>
+    <table class="spec-table">
+      <tr><th>Token / Value</th><th>px</th><th>Usage</th></tr>
+      <tr><td><code>--space-xs</code></td><td>4px</td><td>Tight gaps (badge padding, icon margins)</td></tr>
+      <tr><td><code>--space-sm</code></td><td>8px</td><td>Internal card padding helper, input padding</td></tr>
+      <tr><td><code>--space-md</code></td><td>12-14px</td><td>Card padding, card-grid gap, standard margin</td></tr>
+      <tr><td><code>--space-lg</code></td><td>20-24px</td><td>Page content padding, section spacing</td></tr>
+      <tr><td><code>--space-xl</code></td><td>32px</td><td>Main content horizontal padding</td></tr>
+      <tr><td>Sidebar width</td><td>260px</td><td>Fixed desktop sidebar</td></tr>
+      <tr><td>Content max-width</td><td>1200px</td><td>Centered content area on wide screens</td></tr>
+      <tr><td>Card grid min column</td><td>280px</td><td><code>grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))</code></td></tr>
+      <tr><td>Table row height</td><td>40-44px</td><td>Comfortable scan height for data tables</td></tr>
+    </table>
+
+    <!-- ===== RADIUS & SHADOW ===== -->
+    <div class="section-head">Radius &amp; Shadow Scale</div>
+    <table class="spec-table">
+      <tr><th>Token</th><th>Value</th><th>Usage</th></tr>
+      <tr><td><code>--radius-sm</code></td><td>4px</td><td>Badges, tags, inline code</td></tr>
+      <tr><td><code>--radius-md</code></td><td>8px</td><td>Buttons, inputs, small cards</td></tr>
+      <tr><td><code>--radius-lg</code></td><td>10-12px</td><td>Cards, modals, popovers, dialogs</td></tr>
+      <tr><td><code>--radius-full</code></td><td>9999px</td><td>Avatars, pill badges, rounded buttons</td></tr>
+      <tr><td><code>--shadow-sm</code></td><td><code>0 1px 2px rgba(0,0,0,0.05)</code></td><td>Subtle lift for inputs, small elements</td></tr>
+      <tr><td><code>--shadow-md</code></td><td><code>0 2px 8px rgba(0,0,0,0.08)</code></td><td>Cards at rest, dropdowns</td></tr>
+      <tr><td><code>--shadow-lg</code></td><td><code>0 4px 16px rgba(0,0,0,0.12)</code></td><td>Card hover state, modals, copilot drawer</td></tr>
+    </table>
+
+    <!-- ===== APP SHELL ===== -->
+    <div class="section-head">App Shell Layout</div>
+    <div class="info-box"><strong>Sidebar + Content workspace.</strong> Desktop: fixed 260px sidebar (left) + scrollable content area (right). Mobile (&lt;768px): sidebar collapses to hamburger menu overlay via <code>MobileNav</code> component. Content area fills 100vw. The layout is app-like, not marketing-site-like.</div>
+    <table class="spec-table">
+      <tr><th>Zone</th><th>Structure</th><th>Behaviour</th></tr>
+      <tr><td><strong>Sidebar</strong></td><td>Logo + nav groups. Each group has overline label + nav items. Active item has left border accent + tinted background.</td><td>Scrollable. Sticky on desktop. Collapsed on mobile. Badges show phase (P1/P2/P3).</td></tr>
+      <tr><td><strong>Main Header</strong></td><td>Page title (Satoshi 22px) + subtitle (General Sans 13px text-2) + route badge (mono, surface-2 background).</td><td>Sticky top: 0. Blurred background. Border-bottom divider.</td></tr>
+      <tr><td><strong>Content Area</strong></td><td>Padded 24-32px. Card grids, tables, flow diagrams, info boxes. Max-width 1200px centered on wide screens.</td><td>Scrollable. Smooth scroll-to-top on page change.</td></tr>
+      <tr><td><strong>Copilot Drawer</strong></td><td>Slide-in from right, 400px wide. Chat + action output.</td><td>Triggered by floating AI button (bottom-right). Overlay on mobile. Side panel on desktop.</td></tr>
+      <tr><td><strong>Modal / Dialog</strong></td><td>Centered overlay with backdrop blur. Max-width 600px. Radius-lg shadow-lg.</td><td>For create/edit forms, confirmations, AI previews. Escape to close.</td></tr>
+    </table>
+
+    <!-- ===== COMPONENT PATTERNS ===== -->
+    <div class="section-head">Component Patterns (shadcn/ui base)</div>
+    <div class="info-box warn"><strong>All components extend shadcn/ui primitives.</strong> Customised in <code>tailwind.config.ts</code> + <code>src/index.css</code> to match NDG's softer aesthetic. No raw shadcn defaults — everything gets the NDG token treatment.</div>
+
+    <div class="section-head" style="margin-top: 4px;">Buttons</div>
+    <table class="spec-table">
+      <tr><th>Variant</th><th>Style</th><th>Usage</th></tr>
+      <tr><td><strong>Primary</strong></td><td>Solid fill <code>var(--primary)</code>. White text. Radius-md. Hover: darken 10%. Compact: h-9 px-4.</td><td>Main actions: "Create Project", "Generate Invoice", "Save"</td></tr>
+      <tr><td><strong>Secondary</strong></td><td>Outline border <code>var(--border)</code>. Text colour <code>var(--text)</code>. Hover: surface fill.</td><td>Cancel, secondary actions, filter toggles</td></tr>
+      <tr><td><strong>Ghost</strong></td><td>No border, no fill. Text-2 colour. Hover: muted background.</td><td>Tertiary actions, icon buttons, nav-style actions</td></tr>
+      <tr><td><strong>Destructive</strong></td><td>Solid <code>var(--destructive)</code>. White text.</td><td>Delete, remove, cancel contract</td></tr>
+      <tr><td><strong>AI Action</strong></td><td>Ghost with <code>var(--purple)</code> text + 🤖 icon prefix. Hover: purple/10 background.</td><td>All AI triggers: "Generate Update", "Plan Session", "Summarise"</td></tr>
+    </table>
+
+    <div class="section-head" style="margin-top: 4px;">Cards</div>
+    <table class="spec-table">
+      <tr><th>State</th><th>Style</th></tr>
+      <tr><td>Default</td><td>Background: <code>var(--surface)</code>. Border: 1px <code>var(--border)</code>. Radius-lg (10px). Padding 14-16px. Shadow-sm.</td></tr>
+      <tr><td>Hover</td><td>Border lightens. Shadow-md. Transition 150ms ease.</td></tr>
+      <tr><td>With accent</td><td>Left border 3px solid <code>var(--success/purple/amber)</code> for categorised cards.</td></tr>
+      <tr><td>Clickable</td><td>Cursor pointer. Hover lifts slightly (shadow-lg). Used for project/delivery cards in list views.</td></tr>
+    </table>
+
+    <div class="section-head" style="margin-top: 4px;">Inputs &amp; Forms</div>
+    <table class="spec-table">
+      <tr><th>Element</th><th>Style</th></tr>
+      <tr><td>Text input</td><td>Background: <code>var(--surface-2)</code> (elevated). Border: 1px <code>var(--border)</code>. Radius-md. h-9 px-3. Focus: ring-2 <code>var(--primary)</code> + border-primary.</td></tr>
+      <tr><td>Select / Dropdown</td><td>Same as text input. Chevron icon right. Options in popover with radius-lg shadow-lg.</td></tr>
+      <tr><td>Textarea</td><td>Same base. Min-height 80px. Resize vertical only.</td></tr>
+      <tr><td>Label</td><td>Text-caption size (11px). Font-medium. Margin-bottom 4px. Text-2 colour.</td></tr>
+      <tr><td>Error state</td><td>Border: <code>var(--destructive)</code>. Error message below in destructive colour, caption size.</td></tr>
+    </table>
+
+    <div class="section-head" style="margin-top: 4px;">Status Badges &amp; Tags</div>
+    <table class="spec-table">
+      <tr><th>Badge Type</th><th>Style</th><th>Examples</th></tr>
+      <tr><td><strong>Status badge</strong></td><td>Pill shape (radius-full). Tiny (9-10px text). Background: semantic colour at 15% opacity. Text: semantic colour.</td><td><span class="tag tag-green">Complete</span> <span class="tag tag-amber">Scheduled</span> <span class="tag tag-red">Overdue</span> <span class="tag tag-blue">In Progress</span></td></tr>
+      <tr><td><strong>Phase badge</strong></td><td>Same pill. Green=P1, Purple=P2, Amber=P3.</td><td><span class="tag tag-green">P1</span> <span class="tag tag-purple">P2</span> <span class="tag tag-amber">P3</span></td></tr>
+      <tr><td><strong>Axis badge</strong></td><td>Rounded rectangle. Slightly larger. Used for neuro_phase and kirkpatrick on delivery cards.</td><td><span class="tag tag-purple">Engage</span> <span class="tag tag-cyan">K1 Reaction</span></td></tr>
+      <tr><td><strong>Tag</strong></td><td>Small rectangle (radius-sm). 10px text. Used inline with content.</td><td><span class="tag tag-blue">SYNC</span> <span class="tag tag-amber">API</span></td></tr>
+    </table>
+
+    <div class="section-head" style="margin-top: 4px;">Tables</div>
+    <table class="spec-table">
+      <tr><th>Element</th><th>Style</th></tr>
+      <tr><td>Header row</td><td>Overline text (9-10px, uppercase, tracking-wide, text-3 colour). Border-bottom. Sticky if scrollable.</td></tr>
+      <tr><td>Body row</td><td>13px body text. Padding 7-10px. Border-bottom subtle (#1a1e2e / var(--border)). Hover: surface background.</td></tr>
+      <tr><td>Code cells</td><td>Mono font. Surface-2 background. Radius-sm. Cyan accent in dark mode.</td></tr>
+      <tr><td>Mobile</td><td>Tables collapse to stacked cards on &lt;768px. Each row becomes a card with label: value pairs.</td></tr>
+    </table>
+
+    <div class="section-head" style="margin-top: 4px;">Navigation</div>
+    <table class="spec-table">
+      <tr><th>Element</th><th>Style</th></tr>
+      <tr><td>Nav item (default)</td><td>13px text-2. Padding 6px 16px. Left border 3px transparent. Icon 16px.</td></tr>
+      <tr><td>Nav item (hover)</td><td>Background: surface-2. Text: text (primary). Transition 150ms.</td></tr>
+      <tr><td>Nav item (active)</td><td>Background: primary/8% opacity. Text: primary. Left border: primary. Font-weight 600.</td></tr>
+      <tr><td>Section label</td><td>Overline style (9px, uppercase, tracking-wide, text-3). Padding 8px 16px.</td></tr>
+      <tr><td>Tab bar</td><td>Horizontal tabs. 12px text. Active: primary colour + 2px bottom border. No fill on tabs — underline style.</td></tr>
+    </table>
+
+    <!-- ===== MOTION ===== -->
+    <div class="section-head">Motion &amp; Animation</div>
+    <div class="info-box"><strong>Restrained micro-interactions only.</strong> Nothing flashy. Smooth, quick transitions that make the app feel responsive without being distracting. ADHD-friendly = predictable, fast, no jank.</div>
+    <table class="spec-table">
+      <tr><th>Interaction</th><th>Animation</th><th>Duration</th></tr>
+      <tr><td>Button hover/press</td><td>Background colour shift</td><td>150ms ease</td></tr>
+      <tr><td>Card hover</td><td>Border lighten + shadow lift</td><td>150ms ease</td></tr>
+      <tr><td>Page transition</td><td>Fade-in-up (opacity 0→1, translateY 8px→0)</td><td>200ms ease-out</td></tr>
+      <tr><td>Sidebar nav click</td><td>Background + border colour shift</td><td>150ms ease</td></tr>
+      <tr><td>Modal open</td><td>Fade-in backdrop + scale-up content (0.95→1)</td><td>200ms ease-out</td></tr>
+      <tr><td>Copilot drawer</td><td>Slide-in from right (translateX 100%→0)</td><td>250ms ease-out</td></tr>
+      <tr><td>Toast notification</td><td>Slide-in from top-right + auto-dismiss</td><td>300ms in, 5s display, 200ms out</td></tr>
+      <tr><td>Accordion / expand</td><td>Height auto with clip + opacity</td><td>200ms ease</td></tr>
+      <tr><td>Theme switch</td><td>CSS transition on all token properties</td><td>300ms ease (smooth, not instant)</td></tr>
+      <tr><td>Skeleton loader</td><td>Shimmer gradient (left→right pulse)</td><td>1.5s infinite ease-in-out</td></tr>
+    </table>
+
+    <!-- ===== THEME MODES ===== -->
+    <div class="section-head">Theme Modes</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--text);"><h4>Light Mode</h4><p>Soft off-white background (<code>#F1F1F1</code>). White cards. Dark text. Default for first-time users. Clean, airy feel.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>Dark Mode</h4><p>Deep navy/charcoal background (<code>#1A1A2E</code>). Elevated card surfaces. Light text. Reduced eye strain for long sessions. Default for evening use.</p></div>
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4>System</h4><p>Follows OS preference via <code>prefers-color-scheme</code>. Auto-switches. Persisted override in Settings if user picks manually.</p></div>
+    </div>
+    <div class="info-box new"><strong>Implementation:</strong> Theme stored in <code>localStorage('ndg-theme')</code>. Accent stored in <code>localStorage('ndg-accent')</code>. Applied as <code>data-theme="dark"</code> and <code>data-accent="steel"</code> on <code>&lt;html&gt;</code>. All CSS tokens swap via these attributes. Tailwind <code>darkMode: 'class'</code> + custom attribute selectors.</div>
+
+    <!-- ===== ACCESSIBILITY ===== -->
+    <div class="section-head">Accessibility</div>
+    <table class="spec-table">
+      <tr><th>Concern</th><th>Approach</th></tr>
+      <tr><td>Focus visibility</td><td>Visible focus ring (2px, primary colour, offset 2px) on all interactive elements. Never removed.</td></tr>
+      <tr><td>Colour contrast</td><td>All text/background combinations meet WCAG AA (4.5:1 for body, 3:1 for large text). Tested in both light and dark modes.</td></tr>
+      <tr><td>Keyboard navigation</td><td>Full tab order. Escape closes modals/drawers. Arrow keys in dropdowns. Enter/Space activates buttons.</td></tr>
+      <tr><td>Screen readers</td><td>Semantic HTML (nav, main, section, header). ARIA labels on icon-only buttons. Role attributes on custom components.</td></tr>
+      <tr><td>Motion sensitivity</td><td><code>prefers-reduced-motion</code>: all animations → instant. No auto-playing animations.</td></tr>
+    </table>
+
+    <!-- ===== ICONOGRAPHY ===== -->
+    <div class="section-head">Iconography</div>
+    <div class="info-box"><strong>Lucide React icons</strong> throughout. 16px default size in nav/buttons, 20px in empty states. Stroke-width 1.5-2. Consistent style: rounded line icons, not filled. Use semantic icons: CheckCircle for success, AlertTriangle for warning, XCircle for error, Clock for pending.</div>
+
+    <!-- ===== STATUS COLOUR MAP ===== -->
+    <div class="section-head">Status Colour Map — Master Reference</div>
+    <div class="info-box warn"><strong>Every status value maps to exactly one colour token.</strong> This ensures consistency across all views (cards, badges, table rows, chart segments). Developers: use the <code>getStatusColor(entity, status)</code> utility, never pick colours manually.</div>
+    <table class="spec-table">
+      <tr><th>Entity</th><th>Status</th><th>Colour Token</th><th>Badge Example</th></tr>
+      <tr><td rowspan="7"><strong>Projects</strong></td><td>contracting</td><td><code>--amber</code></td><td><span class="tag tag-amber">Contracting</span></td></tr>
+      <tr><td>project_planning</td><td><code>--blue</code></td><td><span class="tag tag-blue">Planning</span></td></tr>
+      <tr><td>session_planning</td><td><code>--cyan</code></td><td><span class="tag tag-cyan">Session Plan</span></td></tr>
+      <tr><td>content_review</td><td><code>--purple</code></td><td><span class="tag tag-purple">Content Review</span></td></tr>
+      <tr><td>delivery</td><td><code>--green</code></td><td><span class="tag tag-green">Delivery</span></td></tr>
+      <tr><td>feedback_analytics</td><td><code>--pink</code> (<code>#EC4899</code>)</td><td>Feedback</td></tr>
+      <tr><td>closed</td><td><code>--text-3</code> (grey)</td><td>Closed</td></tr>
+      <tr><td rowspan="7"><strong>Deliveries</strong></td><td>planning</td><td><code>--text-2</code></td><td>Planning</td></tr>
+      <tr><td>scheduled</td><td><code>--amber</code></td><td><span class="tag tag-amber">Scheduled</span></td></tr>
+      <tr><td>in_progress</td><td><code>--blue</code></td><td><span class="tag tag-blue">In Progress</span></td></tr>
+      <tr><td>delivered</td><td><code>--purple</code></td><td><span class="tag tag-purple">Delivered</span></td></tr>
+      <tr><td>follow_up</td><td><code>--cyan</code></td><td><span class="tag tag-cyan">Follow Up</span></td></tr>
+      <tr><td>complete</td><td><code>--green</code></td><td><span class="tag tag-green">Complete</span></td></tr>
+      <tr><td>cancelled</td><td><code>--destructive</code></td><td><span class="tag tag-red">Cancelled</span></td></tr>
+      <tr><td rowspan="5"><strong>Invoices</strong></td><td>draft</td><td><code>--text-3</code></td><td>Draft</td></tr>
+      <tr><td>sent</td><td><code>--blue</code></td><td><span class="tag tag-blue">Sent</span></td></tr>
+      <tr><td>viewed</td><td><code>--purple</code></td><td><span class="tag tag-purple">Viewed</span></td></tr>
+      <tr><td>paid</td><td><code>--green</code></td><td><span class="tag tag-green">Paid</span></td></tr>
+      <tr><td>overdue</td><td><code>--destructive</code></td><td><span class="tag tag-red">Overdue</span></td></tr>
+      <tr><td rowspan="4"><strong>Tasks</strong></td><td>todo</td><td><code>--text-3</code></td><td>To Do</td></tr>
+      <tr><td>in_progress</td><td><code>--blue</code></td><td><span class="tag tag-blue">In Progress</span></td></tr>
+      <tr><td>blocked</td><td><code>--destructive</code></td><td><span class="tag tag-red">Blocked</span></td></tr>
+      <tr><td>done</td><td><code>--green</code></td><td><span class="tag tag-green">Done</span></td></tr>
+      <tr><td rowspan="5"><strong>NEURO Phase</strong></td><td>needs</td><td><code>--amber</code></td><td><span class="tag tag-amber">Needs</span></td></tr>
+      <tr><td>engage</td><td><code>--blue</code></td><td><span class="tag tag-blue">Engage</span></td></tr>
+      <tr><td>understand</td><td><code>--purple</code></td><td><span class="tag tag-purple">Understand</span></td></tr>
+      <tr><td>realise</td><td><code>--green</code></td><td><span class="tag tag-green">Realise</span></td></tr>
+      <tr><td>ongoing</td><td><code>--cyan</code></td><td><span class="tag tag-cyan">Ongoing</span></td></tr>
+    </table>
+
+    <!-- ===== BUILD INSTRUCTIONS ===== -->
+    <div class="section-head">Build Instructions for Developer</div>
+    <div class="info-box fix"><strong>Non-negotiable design rules:</strong><br><br>
+    <strong>1. Token-only colours.</strong> No raw hex in any component. Every colour references a CSS custom property. This includes chart colours, SVG fills, and inline styles.<br><br>
+    <strong>2. shadcn/ui base.</strong> All interactive components extend shadcn primitives (Button, Card, Input, Select, Dialog, Popover, Tabs, Table, Badge, Toast, Skeleton, Accordion). Don't build from scratch.<br><br>
+    <strong>3. General Sans + Satoshi + JetBrains Mono.</strong> Load from Google Fonts or self-host. Fallback: system-ui, -apple-system, sans-serif for body; monospace for code.<br><br>
+    <strong>4. Tailwind config extends tokens.</strong> <code>tailwind.config.ts</code> maps CSS custom properties to Tailwind utilities: <code>colors: { background: 'var(--background)', surface: 'var(--surface)', ... }</code>.<br><br>
+    <strong>5. Status colours via utility.</strong> Create <code>src/lib/status-colors.ts</code> exporting <code>getStatusColor(entity: string, status: string): string</code> that returns the correct token. All badge/tag components use this, never hard-code status→colour mapping in JSX.<br><br>
+    <strong>6. Theme persistence.</strong> On mount, read <code>localStorage('ndg-theme')</code> and <code>localStorage('ndg-accent')</code>. Apply to <code>&lt;html&gt;</code> element. Settings page lets user toggle light/dark/system + accent picker.<br><br>
+    <strong>7. Responsive breakpoints.</strong> <code>sm: 640px</code>, <code>md: 768px</code> (sidebar collapses), <code>lg: 1024px</code>, <code>xl: 1280px</code>. Mobile-usable, not mobile-first.</div>
+  </div>
+</div>
+
+<!-- ===================== AI ARCHITECTURE ===================== -->
+<div id="page-ai-arch" class="page">
+  <div class="main-header"><h2>AI Architecture</h2><div class="sub">How AI works across the entire platform — unified backend, inline actions, contextual copilot</div></div>
+  <div class="content">
+    <div class="info-box"><strong>V1 AI maturity: good foundation, lightly integrated.</strong> Three real uses: dedicated assistant, project-update drafting, plan-to-project generation. V2 promotes AI from "chat tab" to "embedded intelligence" across every major workflow.</div>
+
+    <div class="section-head">AI Flow: How a Request Works</div>
+    <div class="flow">
+      <div class="flow-step">User action (button / chat / voice)</div><span class="flow-arrow">→</span>
+      <div class="flow-step"><code>useAI</code> hook</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Edge Function (ai-*)</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Claude API (Sonnet/Haiku)</div><span class="flow-arrow">→</span>
+      <div class="flow-step">Streaming SSE response</div><span class="flow-arrow">→</span>
+      <div class="flow-step">UI render / structured action</div>
+    </div>
+
+    <div class="section-head">V1 → V2 Migration Decisions</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">V1</span> Lovable AI Gateway + Gemini</h4><p>Single backend function routing to Gemini via Lovable's proxy. Limited agent prompt customization. No tool_use support.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4><span class="diff diff-new">V2</span> Claude API Direct</h4><p>Edge Functions call Claude API directly. Sonnet for generation (complex tasks). Haiku for extraction (lightweight parsing). Full tool_use support for DB actions.</p></div>
+    </div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">V1</span> Duplicated AI Client Logic</h4><p>Streaming/fetch/parsing duplicated across AIAssistant, ProjectDetail, CreateProjectFromPlanDialog, AIChatPanel — 4 different implementations.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4><span class="diff diff-new">V2</span> Unified <code>useAI</code> Hook</h4><p>One shared hook handles: streaming, cancellation, retry, error handling, context injection, structured output parsing. Every AI surface uses this.</p></div>
+    </div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">V1</span> AIChatPanel Orphaned</h4><p>Reusable chat drawer existed but was not used anywhere. Product shifted to dedicated /ai route only.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4><span class="diff diff-new">V2</span> Contextual Copilot Drawer</h4><p>AIChatPanel resurrected as contextual copilot. Floating AI button on Project Detail, Workshop Detail, Client Detail, Forms. Inherits page context. Can take actions.</p></div>
+    </div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">V1</span> VoiceInput Orphaned</h4><p>Speech-to-text + text-to-speech component existed but not wired into any UX.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4><span class="diff diff-new">V2</span> Voice Where It Matters</h4><p>Meeting notes capture, mobile quick updates, dictating project/client updates. Phase 2.</p></div>
+    </div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">V1</span> No Conversation Persistence</h4><p>Chat history lost on page refresh or agent switch.</p></div>
+      <div class="card" style="border-left: 3px solid var(--green);"><h4><span class="diff diff-new">V2</span> Persistent Threads</h4><p><code>ai_conversations</code> table. Resume previous chats. Optional team-shared threads.</p></div>
+    </div>
+
+    <div class="section-head">Shared <code>useAI</code> Hook Spec</div>
+    <table class="spec-table">
+      <tr><th>Feature</th><th>Details</th></tr>
+      <tr><td>Streaming</td><td>SSE pass-through. Token-by-token markdown rendering.</td></tr>
+      <tr><td>Context injection</td><td>Reads from <code>useAIContext()</code> — current entity (project, delivery, client, form). Auto-attaches to requests.</td></tr>
+      <tr><td>Agent routing</td><td>Param: <code>agent</code> (pm | insights | clients | setup | business). Routes to correct system prompt.</td></tr>
+      <tr><td>Structured outputs</td><td>When agent returns JSON, hook parses it. Preview step → user confirms → create records.</td></tr>
+      <tr><td>Cancellation</td><td>AbortController support. User can cancel mid-stream.</td></tr>
+      <tr><td>Rate limiting</td><td>Client-side counter + server-side 429 handling. Shows "try again in X minutes".</td></tr>
+      <tr><td>Error handling</td><td>Retry with backoff. Timeout handling. Graceful 402/429 messages.</td></tr>
+      <tr><td>Caching</td><td>Stores output in <code>ai_generations</code> with entity_type + entity_id. Same request → cached result.</td></tr>
+    </table>
+
+    <div class="section-head">Context System: <code>useAIContext()</code></div>
+    <table class="spec-table">
+      <tr><th>Page Setting Context</th><th>Data Injected</th></tr>
+      <tr><td>ProjectDetail</td><td>Project: status, deliveries, tasks, milestones, budget, client name</td></tr>
+      <tr><td>WorkshopDetail (DeliveryDetail)</td><td>Delivery: neuro_phase, kirkpatrick, sessions, agenda items, feedback, service_type</td></tr>
+      <tr><td>ClientDetail</td><td>Organisation: projects, contacts, contracts, invoices, recent activity</td></tr>
+      <tr><td>Forms / Insights</td><td>Form: responses, kirkpatrick_level, linked delivery, scores</td></tr>
+      <tr><td>Dashboard / Daily Brief</td><td>Summary: active projects, overdue tasks, upcoming deliveries, revenue</td></tr>
+    </table>
+
+    <div class="section-head">AI-Related Database Tables <span class="diff diff-new">NEW</span></div>
+    <table class="spec-table">
+      <tr><th>Table</th><th>Fields</th><th>Purpose</th></tr>
+      <tr><td><code>ai_generations</code></td><td>id, user_id, agent, prompt_hash, entity_type, entity_id, input JSONB, output TEXT, model, tokens_used, created_at</td><td>Cache AI outputs. Same entity + prompt → reuse. Track token usage.</td></tr>
+      <tr><td><code>ai_conversations</code></td><td>id, user_id, agent, title, messages JSONB, entity_type, entity_id, created_at, updated_at</td><td>Persistent chat threads. Resume conversations. Optionally team-shared.</td></tr>
+    </table>
+
+    <div class="section-head">AI by Build Phase</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <h4><span class="tag tag-green">Phase 1</span> Core AI</h4>
+        <p><strong>Dedicated /ai page</strong> with 4 agents + streaming + persistent threads.<br>
+        <strong>Create from Plan:</strong> paste brief → AI extracts project JSON → preview → create.<br>
+        <strong>Generate Project Update:</strong> AI drafts status update from live project data.<br>
+        <strong>Session Planner:</strong> AI generates agenda items from delivery context.<br>
+        <strong>Feedback Summariser:</strong> AI clusters form responses, themes, sentiment.<br>
+        <strong>Edge Functions:</strong> ai-assistant, ai-session-planner, ai-impact-reporter, ai-extract.<br>
+        <strong>Tables:</strong> ai_generations, ai_conversations.<br>
+        <strong>Hook:</strong> useAI, useAIContext.</p>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--purple);">
+        <h4><span class="tag tag-purple">Phase 2</span> Embedded AI</h4>
+        <p><strong>Contextual Copilot drawer</strong> on key pages (floating AI button).<br>
+        <strong>Inline actions:</strong> Generate Content, Draft Follow-Up, Suggest Tasks, Risk Detection, Client Relationship Summary, AI Dashboard Narrative, Draft Email Reply, Generate Summary.<br>
+        <strong>Voice Input:</strong> meeting notes, mobile updates.<br>
+        <strong>Edge Functions:</strong> ai-content-generator, ai-smart-assistant (with tool_use).</p>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--amber);">
+        <h4><span class="tag tag-amber">Phase 3</span> AI-Native</h4>
+        <p><strong>Client Portal Q&amp;A:</strong> AI scoped to client's data (projects, invoices, docs).<br>
+        <strong>Tool_use actions:</strong> AI can "create task", "draft invoice", "schedule session", "assign owner".<br>
+        <strong>RAG:</strong> Document retrieval over uploaded docs, contracts, notes.<br>
+        <strong>Team-shared AI history.</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ENTITY MODEL ===================== -->
+<div id="page-entity-model" class="page">
+  <div class="main-header"><h2>Entity Model</h2><div class="sub">Every entity and how they connect</div></div>
+  <div class="content">
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; overflow-x: auto;">
+      <svg viewBox="0 0 1000 700" style="width: 100%; min-width: 800px;" font-family="-apple-system, sans-serif">
+        <defs>
+          <marker id="a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#4a5568"/></marker>
+          <marker id="ag" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#10B981"/></marker>
+          <marker id="ap" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#8b5cf6"/></marker>
+        </defs>
+
+        <!-- ORGANISATIONS -->
+        <rect x="30" y="40" width="160" height="50" rx="8" fill="#10B98112" stroke="#10B981" stroke-width="2"/>
+        <text x="110" y="60" text-anchor="middle" fill="#10B981" font-size="9" font-weight="600">UI: "CLIENTS"</text>
+        <text x="110" y="77" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">organisations</text>
+
+        <!-- CONTACTS -->
+        <rect x="30" y="140" width="160" height="45" rx="8" fill="#10B98112" stroke="#10B981" stroke-width="1.5"/>
+        <text x="110" y="168" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">contacts</text>
+        <line x1="110" y1="90" x2="110" y2="140" stroke="#10B981" stroke-width="1.5" marker-end="url(#ag)"/>
+
+        <!-- PROJECTS -->
+        <rect x="280" y="40" width="180" height="50" rx="8" fill="#10B98115" stroke="#10B981" stroke-width="2.5"/>
+        <text x="370" y="58" text-anchor="middle" fill="#10B981" font-size="9" font-weight="600">CENTRAL HUB</text>
+        <text x="370" y="77" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="700">projects</text>
+        <line x1="190" y1="65" x2="280" y2="65" stroke="#10B981" stroke-width="2" marker-end="url(#ag)"/>
+
+        <!-- DELIVERIES -->
+        <rect x="280" y="150" width="180" height="55" rx="8" fill="#8b5cf615" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="370" y="168" text-anchor="middle" fill="#8b5cf6" font-size="9" font-weight="600">UI: "WORKSHOPS" · AXIS 2+3</text>
+        <text x="370" y="190" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="700">deliveries</text>
+        <line x1="370" y1="90" x2="370" y2="150" stroke="#8b5cf6" stroke-width="2" marker-end="url(#ap)"/>
+
+        <!-- SESSIONS -->
+        <rect x="280" y="260" width="180" height="45" rx="8" fill="#3b82f615" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="370" y="288" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">sessions</text>
+        <line x1="370" y1="205" x2="370" y2="260" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a)"/>
+
+        <!-- AGENDA ITEMS -->
+        <rect x="280" y="355" width="180" height="40" rx="8" fill="#06b6d415" stroke="#06b6d4" stroke-width="1"/>
+        <text x="370" y="380" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">session_agenda_items</text>
+        <line x1="370" y1="305" x2="370" y2="355" stroke="#06b6d4" stroke-width="1" marker-end="url(#a)"/>
+
+        <!-- SERVICES -->
+        <rect x="540" y="150" width="150" height="45" rx="8" fill="#f59e0b15" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="615" y="170" text-anchor="middle" fill="#f59e0b" font-size="9" font-weight="600">PRICES LIVE HERE</text>
+        <text x="615" y="185" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">services</text>
+        <line x1="460" y1="177" x2="540" y2="177" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#a)"/>
+
+        <!-- INVOICES -->
+        <rect x="540" y="40" width="150" height="45" rx="8" fill="#f59e0b15" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="615" y="68" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">invoices</text>
+        <line x1="460" y1="60" x2="540" y2="60" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#a)"/>
+
+        <!-- INVOICE ITEMS -->
+        <rect x="740" y="40" width="150" height="45" rx="8" fill="#f59e0b10" stroke="#f59e0b" stroke-width="1"/>
+        <text x="815" y="68" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">invoice_items</text>
+        <line x1="690" y1="62" x2="740" y2="62" stroke="#f59e0b" stroke-width="1" marker-end="url(#a)"/>
+
+        <!-- CONTRACTS -->
+        <rect x="540" y="240" width="150" height="45" rx="8" fill="#8b5cf610" stroke="#8b5cf6" stroke-width="1"/>
+        <text x="615" y="268" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">contracts</text>
+        <line x1="460" y1="75" x2="500" y2="262" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#a)"/>
+
+        <!-- FORMS -->
+        <rect x="540" y="330" width="150" height="50" rx="8" fill="#ec489915" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="615" y="350" text-anchor="middle" fill="#ec4899" font-size="9" font-weight="600">KIRKPATRICK LEVEL</text>
+        <text x="615" y="370" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">forms</text>
+        <line x1="460" y1="190" x2="540" y2="355" stroke="#ec4899" stroke-width="1" marker-end="url(#a)"/>
+
+        <!-- FORM RESPONSES -->
+        <rect x="740" y="330" width="150" height="45" rx="8" fill="#ec489910" stroke="#ec4899" stroke-width="1"/>
+        <text x="815" y="358" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">form_responses</text>
+        <line x1="690" y1="355" x2="740" y2="355" stroke="#ec4899" stroke-width="1" marker-end="url(#a)"/>
+
+        <!-- TASKS -->
+        <rect x="540" y="430" width="150" height="45" rx="8" fill="#10B98112" stroke="#10B981" stroke-width="1.5"/>
+        <text x="615" y="458" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="700">tasks</text>
+        <line x1="460" y1="80" x2="500" y2="452" stroke="#10B981" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#a)"/>
+        <text x="520" y="445" fill="#64748b" font-size="8">also links to deliveries</text>
+
+        <!-- DAILY STATES -->
+        <rect x="30" y="260" width="160" height="45" rx="8" fill="#10B98112" stroke="#10B981" stroke-width="1"/>
+        <text x="110" y="288" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">daily_states</text>
+        <text x="110" y="250" text-anchor="middle" fill="#64748b" font-size="9">→ auth.users</text>
+
+        <!-- NOTES -->
+        <rect x="30" y="350" width="160" height="40" rx="8" fill="#8b5cf610" stroke="#8b5cf6" stroke-width="1"/>
+        <text x="110" y="375" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">notes</text>
+
+        <!-- EMAILS -->
+        <rect x="30" y="430" width="160" height="40" rx="8" fill="#3b82f610" stroke="#3b82f6" stroke-width="1"/>
+        <text x="110" y="455" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">emails</text>
+
+        <!-- DOCUMENTS -->
+        <rect x="30" y="510" width="160" height="40" rx="8" fill="#f59e0b10" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="110" y="535" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">documents (polymorphic)</text>
+
+        <!-- CURRICULUM -->
+        <rect x="540" y="520" width="180" height="45" rx="8" fill="#8b5cf610" stroke="#8b5cf6" stroke-width="1"/>
+        <text x="630" y="548" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">curriculum_workshops</text>
+        <text x="630" y="515" text-anchor="middle" fill="#64748b" font-size="9">template → delivery</text>
+
+        <!-- PARTNERS -->
+        <rect x="770" y="520" width="130" height="45" rx="8" fill="#8b5cf610" stroke="#8b5cf6" stroke-width="1"/>
+        <text x="835" y="548" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">partners</text>
+        <line x1="720" y1="542" x2="770" y2="542" stroke="#8b5cf6" stroke-width="1" marker-end="url(#a)"/>
+
+        <!-- AUTH USERS -->
+        <rect x="770" y="430" width="130" height="45" rx="8" fill="#64748b15" stroke="#64748b" stroke-width="1"/>
+        <text x="835" y="458" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">auth.users</text>
+
+        <!-- ACTIVITY LOG -->
+        <rect x="770" y="240" width="130" height="40" rx="8" fill="#64748b10" stroke="#64748b" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="835" y="265" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600">activity_log</text>
+
+        <!-- MEETINGS (NEW) -->
+        <rect x="770" y="150" width="130" height="40" rx="8" fill="#3b82f615" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="835" y="165" text-anchor="middle" fill="#3b82f6" font-size="8" font-weight="600">GCal SYNC</text>
+        <text x="835" y="180" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">meetings</text>
+
+        <!-- PROJECT_UPDATES (NEW) -->
+        <rect x="770" y="330" width="130" height="40" rx="8" fill="#10B98112" stroke="#10B981" stroke-width="1"/>
+        <text x="835" y="355" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="600">project_updates</text>
+        <text x="835" y="325" text-anchor="middle" fill="#64748b" font-size="8">→ projects</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DATABASE ===================== -->
+<div id="page-database" class="page">
+  <div class="main-header"><h2>Database Schema</h2><div class="sub">All tables — corrected from V2 PRD</div></div>
+  <div class="content">
+    <div class="info-box warn"><strong>Create ALL tables in Phase 1 DDL.</strong> Even if the UI pages come in Phase 2. Prevents schema migrations breaking things later.</div>
+
+    <div class="section-head">Core Tables</div>
+    <table class="spec-table">
+      <tr><th>Table</th><th>Key Fields</th><th>Phase</th></tr>
+      <tr><td><code>organisations</code></td><td>name, sector, email, phone, status</td><td>P1</td></tr>
+      <tr><td><code>contacts</code></td><td>name, email, phone, job_title, organisation_id</td><td>P1</td></tr>
+      <tr><td><code>projects</code></td><td>organisation_id, name, <strong>status (7-stage)</strong>, intended_neuro_phase, budget, start_date, end_date, owner_id, external_ref <span class="diff diff-fix">REMOVED day_rate, total_days, service_type</span></td><td>P1</td></tr>
+      <tr><td><code>deliveries</code></td><td>project_id, organisation_id, title, <strong>service_id</strong>, status, <strong>neuro_phase</strong>, <strong>kirkpatrick_level</strong>, delivery_date, duration_minutes, delegate_count, location, facilitator_id, feedback_form_id, satisfaction_score, <strong>sort_order INT</strong> <span class="diff diff-new">NEW</span></td><td>P1</td></tr>
+      <tr><td><code>sessions</code></td><td>delivery_id, project_id, title, session_type, session_date, duration_minutes, neuro_phase (nullable override), facilitator_id, content_status, <strong>sort_order INT</strong> <span class="diff diff-new">NEW</span></td><td>P1</td></tr>
+      <tr><td><code>session_agenda_items</code></td><td>session_id, title, type, duration_minutes, position, method, description, materials</td><td>P1</td></tr>
+      <tr><td><code>services</code></td><td>name, category (workshop|service), <strong>price</strong>, description, default_duration, default_neuro_phase, active</td><td>P1</td></tr>
+      <tr><td><code>tasks</code></td><td>title, status, priority, project_id (nullable), delivery_id (nullable), assignee, due_date, parent_task_id, description</td><td>P1</td></tr>
+      <tr><td><code>daily_states</code></td><td>user_id, date, energy_level, focus_score</td><td>P1</td></tr>
+    </table>
+
+    <div class="section-head">Forms & Feedback</div>
+    <table class="spec-table">
+      <tr><td><code>forms</code></td><td>title, <strong>type ENUM (feedback|survey|booking|follow_up|assessment)</strong> <span class="diff diff-fix">DEFINED</span>, description, fields JSONB, active, <strong>kirkpatrick_level</strong>, <strong>delivery_id</strong>, project_id</td><td>P1</td></tr>
+      <tr><td><code>form_responses</code></td><td>form_id, data JSONB, submitted_at, <strong>kirkpatrick_level</strong></td><td>P1</td></tr>
+    </table>
+
+    <div class="section-head">Commercial</div>
+    <table class="spec-table">
+      <tr><td><code>invoices</code></td><td>invoice_number, organisation_id, project_id, contract_id, status, subtotal, vat_rate, vat_amount, total, issue_date, due_date, paid_date, quickbooks_id</td><td>P1</td></tr>
+      <tr><td><code>invoice_items</code></td><td>invoice_id, delivery_id, service_id, description, quantity, unit_price, total</td><td>P1</td></tr>
+      <tr><td><code>contracts</code></td><td>title, type (msa|po|sow), organisation_id, project_id, parent_contract_id, status, value, dates, document_url</td><td>P2</td></tr>
+    </table>
+
+    <div class="section-head">Knowledge & Partners</div>
+    <table class="spec-table">
+      <tr><td><code>curriculum_workshops</code></td><td>title, service_id, neuro_phase, materials JSONB, default_agenda JSONB, partner_variants JSONB</td><td>P2</td></tr>
+      <tr><td><code>knowledge_articles</code></td><td>title, content, category, tags[]</td><td>P2</td></tr>
+      <tr><td><code>partners</code></td><td>name, type, commission_rate, contact_email</td><td>P2</td></tr>
+    </table>
+
+    <div class="section-head">Meetings & Updates <span class="diff diff-new">NEW — from audit</span></div>
+    <table class="spec-table">
+      <tr><td><code>meetings</code> <span class="diff diff-new">NEW</span></td><td>title, meeting_type (client|internal|sales), organisation_id (nullable), project_id (nullable), contact_id (nullable), scheduled_at TIMESTAMPTZ, duration_minutes, location, gcal_event_id, notes, attendees JSONB, created_by</td><td>P2</td></tr>
+      <tr><td><code>project_updates</code> <span class="diff diff-new">NEW</span></td><td>project_id, author_id, content TEXT (markdown), status_snapshot JSONB, ai_generated BOOLEAN, created_at</td><td>P1</td></tr>
+    </table>
+
+    <div class="section-head">Support</div>
+    <table class="spec-table">
+      <tr><td><code>notes</code></td><td>title, body, project_id, user_id, timestamps</td><td>P1</td></tr>
+      <tr><td><code>emails</code></td><td>gmail_id, thread_id, subject, from, to, organisation_id, project_id</td><td>P2</td></tr>
+      <tr><td><code>documents</code></td><td>name, url, entity_type, entity_id, uploaded_by (polymorphic)</td><td>P2</td></tr>
+      <tr><td><code>notifications</code></td><td>user_id, type, title, body, read, entity_type, entity_id</td><td>P2</td></tr>
+      <tr><td><code>activity_log</code></td><td>user_id, entity_type, entity_id, action, metadata JSONB, timestamp</td><td>P1</td></tr>
+      <tr><td><code>client_portal_access</code></td><td>user_id, organisation_id, granted_by, permissions JSONB</td><td>P1</td></tr>
+      <tr><td><code>profiles</code></td><td>id (= auth.users.id), role (admin|team|client), display_name, avatar_url</td><td>P1</td></tr>
+    </table>
+
+    <div class="section-head">AI <span class="diff diff-new">NEW</span></div>
+    <table class="spec-table">
+      <tr><td><code>ai_generations</code></td><td>id, user_id, agent, prompt_hash, entity_type, entity_id, input JSONB, output TEXT, model, tokens_used, created_at</td><td>P1</td></tr>
+      <tr><td><code>ai_conversations</code></td><td>id, user_id, agent, title, messages JSONB, entity_type, entity_id, created_at, updated_at</td><td>P1</td></tr>
+    </table>
+
+    <div class="section-head">RLS — 3 Roles Only</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--green);"><h4>admin</h4><p>Charlie + Rich. Full access.</p></div>
+      <div class="card" style="border-left: 3px solid var(--purple);"><h4>team</h4><p>Associates. Own tasks + assigned projects/deliveries.</p></div>
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4>client</h4><p>Portal users. Read-only on their org's data via client_portal_access.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== EDGE FUNCTIONS ===================== -->
+<div id="page-edge" class="page">
+  <div class="main-header"><h2>Edge Functions</h2><div class="sub">All business logic — no business logic in React</div></div>
+  <div class="content">
+    <div class="info-box warn"><strong>Rule:</strong> Multi-table ops → Edge Function. Single-table CRUD → direct Supabase. Computed values (invoice totals, satisfaction scores) → Edge Function. Status transitions → Edge Function.</div>
+
+    <div class="section-head">Phase 1</div>
+    <table class="spec-table">
+      <tr><th>Function</th><th>What It Does</th></tr>
+      <tr><td><code>scaffold-project</code></td><td>Creates project + deliveries + sessions + default feedback form in one transaction</td></tr>
+      <tr><td><code>scaffold-deliveries</code></td><td>Adds deliveries + default sessions to existing project</td></tr>
+      <tr><td><code>generate-invoice</code></td><td>Takes delivery IDs, looks up service.price for each, creates invoice + invoice_items, auto-generates number</td></tr>
+      <tr><td><code>recalculate-invoice</code></td><td>Re-sums items after manual edit, recalculates VAT + total</td></tr>
+      <tr><td><code>process-form-response</code></td><td>Saves response, sets kirkpatrick_level, calculates satisfaction_score, updates delivery</td></tr>
+      <tr><td><code>advance-project-status</code></td><td>Validates transition is legal, logs to activity_log</td></tr>
+      <tr><td><code>dailyBrief</code></td><td>Aggregates tasks + deliveries + energy + red flags for today</td></tr>
+      <tr><td><code>insightsBusiness</code></td><td>CSAT trends, feedback aggregations, Kirkpatrick distribution</td></tr>
+      <tr><td><code>insightsPersonal</code></td><td>Energy patterns, focus charts, optimal window analysis</td></tr>
+      <tr><td><code>advance-delivery-status</code> <span class="diff diff-new">NEW</span></td><td>Validates delivery status transition. Side-effects: GCal event, feedback form trigger, satisfaction calc, notification. See Automations page.</td></tr>
+      <tr><td><code>send-invoice</code> <span class="diff diff-new">NEW</span></td><td>Sets issue_date + due_date. Emails client contact. Pushes to QuickBooks (P3). Updates portal visibility.</td></tr>
+      <tr><td><code>mark-invoice-paid</code> <span class="diff diff-new">NEW</span></td><td>Records paid_date. Syncs to QuickBooks. Notifies project owner. Checks project closability.</td></tr>
+    </table>
+
+    <div class="section-head">Phase 1 — AI <span class="diff diff-new">PROMOTED from Phase 3</span></div>
+    <table class="spec-table">
+      <tr><th>Function</th><th>What It Does</th></tr>
+      <tr><td><code>ai-assistant</code></td><td>Main conversational agent. Routes to agent prompts (pm, insights, clients, setup, business). Claude Sonnet via streaming SSE. Auth + per-user rate limiting (20/hr). Supports context injection.</td></tr>
+      <tr><td><code>ai-session-planner</code></td><td>Input: delivery context (neuro_phase, service_type, delegate_count, duration). Output: structured agenda items JSON. Claude Sonnet.</td></tr>
+      <tr><td><code>ai-impact-reporter</code></td><td>Input: form_responses + kirkpatrick data + delivery data. Output: theme clusters, sentiment scores, narrative impact report. Claude Sonnet.</td></tr>
+      <tr><td><code>ai-extract</code></td><td>Lightweight extraction: parse plan text → project JSON, parse email → action items, parse feedback → sentiment. Claude Haiku.</td></tr>
+    </table>
+
+    <div class="section-head">Phase 2+</div>
+    <table class="spec-table">
+      <tr><td><code>ai-content-generator</code></td><td>Session materials, facilitator brief, follow-up emails, proposals, reports. Claude Sonnet.</td></tr>
+      <tr><td><code>ai-smart-assistant</code></td><td>Claude tool_use for DB actions: create task, draft invoice, schedule session, assign owner. Sonnet.</td></tr>
+      <tr><td><code>knowledgeSearch</code></td><td>Full-text search across articles + curriculum</td></tr>
+      <tr><td><code>partnerWorkshopAssign</code></td><td>Assigns curriculum workshop to partner</td></tr>
+      <tr><td><code>contractChain</code></td><td>Returns MSA → POs → Invoices for a client</td></tr>
+      <tr><td><code>gmail-sync</code></td><td>Sync email threads, match to organisations/projects</td></tr>
+      <tr><td><code>gcal-sync</code></td><td>2-way calendar sync</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== AUTOMATIONS ===================== -->
+<div id="page-automations" class="page">
+  <div class="main-header"><h2>Automations</h2><div class="sub">Every automated workflow, trigger, sync, and scheduled job across NDG Hub v2 <span class="diff diff-new">NEW</span></div></div>
+  <div class="content">
+    <div class="info-box"><strong>4 automation layers:</strong> (1) Status transition side-effects — Edge Functions that fire when records change state. (2) Integration syncs — 2-way data flow with Google, QuickBooks, etc. (3) Scheduled jobs — recurring tasks on a timer. (4) n8n workflows — complex multi-step orchestrations.</div>
+
+    <!-- ===== LAYER 1: STATUS TRANSITIONS ===== -->
+    <div class="section-head">Layer 1 — Status Transition Side-Effects</div>
+    <div class="info-box warn"><strong>Rule:</strong> Status changes ALWAYS go through Edge Functions, never direct column updates. The Edge Function validates the transition is legal, performs side-effects, and logs to <code>activity_log</code>.</div>
+    <table class="spec-table">
+      <tr><th>Entity</th><th>Transition</th><th>Side-Effect</th><th>Edge Function</th><th>Phase</th></tr>
+      <tr>
+        <td><code>projects</code></td>
+        <td>Any status → next status</td>
+        <td>Validates transition is legal (no skipping stages). Logs to <code>activity_log</code>. Sends notification to project owner.</td>
+        <td><code>advance-project-status</code></td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><code>projects</code></td>
+        <td>→ <code>feedback_analytics</code></td>
+        <td>All deliveries must be in <code>delivered</code> or <code>complete</code>. Triggers feedback form reminder emails to delegates.</td>
+        <td><code>advance-project-status</code></td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><code>projects</code></td>
+        <td>→ <code>closed</code></td>
+        <td>Validates all invoices are <code>paid</code>. Archives project. Final satisfaction score snapshot.</td>
+        <td><code>advance-project-status</code></td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><code>deliveries</code></td>
+        <td>→ <code>scheduled</code></td>
+        <td>Requires <code>delivery_date</code> + <code>facilitator_id</code> set. Creates GCal event (if integration active). Notifies facilitator.</td>
+        <td><code>advance-delivery-status</code></td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><code>deliveries</code></td>
+        <td>→ <code>delivered</code></td>
+        <td>Auto-triggers feedback form link to delegates (email/portal). Creates follow-up task for project owner. Notifies client contact.</td>
+        <td><code>advance-delivery-status</code></td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><code>deliveries</code></td>
+        <td>→ <code>complete</code></td>
+        <td>Calculates <code>satisfaction_score</code> from form responses. Updates <code>projects.intended_neuro_phase</code> hint. Marks delivery as invoiceable.</td>
+        <td><code>advance-delivery-status</code></td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><code>sessions</code></td>
+        <td><code>content_status</code> → <code>ready_for_review</code></td>
+        <td>Notifies admin users (Charlie/Rich) that session content needs approval.</td>
+        <td>Direct Supabase + notification insert</td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><code>invoices</code></td>
+        <td>→ <code>sent</code></td>
+        <td>Records <code>issue_date = now()</code>. Sets <code>due_date = issue_date + 30</code>. Sends email to client contact. Portal shows invoice.</td>
+        <td><code>send-invoice</code></td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><code>invoices</code></td>
+        <td>→ <code>paid</code></td>
+        <td>Records <code>paid_date</code>. Syncs to QuickBooks (if active). Notifies project owner. Checks if all invoices paid → can close project.</td>
+        <td><code>mark-invoice-paid</code></td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><code>contracts</code></td>
+        <td>→ <code>signed</code></td>
+        <td>Notifies project owner. Enables invoice generation for linked project. Updates contract chain display.</td>
+        <td><code>advance-contract-status</code></td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><code>form_responses</code></td>
+        <td>New response submitted</td>
+        <td>Saves response. Sets <code>kirkpatrick_level</code>. Recalculates <code>delivery.satisfaction_score</code>. Notifies project owner. Increments form response count.</td>
+        <td><code>process-form-response</code></td>
+        <td>P1</td>
+      </tr>
+    </table>
+
+    <!-- ===== LAYER 2: INTEGRATION SYNCS ===== -->
+    <div class="section-head">Layer 2 — Integration Syncs</div>
+    <table class="spec-table">
+      <tr><th>Integration</th><th>Direction</th><th>What Syncs</th><th>Trigger</th><th>Edge Function</th><th>Phase</th></tr>
+      <tr>
+        <td><span class="tag tag-blue">Google Calendar</span></td>
+        <td>Hub → GCal</td>
+        <td>When delivery moves to <code>scheduled</code>, creates GCal event with: title, date/time, location, facilitator as attendee, client contact as attendee.</td>
+        <td>Delivery status change</td>
+        <td><code>gcal-sync</code></td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-blue">Google Calendar</span></td>
+        <td>GCal → Hub</td>
+        <td>New/updated GCal events → creates/updates <code>meetings</code> row. Matches attendee emails to <code>contacts</code> for auto-linking to organisation.</td>
+        <td>Webhook / polling (every 5 min)</td>
+        <td><code>gcal-sync</code></td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-blue">Gmail</span></td>
+        <td>Gmail → Hub</td>
+        <td>Email threads matching known contact emails → creates <code>emails</code> rows linked to organisation + project. Subject, from, to, snippet stored.</td>
+        <td>Webhook / polling (every 5 min)</td>
+        <td><code>gmail-sync</code></td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-blue">Gmail</span></td>
+        <td>Hub → Gmail</td>
+        <td>Compose email from project context → sends via Gmail API. Thread linked back to <code>emails</code> table.</td>
+        <td>User action (compose)</td>
+        <td><code>gmail-sync</code></td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-blue">QuickBooks</span></td>
+        <td>Hub → QB</td>
+        <td>When invoice moves to <code>sent</code>, pushes to QuickBooks: customer, line items, amounts, dates. Stores <code>quickbooks_id</code> on invoice.</td>
+        <td>Invoice status change</td>
+        <td><code>quickbooks-sync</code></td>
+        <td>P3</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-blue">QuickBooks</span></td>
+        <td>QB → Hub</td>
+        <td>Payment recorded in QB → webhook → marks Hub invoice as <code>paid</code>, sets <code>paid_date</code>.</td>
+        <td>Webhook from QuickBooks</td>
+        <td><code>quickbooks-sync</code></td>
+        <td>P3</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-blue">Clarify CRM</span></td>
+        <td>Clarify → Hub</td>
+        <td>When deal moves to "won" in Clarify → creates <code>organisation</code> + <code>contact</code> in Hub. Pre-populates project scaffold.</td>
+        <td>Webhook from Clarify</td>
+        <td><code>clarify-sync</code></td>
+        <td>P3</td>
+      </tr>
+      <tr>
+        <td><span class="tag tag-purple">Telegram</span></td>
+        <td>Hub → Telegram</td>
+        <td>Notification events (overdue tasks, delivery reminders, invoice alerts) push to Telegram bot. Uses user's <code>telegram_chat_id</code> from settings.</td>
+        <td>Notification insert trigger</td>
+        <td><code>send-telegram</code></td>
+        <td>P2</td>
+      </tr>
+    </table>
+
+    <!-- ===== LAYER 3: SCHEDULED JOBS ===== -->
+    <div class="section-head">Layer 3 — Scheduled / Cron Jobs</div>
+    <div class="info-box new"><strong>Implementation:</strong> Supabase <code>pg_cron</code> for database-level jobs. For complex jobs, use Supabase scheduled Edge Function invocations or n8n cron triggers.</div>
+    <table class="spec-table">
+      <tr><th>Job</th><th>Schedule</th><th>What It Does</th><th>Phase</th></tr>
+      <tr>
+        <td><strong>Invoice overdue check</strong></td>
+        <td>Daily 9am</td>
+        <td>Finds invoices where <code>status = sent</code> AND <code>due_date < today</code>. Sets status to <code>overdue</code>. Creates notification for project owner. Sends Telegram alert.</td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><strong>Task overdue check</strong></td>
+        <td>Daily 8am</td>
+        <td>Finds tasks where <code>due_date < today</code> AND <code>status NOT IN (done, cancelled)</code>. Creates overdue notification. Feeds into Daily Brief red flags.</td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><strong>Delivery reminder</strong></td>
+        <td>Daily 6pm</td>
+        <td>Finds deliveries where <code>delivery_date = tomorrow</code> AND <code>status = scheduled</code>. Sends reminder to facilitator + client contact. Telegram push.</td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><strong>Feedback form chase</strong></td>
+        <td>Daily 10am</td>
+        <td>Finds deliveries in <code>delivered</code> status for 3+ days with &lt;50% form response rate. Sends reminder email to delegates. Max 2 chases per form.</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>90-day follow-up trigger</strong></td>
+        <td>Daily 9am</td>
+        <td>Finds deliveries completed 90 days ago that have a kirkpatrick_level 1/2 form but no L3 follow-up form. Creates task: "Send 90-day follow-up form for [delivery]". Suggests AI-generated L3 form.</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>GCal/Gmail poll</strong></td>
+        <td>Every 5 minutes</td>
+        <td>Polls Google APIs for new/changed events and emails. Processes via <code>gcal-sync</code> / <code>gmail-sync</code>. (Webhook preferred but poll as fallback.)</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>Weekly digest</strong></td>
+        <td>Monday 8am</td>
+        <td>Generates weekly summary: projects progressed, deliveries completed, revenue invoiced, CSAT average, upcoming week preview. Sends to admin users via email + Telegram.</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>Contract expiry check</strong></td>
+        <td>Weekly Monday 9am</td>
+        <td>Finds contracts where <code>end_date</code> is within 30 days. Creates notification + task: "Renew [contract] for [client]".</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>AI cache cleanup</strong></td>
+        <td>Weekly Sunday 2am</td>
+        <td>Deletes <code>ai_generations</code> rows older than 30 days where entity no longer exists (orphaned cache). Keeps token usage stats.</td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><strong>Energy pattern analysis</strong></td>
+        <td>Weekly Friday 5pm</td>
+        <td>Analyses <code>daily_states</code> for the week. Updates energy pattern insights. Feeds into Personal Insights tab + AI recommendations.</td>
+        <td>P2</td>
+      </tr>
+    </table>
+
+    <!-- ===== LAYER 4: n8n WORKFLOWS ===== -->
+    <div class="section-head">Layer 4 — n8n Workflow Automations</div>
+    <div class="info-box"><strong>Why n8n?</strong> For multi-step workflows that span multiple services and need error handling, retries, and visual debugging. NDG Hub triggers n8n via webhook. n8n calls back to Hub's Edge Functions or writes directly to Supabase.</div>
+    <table class="spec-table">
+      <tr><th>Workflow</th><th>Trigger</th><th>Steps</th><th>Phase</th></tr>
+      <tr>
+        <td><strong>New Client Onboarding</strong></td>
+        <td>Organisation created in Hub (or synced from Clarify)</td>
+        <td>1. Create welcome email draft (Gmail) → 2. Create Telegram notification → 3. If from Clarify: pull contact details + deal value → 4. Create default project scaffold task → 5. Log to activity_log</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>Post-Delivery Sequence</strong></td>
+        <td>Delivery status → <code>delivered</code></td>
+        <td>1. Send feedback form link email to delegates → 2. Wait 3 days → 3. If response rate &lt;50%, send chase email → 4. Wait 4 days → 5. If still &lt;50%, create task for manual follow-up → 6. When form closes, trigger AI feedback summariser</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>Invoice Lifecycle</strong></td>
+        <td>Invoice created in Hub</td>
+        <td>1. Generate PDF (from template) → 2. Push to QuickBooks → 3. Email PDF to client contact → 4. Set status to <code>sent</code> → 5. Schedule overdue check for due_date+1 → 6. If overdue: send reminder email → 7. If paid in QB: webhook → mark paid in Hub</td>
+        <td>P3</td>
+      </tr>
+      <tr>
+        <td><strong>Meeting Follow-Up</strong></td>
+        <td>Meeting marked complete (or GCal event ends)</td>
+        <td>1. If meeting has notes → AI extract action items (<code>ai-extract</code>) → 2. Create tasks from extracted items → 3. Draft follow-up email to attendees → 4. Log meeting summary to project updates</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>Content Pipeline</strong></td>
+        <td>Session <code>content_status</code> → <code>ready_for_review</code></td>
+        <td>1. Notify reviewer (Telegram + in-app) → 2. If not reviewed in 48h → escalate notification → 3. When approved → mark <code>approved</code> → notify facilitator → 4. Attach final materials to delivery documents</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>Perplexity Research</strong></td>
+        <td>User triggers "Research this client" from Client Detail</td>
+        <td>1. Call Perplexity API with org name + sector → 2. Call Firecrawl to scrape org website → 3. AI summarises findings → 4. Stores in knowledge_articles linked to org → 5. Surfaces in Client Detail "Research" card</td>
+        <td>P3</td>
+      </tr>
+      <tr>
+        <td><strong>ElevenLabs Audio</strong></td>
+        <td>User triggers "Generate audio" from session materials</td>
+        <td>1. Take session content text → 2. Call ElevenLabs TTS API → 3. Store audio file in documents → 4. Link to session → 5. Available for download/playback in Workshop Detail</td>
+        <td>P3</td>
+      </tr>
+    </table>
+
+    <!-- ===== LAYER 5: AI-TRIGGERED ===== -->
+    <div class="section-head">Layer 5 — AI-Triggered Automations</div>
+    <div class="info-box"><strong>AI actions that create or modify data.</strong> These are user-initiated but AI-executed. The AI generates structured output → user previews → confirms → records created.</div>
+    <table class="spec-table">
+      <tr><th>AI Action</th><th>Trigger</th><th>What Gets Created</th><th>Phase</th></tr>
+      <tr>
+        <td><strong>Create Project from Plan</strong></td>
+        <td>User pastes brief/proposal text</td>
+        <td><code>ai-extract</code> (Haiku) → JSON → preview → creates: project + deliveries (with service_id) + default sessions + tasks + feedback form</td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><strong>AI Session Planner</strong></td>
+        <td>User clicks "Plan Session" on empty session</td>
+        <td><code>ai-session-planner</code> (Sonnet) → structured agenda items JSON → preview → creates: session_agenda_items with types, durations, methods</td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><strong>Generate Project Update</strong></td>
+        <td>User clicks "Generate Update" on Project Detail</td>
+        <td><code>ai-assistant</code> (pm agent) → markdown update → preview → creates: project_updates row with status_snapshot + ai_generated=true</td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><strong>Summarise Feedback</strong></td>
+        <td>User clicks "Summarise" on Forms/Insights</td>
+        <td><code>ai-impact-reporter</code> (Sonnet) → theme clusters + sentiment + narrative → stores in ai_generations → displayed in Insights</td>
+        <td>P1</td>
+      </tr>
+      <tr>
+        <td><strong>Extract Email Actions</strong></td>
+        <td>User clicks "Extract Actions" on email thread</td>
+        <td><code>ai-extract</code> (Haiku) → action items JSON → preview → creates: tasks linked to project/org</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>Suggest Tasks</strong></td>
+        <td>User clicks "Suggest Tasks" on project</td>
+        <td><code>ai-assistant</code> (pm agent) → task suggestions JSON → preview → creates: tasks linked to project</td>
+        <td>P2</td>
+      </tr>
+      <tr>
+        <td><strong>AI Smart Actions (tool_use)</strong></td>
+        <td>User asks copilot to "create a task" / "draft an invoice" / "schedule a session"</td>
+        <td><code>ai-smart-assistant</code> (Sonnet with tool_use) → calls Hub functions → creates records with user confirmation</td>
+        <td>P3</td>
+      </tr>
+    </table>
+
+    <!-- ===== SUMMARY ===== -->
+    <div class="section-head">Automation Summary by Phase</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <h4><span class="tag tag-green">Phase 1</span> 14 Automations</h4>
+        <p><strong>Status transitions:</strong> project status (7 stages), delivery status (6 stages + side-effects), invoice lifecycle (draft→sent→paid), form response processing.<br>
+        <strong>Scheduled:</strong> Invoice overdue check, task overdue check, delivery reminder, AI cache cleanup.<br>
+        <strong>AI-triggered:</strong> Create from plan, session planner, generate update, summarise feedback.</p>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--purple);">
+        <h4><span class="tag tag-purple">Phase 2</span> 16 Automations</h4>
+        <p><strong>Syncs:</strong> GCal 2-way, Gmail 2-way, Telegram push.<br>
+        <strong>Scheduled:</strong> Feedback chase, 90-day follow-up, GCal/Gmail poll, weekly digest, contract expiry, energy analysis.<br>
+        <strong>n8n:</strong> Client onboarding, post-delivery sequence, meeting follow-up, content pipeline.<br>
+        <strong>AI-triggered:</strong> Extract email actions, suggest tasks.</p>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--amber);">
+        <h4><span class="tag tag-amber">Phase 3</span> 6 Automations</h4>
+        <p><strong>Syncs:</strong> QuickBooks 2-way, Clarify CRM import.<br>
+        <strong>n8n:</strong> Invoice lifecycle (PDF + QB + email), Perplexity research, ElevenLabs audio.<br>
+        <strong>AI-triggered:</strong> Smart actions (tool_use — create task, draft invoice, schedule session).</p>
+      </div>
+    </div>
+
+    <div class="section-head">Implementation Notes</div>
+    <div class="info-box warn"><strong>Key decisions for the build:</strong><br><br>
+    <strong>Edge Functions handle all status transitions.</strong> No direct status column updates from the frontend. This ensures side-effects always fire.<br><br>
+    <strong>Notifications table is the central hub.</strong> Every automation that needs to tell a user something inserts into <code>notifications</code>. Supabase Realtime pushes to connected clients. Telegram bot polls or triggers from there.<br><br>
+    <strong>n8n runs on self-hosted instance.</strong> Hub sends webhooks to n8n. n8n calls back to Hub Edge Functions. Auth via shared secret in headers.<br><br>
+    <strong>Scheduled jobs: pg_cron for simple checks, n8n for multi-step.</strong> "Is this invoice overdue?" = pg_cron. "Send chase email, wait 3 days, send another" = n8n.<br><br>
+    <strong>AI automations always show preview.</strong> No silent record creation. User confirms before data is written. Exception: AI cache writes (transparent).</div>
+  </div>
+</div>
+
+<!-- ===================== BUILD PHASES ===================== -->
+<div id="page-phases" class="page">
+  <div class="main-header"><h2>Build Phases</h2><div class="sub">What to build, in what order</div></div>
+  <div class="content">
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <h4><span class="tag tag-green">Phase 1</span> Core Work Management Platform (4-6 weeks)</h4>
+        <p><strong>Goal:</strong> A fully functional work management platform — projects, tasks, clients, daily brief, insights, settings — with the database foundation for all future phases.</p>
+        <p style="margin-top:8px"><strong>Pages:</strong> Home, Daily Brief, Projects (+detail), Workshops (+detail with sessions+agenda), Tasks, Clients (+detail with contacts), Insights, Forms (+builder+public), Invoices, Client Portal, Services, AI Assistant (/ai), Settings, Auth</p>
+        <p style="margin-top:8px"><strong>ALL tables created</strong> (even P2 tables sit empty). 16 Edge Functions (12 core + 4 AI).</p>
+        <p style="margin-top:8px"><strong>Design System:</strong> Full token-driven theme setup (index.css + tailwind.config.ts). Satoshi + General Sans + JetBrains Mono loaded. 5 accent themes. Light/dark/system toggle. shadcn/ui primitives customised. Status colour utility. Skeleton loaders. Empty states for all P1 pages.</p>
+        <p style="margin-top:8px"><strong>AI in P1:</strong> Dedicated /ai page (4 agents, streaming, persistent threads), Create Project from Plan, Generate Project Update, AI Session Planner, Feedback Summariser. useAI hook + useAIContext. ai_generations + ai_conversations tables.</p>
+        <p style="margin-top:8px"><strong>Test:</strong> Create org → scaffold project with deliveries → plan sessions with agenda → collect feedback → generate invoice → verify portal. Also: AI generates session agenda, AI creates project from plan, AI summarises feedback.</p>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--purple);">
+        <h4><span class="tag tag-purple">Phase 2</span> Operational Depth + Embedded AI (3-4 weeks)</h4>
+        <p><strong>Pages:</strong> Meetings (GCal sync), Partners, Knowledge Hub, Curriculum Hub, Contracts, Emails (Gmail sync), Notifications</p>
+        <p style="margin-top:8px"><strong>AI:</strong> Contextual Copilot drawer on key pages. Inline AI actions: Generate Content, Draft Follow-Up, Suggest Tasks, Risk Detection, Client Summary, Dashboard Narrative, Draft Reply, Generate Summary. Voice Input for meetings + mobile.</p>
+        <p style="margin-top:8px"><strong>Edge Functions:</strong> knowledgeSearch, partnerWorkshopAssign, contractChain, gmail-sync, gcal-sync, ai-content-generator, ai-smart-assistant</p>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--amber);">
+        <h4><span class="tag tag-amber">Phase 3</span> Scale + AI-Native (4-6 weeks)</h4>
+        <p><strong>Pages:</strong> Reporting, Templates, Integrations (Perplexity/Firecrawl/ElevenLabs/n8n/Clarify/QuickBooks/Telegram)</p>
+        <p style="margin-top:8px"><strong>AI:</strong> Client Portal Q&amp;A (permission-scoped). AI tool_use actions (create task, draft invoice, schedule session). RAG over uploaded docs/contracts/notes. Team-shared AI history.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== UX PATTERNS & BUILD GUIDANCE (from audit) ===================== -->
+<div id="page-ux-patterns" class="page">
+  <div class="main-header"><h2>UX Patterns &amp; Build Guidance</h2><div class="sub">Empty states, mobile, form builder, agenda builder, portal auth, data seeding — all defined <span class="diff diff-new">NEW</span></div></div>
+  <div class="content">
+
+    <div class="section-head">Empty States <span class="diff diff-new">NEW — from audit</span></div>
+    <div class="info-box new"><strong>Every list view needs an empty state.</strong> Don't show a blank screen. Show a message + primary action button. This is critical for first-run experience and client portal.</div>
+    <table class="spec-table">
+      <tr><th>Page</th><th>Empty State Message</th><th>Action</th></tr>
+      <tr><td>Projects</td><td>"No projects yet. Create your first project to get started."</td><td>+ New Project button</td></tr>
+      <tr><td>Workshops</td><td>"No workshops scheduled. Add deliveries from a project."</td><td>Go to Projects</td></tr>
+      <tr><td>Tasks</td><td>"All clear! No tasks to show."</td><td>+ New Task button</td></tr>
+      <tr><td>Clients</td><td>"No clients yet. Add your first organisation."</td><td>+ New Client button</td></tr>
+      <tr><td>Invoices</td><td>"No invoices yet. Generate one from a project's billing tab."</td><td>Go to Projects</td></tr>
+      <tr><td>Forms</td><td>"No forms created. Start with a feedback template."</td><td>+ New Form button</td></tr>
+      <tr><td>Client Portal</td><td>"Welcome! Your project details will appear here once your team sets things up."</td><td>—</td></tr>
+    </table>
+
+    <div class="section-head">Mobile / Responsive Approach <span class="diff diff-new">NEW — from audit</span></div>
+    <div class="info-box new"><strong>Desktop-first, mobile-usable.</strong> Primary users (Charlie + Rich) use desktop for planning. Mobile is for: Daily Brief check, task check-off, meeting notes (voice input), quick status glance.<br><br>
+    <strong>Build rule:</strong> All pages use responsive grid (<code>grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))</code>). Sidebar collapses to hamburger on &lt;768px. Tables become card stacks on mobile. Forms are fully responsive.<br><br>
+    <strong>Not required:</strong> Native app. Offline mode. Push notifications on mobile (Telegram covers this).</div>
+
+    <div class="section-head">Form Builder UX <span class="diff diff-new">NEW — from audit</span></div>
+    <div class="info-box new"><strong>Pattern: JSON-driven field builder.</strong><br><br>
+    <strong>Form fields stored as:</strong> <code>fields JSONB</code> = array of field objects:<br>
+    <code>[{type: "rating", label: "Overall satisfaction", required: true, options: {min:1, max:10}}, ...]</code><br><br>
+    <strong>Supported field types:</strong> text, textarea, rating (1-10), select, multi_select, number, date, yes_no, nps (0-10).<br><br>
+    <strong>Builder UX:</strong> Drag-to-reorder field list. Click field to edit properties in side panel. Preview tab shows public form. Field type picker dropdown. Required toggle per field.<br><br>
+    <strong>Public form route:</strong> <code>/form/:formId</code> — no auth required. Renders fields from JSONB. Submits to <code>process-form-response</code> Edge Function.</div>
+
+    <div class="section-head">Agenda Builder Interaction <span class="diff diff-new">NEW — from audit</span></div>
+    <div class="info-box new"><strong>Pattern: Timed block list with drag-to-reorder.</strong><br><br>
+    <strong>Session detail → Agenda tab:</strong> List of agenda items sorted by <code>position</code>. Each item shows: type badge (intro/activity/break/debrief/energiser), title, duration in minutes, method.<br><br>
+    <strong>Interactions:</strong> Drag handle to reorder (updates <code>position</code>). Click to expand inline edit (title, type, duration, method, description, materials). "+ Add block" button at bottom. Running time total shown at top ("75 / 90 minutes planned"). Type badge colour-coded: intro=green, activity=blue, break=amber, debrief=purple, energiser=pink.<br><br>
+    <strong>AI integration:</strong> "Plan Session" button (P1) generates full agenda from delivery context. Populates empty agenda with suggested blocks. User can edit/reorder after generation.</div>
+
+    <div class="section-head">Success Metrics <span class="diff diff-new">NEW — from audit</span></div>
+    <table class="spec-table">
+      <tr><th>Metric</th><th>Target</th><th>Source</th></tr>
+      <tr><td>Average CSAT score</td><td>≥ 9.5 / 10</td><td><code>deliveries.satisfaction_score</code></td></tr>
+      <tr><td>Invoice generation time</td><td>&lt; 2 minutes</td><td>Time from click to draft</td></tr>
+      <tr><td>Project scaffold time</td><td>&lt; 5 minutes</td><td>Time to create project + deliveries</td></tr>
+      <tr><td>Form response rate</td><td>≥ 70%</td><td>responses / delegates</td></tr>
+      <tr><td>AI adoption</td><td>≥ 3 AI actions/week/user</td><td><code>ai_generations</code> count</td></tr>
+      <tr><td>Portal client satisfaction</td><td>≥ 8 / 10</td><td>Portal feedback form</td></tr>
+      <tr><td>Daily brief usage</td><td>≥ 4 days/week</td><td>Page view analytics</td></tr>
+    </table>
+
+    <div class="section-head">Client Portal Auth &amp; Invite Flow <span class="diff diff-new">NEW — from audit</span></div>
+    <div class="info-box new"><strong>Magic link auth for clients.</strong><br><br>
+    <strong>Invite flow:</strong> Admin opens Client Detail → Contacts tab → selects contact → "Invite to Portal" button → creates <code>auth.users</code> entry with role=client + <code>client_portal_access</code> row → sends magic link email via Supabase Auth.<br><br>
+    <strong>Login:</strong> Client clicks magic link → authenticated → RLS filters all queries to their <code>organisation_id</code> via <code>client_portal_access</code>. No password needed.<br><br>
+    <strong>Permissions JSONB:</strong> <code>{can_view_invoices: true, can_submit_forms: true, can_view_documents: false}</code> — granular per-client control.</div>
+
+    <div class="section-head">Data Seeding Decision <span class="diff diff-new">NEW — from audit</span></div>
+    <div class="info-box warn"><strong>Seed data for development and demo.</strong><br><br>
+    <strong>Seed script creates:</strong> 3 sample organisations (NHS Trust, University, Corporate), 2 projects per org in different statuses, 3-5 deliveries per project with varying neuro_phases, sample sessions with agenda items, 1 feedback form per project with 5 sample responses, 2 invoices (1 paid, 1 draft), services catalogue (4 workshops + 4 services), 2 user profiles (admin + team).<br><br>
+    <strong>Implementation:</strong> SQL seed file run during <code>supabase db reset</code>. Separate from production migrations. Clearly marked as dev-only.</div>
+
+    <div class="section-head">Loading &amp; Error States <span class="diff diff-new">NEW — from audit</span></div>
+    <div class="info-box new"><strong>Shared patterns for every data-fetching component:</strong><br><br>
+    <strong>Loading:</strong> Skeleton loaders (not spinners) matching the shape of the expected content. Cards show grey rectangles. Tables show grey rows.<br><br>
+    <strong>Error:</strong> Inline error banner (red info-box) with retry button. Never a full-page crash screen. Toast for transient errors (network timeout). Persistent banner for auth errors.<br><br>
+    <strong>Optimistic updates:</strong> Task status changes, form submissions, and note edits update UI immediately, roll back on error.</div>
+  </div>
+</div>
+
+<!-- ===================== BUILD PROMPT ===================== -->
+<div id="page-build-prompt" class="page">
+  <div class="main-header"><h2>Build Prompt</h2><div class="sub">The one-prompt Lovable build — copy, paste, build <span class="diff diff-new">NEW</span></div></div>
+  <div class="content">
+    <div class="info-box" style="border-color: var(--green); background: #10B98110;"><strong>This is it.</strong> The complete Phase 1 build prompt for Lovable. It contains everything: stack, architecture rules, design system, full SQL schema, Edge Functions, page specs, automations, seed data, and a final checklist. Copy the standalone file and paste into Lovable.</div>
+
+    <div class="section-head">File</div>
+    <div class="card" style="border-left: 3px solid var(--green); margin-bottom: 18px;">
+      <h4>📄 ndg-hub-v2-lovable-prompt.md</h4>
+      <p>Standalone markdown file. ~650 lines. Covers the full Phase 1 build. Open it, select all, paste into Lovable.</p>
+    </div>
+
+    <div class="section-head">What's in the Prompt</div>
+    <table class="spec-table">
+      <tr><th>Section</th><th>Coverage</th></tr>
+      <tr><td><strong>Identity &amp; Context</strong></td><td>What NDG Hub is, who it's for, why V1 failed</td></tr>
+      <tr><td><strong>Stack</strong></td><td>React + Vite + TS, Supabase, shadcn/ui, Tailwind, TanStack Query, React Router v6, Lucide</td></tr>
+      <tr><td><strong>Architecture Rules</strong></td><td>6 non-negotiable rules (no biz logic in React, entity hierarchy, naming, RLS, pricing, 3-axis)</td></tr>
+      <tr><td><strong>Design System</strong></td><td>Full CSS tokens (light+dark), 5 accent themes, typography (3 fonts + scale), spacing, radius/shadow, app shell, component patterns (buttons, cards, inputs, badges, tables, nav), motion, accessibility</td></tr>
+      <tr><td><strong>Status Colour Map</strong></td><td>Every status value for projects (7), deliveries (7), invoices (5), tasks (4), NEURO phases (5) → exact colour token. <code>getStatusColor()</code> utility spec.</td></tr>
+      <tr><td><strong>Database Schema</strong></td><td>Complete SQL DDL for ALL 26 tables. Includes constraints, checks, defaults, FKs. RLS policy patterns.</td></tr>
+      <tr><td><strong>Edge Functions</strong></td><td>16 functions fully specified: scaffold-project, scaffold-deliveries, generate-invoice, recalculate-invoice, process-form-response, advance-project-status, advance-delivery-status, send-invoice, mark-invoice-paid, dailyBrief, insightsBusiness, insightsPersonal, ai-assistant, ai-session-planner, ai-impact-reporter, ai-extract</td></tr>
+      <tr><td><strong>Shared Hooks</strong></td><td><code>useAI</code> (streaming, context, agents, structured output, cancellation, rate limit, cache), <code>useAIContext</code> (5 page contexts), <code>getStatusColor</code></td></tr>
+      <tr><td><strong>Pages &amp; Routes</strong></td><td>14 Phase 1 pages fully specified: Home, Daily Brief, Projects (+detail 8 tabs), Workshops (+detail 4 tabs + agenda builder), Tasks, Clients (+detail 7 tabs), Insights (2 tabs), Services, Invoices, Forms (+builder +public), Client Portal, AI Assistant, Settings, Auth. Every page has: route, components, data sources, empty state.</td></tr>
+      <tr><td><strong>Automations</strong></td><td>Status transition side-effects (8 transitions), scheduled jobs (4 cron jobs)</td></tr>
+      <tr><td><strong>Seed Data</strong></td><td>3 orgs, 6 projects, 18 deliveries, sessions, forms, responses, invoices, 7 services, 2 users</td></tr>
+      <tr><td><strong>What NOT to Build</strong></td><td>Explicit list of Phase 2/3 items — tables created, no UI yet</td></tr>
+      <tr><td><strong>Final Checklist</strong></td><td>15-point verification: full lifecycle test, AI tests, portal, theme, empty states, skeletons, status colours</td></tr>
+    </table>
+
+    <div class="section-head">How to Use It</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <h4>Step 1: Open Lovable</h4>
+        <p>Create a new project. Select "Full-stack app" with Supabase.</p>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <h4>Step 2: Paste the Prompt</h4>
+        <p>Open <code>ndg-hub-v2-lovable-prompt.md</code>. Select all. Paste into Lovable's initial prompt field.</p>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <h4>Step 3: Let It Build</h4>
+        <p>Lovable will scaffold: database tables, Edge Functions, pages, components, routing, auth. It may take multiple iterations.</p>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <h4>Step 4: Run Checklist</h4>
+        <p>Use the 15-point final checklist at the bottom of the prompt to verify everything works end-to-end.</p>
+      </div>
+    </div>
+
+    <div class="section-head">Prompt Strategy Notes</div>
+    <div class="info-box warn"><strong>If Lovable struggles with the full prompt:</strong><br><br>
+    <strong>Option A — Split into 3 pastes:</strong><br>
+    Paste 1: Stack + Architecture Rules + Design System + Database Schema (the foundation)<br>
+    Paste 2: Edge Functions + Shared Hooks + Automations (the backend logic)<br>
+    Paste 3: Pages &amp; Routes + Seed Data + Checklist (the frontend)<br><br>
+    <strong>Option B — Iterative build:</strong><br>
+    Start with just the database schema + auth + basic page shells. Then add Edge Functions. Then flesh out each page one at a time. Use the unified spec (this document) as your reference for each iteration.<br><br>
+    <strong>Either way:</strong> The database schema should ALWAYS go in first. All 26 tables. This is the foundation everything else depends on.</div>
+  </div>
+</div>
+
+<!-- ===================== WHAT WE FIXED ===================== -->
+<div id="page-fixes" class="page">
+  <div class="main-header"><h2>What We Fixed</h2><div class="sub">10 issues from the original audit + 7 from the UI/UX &amp; PM audit, all resolved</div></div>
+  <div class="content">
+    <div class="section-head">Original Audit (10 fixes)</div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 1</span> Data model mismatch</h4><p>V2 PRD is now the source of truth. Entity hierarchy: Organisation → Project → Delivery → Session → AgendaItems. Old platform map dismissed.</p></div>
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 2</span> Naming confusion</h4><p>UI says "Workshops." DB says <code>deliveries</code>. Sessions are children of deliveries. Meetings are separate (non-delivery calendar events).</p></div>
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 3</span> 3-axis placement</h4><p><code>neuro_phase</code> lives on <code>deliveries</code> (not projects). <code>kirkpatrick_level</code> on deliveries + forms. Projects get <code>intended_neuro_phase</code> as hint only.</p></div>
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 4</span> Status values</h4><p>7-stage operational status from V2 PRD: contracting → project_planning → session_planning → content_review → delivery → feedback_analytics → closed.</p></div>
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 5</span> Invoice generation</h4><p>Invoices generated from delivery service prices. No day rates. <code>generate-invoice</code> sums <code>services.price</code> per uninvoiced delivery. <code>invoice_items</code> table added.</p></div>
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 6</span> Missing tables</h4><p>Added: <code>sessions</code>, <code>session_agenda_items</code>, <code>invoice_items</code>, <code>activity_log</code>, <code>client_portal_access</code>, <code>profiles</code>, <code>services</code>.</p></div>
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 7</span> Contacts</h4><p>Tab on Client Detail only. Not a standalone page. <code>contacts.organisation_id</code> links people to orgs.</p></div>
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 8</span> Curriculum → Delivery link</h4><p><code>curriculum_workshops</code> now has <code>service_id</code> and <code>default_agenda</code>. When delivery created from template, agenda items are copied to new sessions.</p></div>
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 9</span> Forms → Insights pipeline</h4><p><code>process-form-response</code> Edge Function handles the full chain: save response → set kirkpatrick_level → calculate satisfaction → update delivery.satisfaction_score.</p></div>
+      <div class="card" style="border-left: 3px solid var(--red);"><h4><span class="diff diff-fix">FIX 10</span> service_type</h4><p><code>services</code> table added with category (workshop|service), price, defaults. Deliveries link via <code>service_id</code>. Drives pricing, curriculum templates, and default agenda.</p></div>
+    </div>
+
+    <div class="section-head">UI/UX &amp; PM Audit — Round 2 (7 fixes) <span class="diff diff-new">NEW</span></div>
+    <div class="card-grid">
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4><span class="diff diff-new">FIX 11</span> Removed day_rate from projects</h4><p>PRD still had <code>day_rate</code> and <code>total_days</code> on projects table. Removed. Service pricing lives on deliveries via <code>service_id</code> → <code>services.price</code>. Invoice calc corrected.</p></div>
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4><span class="diff diff-new">FIX 12</span> Removed service_type from projects</h4><p>PRD had <code>service_type</code> enum on projects. Removed. Each delivery has its own <code>service_id</code>. A project can contain multiple service types (awareness + consultancy).</p></div>
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4><span class="diff diff-new">FIX 13</span> Added meetings table</h4><p>Meetings page existed but had no database spec. Added <code>meetings</code> table with: meeting_type, GCal sync ref, attendees JSONB, nullable links to org/project/contact.</p></div>
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4><span class="diff diff-new">FIX 14</span> Added project_updates table</h4><p>Project Detail had "Updates" tab but no backing table. Added <code>project_updates</code> with: content (markdown), status_snapshot JSONB, ai_generated flag.</p></div>
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4><span class="diff diff-new">FIX 15</span> Added sort_order to deliveries + sessions</h4><p>Drag-to-reorder needs a column. Added <code>sort_order INT DEFAULT 0</code> to both tables. Agenda items already had <code>position</code>.</p></div>
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4><span class="diff diff-new">FIX 16</span> Defined forms.type enum</h4><p>Was unspecified. Now: <code>feedback | survey | booking | follow_up | assessment</code>. Each maps to a template category and Kirkpatrick usage.</p></div>
+      <div class="card" style="border-left: 3px solid var(--blue);"><h4><span class="diff diff-new">FIX 17</span> Notification triggers defined</h4><p>Added trigger mechanism: Edge Functions create notification rows as side-effects (P1). Postgres triggers + Realtime for push (P2). Telegram bot for mobile push.</p></div>
+    </div>
+
+    <div class="section-head">UX Patterns Defined <span class="diff diff-new">NEW</span></div>
+    <div class="info-box new"><strong>New "UX Patterns" page added</strong> covering: empty states for every list view, mobile/responsive approach, form builder interaction pattern, agenda builder interaction pattern, success metrics, client portal invite flow, data seeding plan, loading/error states.</div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const pageId = item.dataset.page;
+    if (!pageId) return;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+    const page = document.getElementById('page-' + pageId);
+    if (page) page.classList.add('visible');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelector('.main').scrollTop = 0;
+  });
+});
+</script>
+</body>
+</html>
