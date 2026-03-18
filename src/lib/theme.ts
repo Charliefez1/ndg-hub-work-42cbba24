@@ -24,12 +24,19 @@ export function setAccent(accent: Accent) {
 
 export function applyTheme(theme: Theme) {
   const root = document.documentElement;
+  root.setAttribute("data-transitioning", "");
+
   if (theme === 'system') {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    root.classList.toggle('dark', prefersDark);
   } else {
-    root.setAttribute('data-theme', theme);
+    root.classList.toggle('dark', theme === 'dark');
   }
+
+  // Remove old data-theme attribute if present
+  root.removeAttribute('data-theme');
+
+  setTimeout(() => root.removeAttribute("data-transitioning"), 250);
 }
 
 export function initTheme() {
@@ -38,7 +45,6 @@ export function initTheme() {
   applyTheme(theme);
   document.documentElement.setAttribute('data-accent', accent);
 
-  // Listen for system theme changes
   if (theme === 'system') {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
       if (getStoredTheme() === 'system') {
