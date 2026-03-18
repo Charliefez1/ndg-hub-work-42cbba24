@@ -101,8 +101,8 @@ export function AppSidebar() {
                           end={item.url === '/'}
                           className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13px] transition-colors duration-100 ${
                             isActive
-                              ? 'bg-primary/10 text-primary font-medium'
-                              : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                              ? 'bg-accent-muted border-l-2 border-accent text-foreground font-medium'
+                              : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-muted'
                           }`}
                           activeClassName=""
                         >
