@@ -20,7 +20,7 @@ export function AppShell({ children }: AppShellProps) {
             <div className="flex-1" />
             <NotificationBell />
           </header>
-          <main className="flex-1 px-6 pb-20 md:pb-6 animate-fade-in-up">
+          <main className="flex-1 px-6 md:px-8 pb-20 md:pb-8 pt-2 animate-fade-in-up">
             {children}
           </main>
         </div>
