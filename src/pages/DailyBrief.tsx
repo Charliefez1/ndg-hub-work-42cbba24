@@ -67,12 +67,12 @@ export default function DailyBrief() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-8">
         <h1 className="text-page-title">Daily Brief</h1>
         <p className="text-body text-text-2">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
 
         {/* KPI cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-lg">
           <Card><CardContent className="pt-4 flex items-center gap-md">
             <Clock className="h-8 w-8 text-primary" />
             <div><p className="text-caption text-text-3">Due Today</p><p className="text-section-title">{todayTasks.length}</p></div>
@@ -91,7 +91,7 @@ export default function DailyBrief() {
           </CardContent></Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Energy check-in */}
           <Card className="lg:col-span-1">
             <CardHeader><CardTitle className="text-body flex items-center gap-2"><Battery className="h-4 w-4" /> Daily Check-in</CardTitle></CardHeader>
@@ -129,8 +129,8 @@ export default function DailyBrief() {
           </Card>
 
           {/* Focus tasks + upcoming */}
-          <div className="lg:col-span-2 space-y-lg">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Card>
                 <CardHeader><CardTitle className="text-body">Focus Tasks</CardTitle></CardHeader>
                 <CardContent className="space-y-xs">
