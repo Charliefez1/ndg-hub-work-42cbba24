@@ -72,7 +72,7 @@ export default function DailyBrief() {
         <p className="text-body text-text-2">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
 
         {/* KPI cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-lg">
           <Card><CardContent className="pt-4 flex items-center gap-md">
             <Clock className="h-8 w-8 text-primary" />
             <div><p className="text-caption text-text-3">Due Today</p><p className="text-section-title">{todayTasks.length}</p></div>
