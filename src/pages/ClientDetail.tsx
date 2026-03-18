@@ -6,18 +6,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useOrganisation, useUpdateOrganisation, useContacts, useCreateContact, useDeleteContact } from '@/hooks/useOrganisations';
 import { useProjects } from '@/hooks/useProjects';
 import { useInvoices } from '@/hooks/useInvoices';
+import { useContracts } from '@/hooks/useContracts';
+import { useEmails } from '@/hooks/useEmails';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Plus, Star, Trash2, Mail, Send } from 'lucide-react';
+import { ArrowLeft, Plus, Star, Trash2, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getStatusBadgeClasses } from '@/lib/status-colors';
+import { getStatusBadgeClasses, formatStatus } from '@/lib/status-colors';
 
 export default function ClientDetail() {
   const { id } = useParams<{ id: string }>();
@@ -27,11 +29,15 @@ export default function ClientDetail() {
   const deleteContact = useDeleteContact();
   const { data: allProjects } = useProjects();
   const { data: allInvoices } = useInvoices();
+  const { data: allContracts } = useContracts({ organisationId: id });
+  const { data: allEmails } = useEmails();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [invitingContact, setInvitingContact] = useState<string | null>(null);
 
   const projects = allProjects?.filter((p) => p.organisation_id === id) ?? [];
   const invoices = allInvoices?.filter((i) => i.organisation_id === id) ?? [];
+  const contracts = allContracts ?? [];
+  const emails = allEmails?.filter((e: any) => e.organisation_id === id) ?? [];
 
   // Activity log for this org
   const { data: activity } = useQuery({
@@ -53,7 +59,6 @@ export default function ClientDetail() {
     if (!contactEmail) { toast.error('Contact needs an email address'); return; }
     setInvitingContact(contactId);
     try {
-      // Send magic link via Supabase Auth
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: contactEmail,
         options: {
@@ -63,9 +68,6 @@ export default function ClientDetail() {
         },
       });
       if (authError) throw authError;
-
-      // Note: client_portal_access row will be created after the user confirms
-      // For now, we create a placeholder that the admin can manage
       toast.success(`Magic link sent to ${contactEmail}`);
     } catch (err: any) {
       toast.error(err.message);
@@ -87,11 +89,13 @@ export default function ClientDetail() {
         </div>
 
         <Tabs defaultValue="profile">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="contacts">Contacts ({contacts?.length ?? 0})</TabsTrigger>
             <TabsTrigger value="projects">Projects ({projects.length})</TabsTrigger>
+            <TabsTrigger value="contracts">Contracts ({contracts.length})</TabsTrigger>
             <TabsTrigger value="invoices">Invoices ({invoices.length})</TabsTrigger>
+            <TabsTrigger value="emails">Emails ({emails.length})</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
@@ -133,7 +137,7 @@ export default function ClientDetail() {
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             {c.name}
-                            {c.is_primary && <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />}
+                            {c.is_primary && <Star className="h-3.5 w-3.5 text-warning fill-warning" />}
                           </div>
                         </TableCell>
                         <TableCell>{c.job_title ?? '—'}</TableCell>
@@ -142,14 +146,12 @@ export default function ClientDetail() {
                         <TableCell>
                           {c.email ? (
                             <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 text-xs"
+                              variant="outline" size="sm" className="h-7 text-xs"
                               onClick={() => handleInviteToPortal(c.email!, c.id)}
                               disabled={invitingContact === c.id}
                             >
                               <Send className="h-3 w-3 mr-1" />
-                              {invitingContact === c.id ? 'Sending...' : 'Invite'}
+                              {invitingContact === c.id ? 'Sending…' : 'Invite'}
                             </Button>
                           ) : (
                             <span className="text-caption text-text-3">No email</span>
@@ -177,10 +179,30 @@ export default function ClientDetail() {
                   <Link key={p.id} to={`/projects/${p.id}`} className="block bg-surface rounded-md border p-md hover:border-primary transition-colors">
                     <div className="flex items-center justify-between">
                       <p className="font-medium">{p.name}</p>
-                      <Badge className={getStatusBadgeClasses(p.status, 'project')}>{p.status.replace(/_/g, ' ')}</Badge>
+                      <Badge className={getStatusBadgeClasses(p.status, 'project')}>{formatStatus(p.status)}</Badge>
                     </div>
                     <p className="text-caption text-text-3 mt-1">{p.start_date ?? 'No dates'}</p>
                   </Link>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="contracts" className="mt-md">
+            {!contracts.length ? (
+              <p className="text-text-2 text-center py-lg">No contracts for this client.</p>
+            ) : (
+              <div className="space-y-xs">
+                {contracts.map((c: any) => (
+                  <div key={c.id} className="bg-surface rounded-md border p-md flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{c.title}</p>
+                      <p className="text-caption text-text-3">
+                        {c.type} {c.value ? `· £${Number(c.value).toLocaleString()}` : ''} {c.start_date ? `· ${c.start_date}` : ''}
+                      </p>
+                    </div>
+                    <Badge className={getStatusBadgeClasses(c.status ?? 'draft', 'contract')}>{formatStatus(c.status ?? 'draft')}</Badge>
+                  </div>
                 ))}
               </div>
             )}
@@ -204,6 +226,27 @@ export default function ClientDetail() {
             )}
           </TabsContent>
 
+          <TabsContent value="emails" className="mt-md">
+            {!emails.length ? (
+              <p className="text-text-2 text-center py-lg">No email threads linked to this client.</p>
+            ) : (
+              <div className="space-y-xs">
+                {emails.map((e: any) => (
+                  <div key={e.id} className="bg-surface rounded-md border p-md">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-sm truncate">{e.subject ?? '(no subject)'}</p>
+                      <span className="text-caption text-text-3 shrink-0 ml-2">
+                        {e.received_at ? new Date(e.received_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}
+                      </span>
+                    </div>
+                    <p className="text-caption text-text-3 truncate">{e.from_address}</p>
+                    {e.snippet && <p className="text-xs text-text-3 mt-1 line-clamp-2">{e.snippet}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="activity" className="mt-md">
             {!activity?.length ? (
               <p className="text-text-2 text-center py-lg">No activity recorded yet.</p>
@@ -215,7 +258,7 @@ export default function ClientDetail() {
                       <p className="text-body"><span className="font-medium">{a.action}</span> on {a.entity_type}</p>
                     </div>
                     <span className="text-caption text-text-3">
-                      {new Date(a.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      {new Date(a.created_at!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                 ))}
