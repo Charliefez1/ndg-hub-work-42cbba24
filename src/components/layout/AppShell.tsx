@@ -3,9 +3,15 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { CommandPalette } from '@/components/layout/CommandPalette';
 import { MobileTabBar } from '@/components/layout/MobileTabBar';
+import { useTelegramDispatch } from '@/hooks/useTelegramDispatch';
 
 interface AppShellProps {
   children: React.ReactNode;
+}
+
+function TelegramDispatcher() {
+  useTelegramDispatch();
+  return null;
 }
 
 export function AppShell({ children }: AppShellProps) {
@@ -27,6 +33,7 @@ export function AppShell({ children }: AppShellProps) {
       </div>
       <CommandPalette />
       <MobileTabBar />
+      <TelegramDispatcher />
     </SidebarProvider>
   );
 }
