@@ -67,7 +67,7 @@ export default function DailyBrief() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-8">
         <h1 className="text-page-title">Daily Brief</h1>
         <p className="text-body text-text-2">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
 
