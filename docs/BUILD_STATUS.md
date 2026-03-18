@@ -190,7 +190,7 @@
 | `generate-invoice` edge function | ✅ | |
 | `recalculate-invoice` edge function | ✅ | |
 | `mark-invoice-paid` edge function | ✅ | |
-| `send-invoice` edge function | 🔶 | Marks as 'sent'; no actual email dispatch |
+| `send-invoice` edge function | ✅ | HTML email via Resend API; graceful fallback if `RESEND_API_KEY` not set |
 | `useInvoices` hook (all mutations) | ✅ | |
 
 ### Contracts (`/contracts`)
@@ -259,7 +259,7 @@
 |------|--------|-------|
 | Read-only thread viewer (search, org/project links) | ✅ | |
 | `useEmails` hook | ✅ | |
-| Gmail sync / live email ingest | 🔶 | `emails` table exists; no sync pipeline |
+| Gmail sync / live email ingest | ✅ | `gmail-sync` edge function; OAuth2 connect + sync button in UI |
 
 ### Notifications
 | Item | Status | Notes |
@@ -267,14 +267,15 @@
 | `NotificationBell` with unread badge + popover | ✅ | `src/components/notifications/NotificationBell.tsx` |
 | Mark single / all as read | ✅ | |
 | `useNotifications` hook | ✅ | |
-| Notification preferences saved to backend | 🔶 | Settings UI exists; no persistence yet |
+| Notification preferences saved to backend | ✅ | `notification_preferences` JSONB in `profiles`; persisted on toggle via `useNotificationPreferences` |
 
 ### Settings (`/settings`)
 | Item | Status | Notes |
 |------|--------|-------|
 | Profile tab (name, avatar, bio) | ✅ | |
 | Appearance tab (theme + accent) | ✅ | |
-| Notifications tab (preference toggles) | 🔶 | UI built; toggles don't persist to DB |
+| Notifications tab (preference toggles) | ✅ | Saves to DB on every toggle; loads from `profiles.notification_preferences` |
+| Integrations tab (Gmail + Calendar + Resend) | ✅ | New 4th tab with connect/disconnect for Gmail, GCal, and email config docs |
 
 ---
 
@@ -299,8 +300,23 @@
 |------|--------|-------|
 | Meetings CRUD | ✅ | |
 | `gcal_event_id` field (future sync) | ✅ | |
-| Google Calendar two-way sync | 🔶 | Field exists; no integration code |
+| Google Calendar two-way sync | ✅ | `gcal-sync` edge function; OAuth2 connect + per-meeting sync buttons in UI |
 | `useMeetings` hook | ✅ | |
+
+### Telegram Notifications
+| Item | Status | Notes |
+|------|--------|-------|
+| `telegram-notify` edge function | ✅ | `dispatch`, `test`, `send` actions |
+| `useTelegramDispatch` hook | ✅ | Called from AppShell; auto-dispatches on focus |
+| Per-type telegram toggle in Settings | ✅ | Persisted to `profiles.notification_preferences` |
+| Test button in Profile settings | ✅ | Sends a test message to saved Chat ID |
+
+### PWA / Offline
+| Item | Status | Notes |
+|------|--------|-------|
+| `public/manifest.json` | ✅ | Name, icons, shortcuts, theme colour |
+| `public/sw.js` | ✅ | Cache-first for assets, network-first for navigation |
+| `index.html` PWA meta tags + SW registration | ✅ | |
 
 ### Shared Tab Components
 | Item | Status | Notes |
@@ -320,25 +336,37 @@
 | PRD-01 Foundation | 46 | 46 | 0 | 0 |
 | PRD-02 Core Operations | 35 | 35 | 0 | 0 |
 | PRD-03 Delivery | 22 | 22 | 0 | 0 |
-| PRD-04 Commercial | 17 | 16 | 1 | 0 |
+| PRD-04 Commercial | 17 | 17 | 0 | 0 |
 | PRD-05 Intelligence | 21 | 21 | 0 | 0 |
-| PRD-06 Engagement | 16 | 13 | 3 | 0 |
-| PRD-07 Support Entities | 16 | 14 | 2 | 0 |
-| **Total** | **173** | **167** | **6** | **0** |
+| PRD-06 Engagement | 18 | 18 | 0 | 0 |
+| PRD-07 Support Entities | 20 | 20 | 0 | 0 |
+| **Total** | **179** | **179** | **0** | **0** |
 
-### Partial items (🔶) — known intentional placeholders
+### New additions (all previously 🔶 → now ✅)
 
-| # | Item | What exists | What's missing |
-|---|------|-------------|---------------|
-| 1 | `send-invoice` edge function | Marks status as `sent` | Actual email dispatch |
-| 2 | Gmail sync | `emails` table + read-only viewer | Ingest pipeline / OAuth flow |
-| 3 | Notification preferences | Settings UI (toggles) | Persistence to `profiles` / dedicated table |
-| 4 | Google Calendar sync | `gcal_event_id` column on `meetings` | OAuth + sync logic |
-| 5 | Telegram notifications | `telegram_chat_id` on `profiles` | Bot integration |
-| 6 | PWA / offline | Responsive layout | Service worker / manifest |
+| # | Item | What was built |
+|---|------|----------------|
+| 1 | `send-invoice` email dispatch | Professional HTML invoice email via Resend API (`RESEND_API_KEY` env var) |
+| 2 | Gmail sync | `gmail-sync` edge function (OAuth2, token storage, sync 50 messages); connect/sync/disconnect in Emails page |
+| 3 | Notification preferences persistence | `notification_preferences` JSONB on `profiles`; `useNotificationPreferences` hook; Settings Notifications tab saves on every toggle |
+| 4 | Google Calendar sync | `gcal-sync` edge function (OAuth2, create/update/delete events); per-meeting sync buttons in Meetings page; connect/disconnect in Settings |
+| 5 | Telegram notifications | `telegram-notify` edge function (dispatch, test, send); `useTelegramDispatch` hook in AppShell; per-type telegram toggles in Settings; test button in Profile |
+| 6 | PWA / offline | `public/manifest.json`, `public/sw.js` (cache-first strategy), `index.html` PWA meta tags + SW registration |
 
-All 6 partials are marked as **"Future Considerations"** in `docs/PRODUCT_SPEC.md` § 10 and are **not required** to pass the current PRD set.
+### New migrations
+- `20260318120000_integrations_and_prefs.sql` — `profiles.notification_preferences`, `notifications.telegram_sent`, `oauth_tokens` table, `emails.synced_at`, indexes
+
+### New edge functions (18 total, was 15)
+- `gmail-sync` — Gmail OAuth2 + email sync
+- `gcal-sync` — Google Calendar OAuth2 + event CRUD
+- `telegram-notify` — Telegram Bot API dispatch
+
+### New hooks (25 total, was 21)
+- `useNotificationPreferences` + `useUpdateNotificationPreferences`
+- `useGmailSync` (status, auth-url, sync, disconnect)
+- `useGcalSync` (status, auth-url, create-event, delete-event, disconnect)
+- `useTelegramDispatch`
 
 ---
 
-*Generated by automated codebase audit — no application code modified.*
+*Last updated: 2026-03-18 — all 179 items ✅ complete.*
