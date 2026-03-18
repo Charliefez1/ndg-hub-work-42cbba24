@@ -10,12 +10,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
 import { Link } from 'react-router-dom';
-import { ClipboardList, Loader2 } from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 
 export default function Portal() {
   const { profile, signOut, user } = useAuth();
 
-  const { data: access, isLoading: accessLoading } = useQuery({
+  const { data: access } = useQuery({
     queryKey: ['portal-access', user?.id],
     enabled: !!user,
     queryFn: async () => {
@@ -90,11 +90,7 @@ export default function Portal() {
       <main className="max-w-5xl mx-auto p-lg space-y-lg">
         <h1 className="text-page-title">Welcome{profile?.display_name ? `, ${profile.display_name}` : ''}</h1>
 
-        {accessLoading ? (
-          <div className="flex justify-center py-xl">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : !access?.length ? (
+        {!access?.length ? (
           <Card>
             <CardContent className="pt-6 text-center text-text-2">
               <p>No portal access configured yet. Please contact your account manager.</p>

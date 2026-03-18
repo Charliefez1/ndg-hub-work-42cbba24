@@ -28,7 +28,7 @@ async function callClaude(apiKey: string, systemPrompt: string, messages: Array<
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-6",
+      model: "claude-sonnet-4-5-20250514",
       max_tokens: 2048,
       system: systemPrompt,
       messages: claudeMessages,
@@ -97,7 +97,7 @@ Deno.serve(async (req: Request) => {
 
     if (anthropicKey) {
       result = await callClaude(anthropicKey, systemPrompt, messages);
-      model = "claude-sonnet-4-6";
+      model = "claude-sonnet-4-5";
     } else if (lovableKey) {
       result = await callLovableGateway(lovableKey, systemPrompt, messages);
       model = "gemini-2.5-flash";

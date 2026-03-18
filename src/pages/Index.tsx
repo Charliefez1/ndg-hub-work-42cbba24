@@ -8,7 +8,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useDeliveries } from '@/hooks/useDeliveries';
 import { useTasks } from '@/hooks/useTasks';
 import { useInvoices } from '@/hooks/useInvoices';
-import { FolderKanban, CheckSquare, Briefcase, FileText, AlertTriangle } from 'lucide-react';
+import { FolderKanban, CheckSquare, Briefcase, FileText, Plus, AlertTriangle } from 'lucide-react';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
 
 export default function Home() {
@@ -49,7 +49,7 @@ export default function Home() {
         </div>
 
         {/* KPI cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+        <div className="grid grid-cols-4 gap-md">
           <Card><CardContent className="pt-4">
             <p className="text-caption text-text-3">Active Projects</p>
             <p className="text-section-title">{activeProjects}</p>
@@ -68,7 +68,7 @@ export default function Home() {
           </CardContent></Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
+        <div className="grid grid-cols-2 gap-lg">
           {/* Overdue alerts */}
           {overdueTasks.length > 0 && (
             <Card className="border-destructive/30">

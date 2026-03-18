@@ -118,7 +118,7 @@ Deno.serve(async (req: Request) => {
             nonDeliveryDaysCount: nonDeliveryDayEnergy.length,
           },
           optimalWindow: bestDay
-            ? `You tend to focus best on ${bestDay.day}s (avg focus: ${bestDay.avgFocus}/5)`
+            ? `You tend to focus best on ${bestDay.day}s (avg focus: ${bestDay.avgFocus}/10)`
             : "Not enough data yet. Log your energy daily for personalised insights.",
         },
       }),

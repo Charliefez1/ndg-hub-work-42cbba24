@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -82,7 +81,6 @@ function LoginForm() {
         {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
         Sign In
       </Button>
-      <ForgotPasswordLink />
     </form>
   );
 }
@@ -125,65 +123,5 @@ function SignUpForm() {
         Sign Up
       </Button>
     </form>
-  );
-}
-
-function ForgotPasswordLink() {
-  const [showReset, setShowReset] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [sending, setSending] = useState(false);
-
-  const handleReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSending(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/login`,
-    });
-    setSending(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success('Password reset email sent. Check your inbox.');
-      setShowReset(false);
-      setResetEmail('');
-    }
-  };
-
-  if (!showReset) {
-    return (
-      <button
-        type="button"
-        onClick={() => setShowReset(true)}
-        className="w-full text-center text-sm text-text-3 hover:text-foreground transition-colors mt-2"
-      >
-        Forgot your password?
-      </button>
-    );
-  }
-
-  return (
-    <div className="border-t pt-3 mt-3 space-y-2">
-      <p className="text-sm text-text-2">Enter your email to receive a reset link.</p>
-      <form onSubmit={handleReset} className="flex gap-2">
-        <Input
-          type="email"
-          placeholder="Email address"
-          value={resetEmail}
-          onChange={(e) => setResetEmail(e.target.value)}
-          required
-          className="flex-1"
-        />
-        <Button type="submit" size="sm" disabled={sending}>
-          {sending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Send'}
-        </Button>
-      </form>
-      <button
-        type="button"
-        onClick={() => setShowReset(false)}
-        className="text-xs text-text-3 hover:text-foreground transition-colors"
-      >
-        Cancel
-      </button>
-    </div>
   );
 }
