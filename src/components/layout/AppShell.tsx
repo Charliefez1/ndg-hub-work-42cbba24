@@ -14,10 +14,16 @@ export function AppShell({ children }: AppShellProps) {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 flex items-center justify-between border-b border-border bg-surface px-4 sticky top-0 z-30">
+          <header className="h-11 flex items-center justify-between border-b border-border bg-surface/80 backdrop-blur-sm px-4 sticky top-0 z-30">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="mr-1" />
-              <kbd className="hidden md:inline-flex items-center gap-1 text-[10px] text-text-3 bg-muted px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
+              <button
+                onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+                className="hidden md:inline-flex items-center gap-1.5 text-[11px] text-text-3 bg-muted hover:bg-muted/80 px-2 py-1 rounded-md font-mono transition-colors cursor-pointer"
+              >
+                <kbd className="text-[10px]">⌘</kbd>
+                <kbd className="text-[10px]">K</kbd>
+              </button>
             </div>
             <NotificationBell />
           </header>

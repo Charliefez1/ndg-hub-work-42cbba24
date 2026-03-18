@@ -67,9 +67,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <div className="h-12 flex items-center px-4 border-b border-sidebar-border">
+      <div className="h-11 flex items-center px-4 border-b border-sidebar-border">
         {!collapsed && (
-          <span className="font-satoshi text-lg font-bold text-sidebar-foreground">
+          <span className="font-satoshi text-[15px] font-bold text-sidebar-foreground tracking-tight">
             NDG Hub
           </span>
         )}
@@ -77,7 +77,7 @@ export function AppSidebar() {
       <SidebarContent>
         {navGroups.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel className="text-overline text-text-3 px-3">
+            <SidebarGroupLabel className="text-overline text-text-3 px-3 mb-0.5">
               {!collapsed && group.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -92,14 +92,14 @@ export function AppSidebar() {
                         <NavLink
                           to={item.url}
                           end={item.url === '/'}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-md text-body transition-colors duration-150 ${
+                          className={`flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[13px] transition-colors duration-100 ${
                             isActive
-                              ? 'bg-sidebar-accent text-primary font-medium border-l-2 border-primary'
-                              : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+                              ? 'bg-primary/8 text-primary font-medium'
+                              : 'text-sidebar-foreground hover:bg-sidebar-accent'
                           }`}
                           activeClassName=""
                         >
-                          <item.icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+                          <item.icon className="h-[15px] w-[15px] shrink-0" strokeWidth={isActive ? 2 : 1.5} />
                           {!collapsed && <span>{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
@@ -112,16 +112,16 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
       <div className="mt-auto border-t border-sidebar-border p-3">
+        {!collapsed && profile?.display_name && (
+          <p className="text-caption text-text-3 px-3 mb-2 truncate">{profile.display_name}</p>
+        )}
         <button
           onClick={signOut}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-body text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+          className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-md text-[13px] text-sidebar-foreground hover:bg-sidebar-accent transition-colors duration-100"
         >
-          <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.75} />
+          <LogOut className="h-[15px] w-[15px] shrink-0" strokeWidth={1.5} />
           {!collapsed && <span>Sign Out</span>}
         </button>
-        {!collapsed && profile?.display_name && (
-          <p className="text-caption text-text-3 px-3 mt-1 truncate">{profile.display_name}</p>
-        )}
       </div>
     </Sidebar>
   );
