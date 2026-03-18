@@ -34,6 +34,7 @@
 - Fields: name, category, price, duration, neuro phase, description, active toggle
 - Inline edit and delete via dropdown menu
 - Dialog form for create/edit
+- Per-service fixed pricing (no day rates)
 
 ---
 
@@ -44,20 +45,27 @@
 - Columns: name, sector, status, contact count
 - Create dialog with name, sector, email, phone, website, address fields
 
-### Client Detail
-- Overview card with org info
-- Tabs: Contacts, Projects, Activity Log
-- Contact management (add/edit/delete contacts)
-- Activity log showing auto-logged CRUD actions
+### Client Detail — 7 Tabs
+| Tab | Content |
+|-----|---------|
+| **Profile** | Org info: sector, email, phone, website, address, notes |
+| **Contacts** | Contact table with add/edit/delete, primary flag, portal invite |
+| **Projects** | Filtered project list with status badges |
+| **Contracts** | Filtered contracts for this org with status badges |
+| **Invoices** | Filtered invoice list with totals and status |
+| **Emails** | Filtered email threads linked to this org |
+| **Activity** | Auto-logged CRUD actions from activity_log triggers |
 
 ---
 
 ## 5. Projects (`/projects`, `/projects/:id`)
 
 ### Project List
-- Filterable grid of project cards
+- Table and Board (Kanban) views
 - Status badges with colour coding
-- Create dialog linked to organisation
+- **New Project dialog** with two modes:
+  1. **Manual:** Name, client, budget → bare insert
+  2. **Create from Plan:** Paste proposal text → AI extracts structure → preview → scaffold-project Edge Function creates project + deliveries + sessions + forms
 
 ### Project Detail
 - **Header:** Project name, status badge, "Advance" button (status pipeline)
@@ -65,14 +73,14 @@
   - **Overview:** Start/end dates, budget, org, external ref, notes
   - **Workshops:** List of deliveries with status, date, location
   - **Tasks:** Filtered task list for this project
-  - **Billing:** Invoice list + generate invoice action
+  - **Billing:** Invoice list + generate invoice action (select uninvoiced deliveries)
   - **Forms:** Linked feedback/intake forms
   - **Notes:** Personal notes (per-user, Markdown)
   - **Documents:** File upload to storage bucket + URL linking
   - **Updates:** Status update feed (manual + AI-generated)
 
-### Status Pipeline
-`contracting → scheduling → content_development → ready → delivering → evaluating → complete`
+### Project Status Pipeline
+`contracting → project_planning → session_planning → content_review → delivery → feedback_analytics → closed`
 
 ---
 
@@ -92,8 +100,9 @@
   - **Feedback:** Linked form responses with satisfaction scores + public form link
   - **Documents:** File upload + URL linking
 
-### Status Pipeline
-`planning → confirmed → materials_sent → delivered → feedback_collected`
+### Delivery Status Pipeline
+`planning → scheduled → in_progress → delivered → follow_up → complete`
+Also: `cancelled`
 
 ---
 
@@ -116,6 +125,7 @@ title, description, project, priority (low/medium/high/urgent), status, due date
 ### Form Builder
 - CRUD list of forms (feedback, intake types)
 - Dynamic field editor (JSON-based `fields` column)
+- Field types: text, number, rating, select, multi-select, textarea, nps
 - Link to project and/or delivery
 - Active/inactive toggle
 - Kirkpatrick level tagging
@@ -133,6 +143,7 @@ title, description, project, priority (low/medium/high/urgent), status, due date
 - Invoice table with status badges
 - Quick "Mark Paid" action
 - Fields: invoice number, project, org, subtotal, VAT, total, dates, status
+- Invoice generation: select uninvoiced deliveries → generate-invoice creates invoice + items from service prices
 - Edge functions: generate, recalculate, mark paid, send
 
 ---
@@ -142,7 +153,7 @@ title, description, project, priority (low/medium/high/urgent), status, due date
 - CRUD table for legal agreements
 - Fields: title, type (MSA/SOW/amendment), organisation, project, value, dates, status
 - Parent contract linking (amendments reference parent)
-- Status: draft, active, expired, terminated
+- Status pipeline: `draft → sent → signed → expired / cancelled`
 
 ---
 
@@ -229,7 +240,7 @@ title, description, project, priority (low/medium/high/urgent), status, due date
 ## 19. Settings (`/settings`)
 
 - **Profile tab:** Display name, Telegram chat ID
-- **Appearance tab:** Theme switcher (light/dark/system), accent colour picker
+- **Appearance tab:** Theme switcher (light/dark/system), accent colour picker (steel, sky, mint, amber, purple)
 - **Notifications tab:** Toggle preferences (placeholder)
 
 ---
@@ -254,3 +265,12 @@ title, description, project, priority (low/medium/high/urgent), status, due date
   - **Workshops:** Read-only list of org's deliveries with status
   - **Invoices:** Read-only table with invoice details
   - **Feedback:** Active feedback forms for client's deliveries, with "Submit Feedback" link to public form
+
+---
+
+## 22. Global Features
+
+### ⌘K Command Palette
+- Quick navigation to any page
+- Search across projects, clients, tasks
+- Keyboard-first interaction

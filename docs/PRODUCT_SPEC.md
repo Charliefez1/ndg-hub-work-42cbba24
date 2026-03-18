@@ -15,10 +15,15 @@
 
 ### Core Value Propositions
 1. **Single source of truth** for projects, workshops, invoices, and contracts
-2. **Neuroscience-informed workflow** — neuro phases, Kirkpatrick evaluation levels, energy/focus tracking
+2. **Neuroscience-informed workflow** — NEURO phases, Kirkpatrick evaluation levels, energy/focus tracking
 3. **Client transparency** — self-service portal for project status, invoices, and feedback
 4. **AI augmentation** — multi-agent assistant for planning, content, and analytics
 5. **Personal productivity** — daily check-ins, energy insights, optimal work window detection
+
+### ADHD-Informed Design Rules
+- No infinite scroll. No nested navigation. Everything visible without clicking.
+- Checkboxes are big and satisfying. Colour-coded urgency throughout.
+- Per-service pricing from a services catalogue with fixed prices. NO day rates.
 
 ---
 
@@ -27,22 +32,22 @@
 ### Journey 1: New Client Engagement
 1. Admin creates **Organisation** with contacts
 2. Admin creates **Contract** (MSA/SOW) linked to org
-3. Admin creates **Project** linked to org + contract
-4. System **scaffolds** deliveries and tasks from templates
+3. Admin creates **Project** — optionally pastes a proposal for AI extraction → preview → scaffold
+4. System **scaffolds** deliveries, sessions, and feedback forms from the plan
 5. Team configures **Workshop** sessions and agenda items
 6. Team creates **Feedback forms** linked to deliveries
-7. Admin **generates invoice** from delivered workshops
+7. Admin **generates invoice** by selecting uninvoiced deliveries → generate-invoice creates invoice + items from service prices
 8. Admin sends invoice; marks paid when settled
 
 ### Journey 2: Workshop Delivery
-1. Team advances delivery status: `planning → confirmed → materials_sent`
+1. Team advances delivery status: `planning → scheduled → in_progress`
 2. Team builds session agendas using **curriculum templates**
 3. AI Session Planner can auto-generate agenda items
 4. Workshop delivered; status → `delivered`
 5. Feedback form link shared with delegates
 6. Responses collected; satisfaction scores calculated
 7. AI Impact Reporter generates impact summary
-8. Status → `feedback_collected`
+8. Status → `follow_up` → `complete`
 
 ### Journey 3: Client Portal Access
 1. Admin grants portal access (creates `client_portal_access` row)
@@ -66,29 +71,35 @@
 NDG Hub
 ├── Dashboard (/)
 ├── Core
-│   ├── Services (/services)
+│   ├── Daily Brief (/daily)
+│   ├── Projects (/projects)
+│   ├── Tasks (/tasks)
 │   ├── Clients (/clients)
-│   └── Projects (/projects)
+│   └── Insights (/insights)
 ├── Delivery
 │   ├── Workshops (/workshops)
-│   ├── Tasks (/tasks)
+│   ├── Meetings (/meetings)
 │   └── Curriculum (/curriculum)
 ├── Commercial
 │   ├── Invoices (/invoices)
-│   ├── Contracts (/contracts)
-│   └── Partners (/partners)
-├── Engagement
+│   └── Contracts (/contracts)
+├── Engage
 │   ├── Forms (/forms)
 │   ├── Emails (/emails)
-│   └── Meetings (/meetings)
-├── Intelligence
-│   ├── Daily Brief (/daily)
-│   ├── Insights (/insights)
+│   └── Client Portal (/portal)
+├── Admin
+│   ├── Services (/services)
+│   ├── Partners (/partners)
+│   ├── Knowledge Base (/knowledge)
 │   ├── AI Assistant (/ai)
-│   └── Knowledge Base (/knowledge)
-├── Settings (/settings)
-└── Client Portal (/portal)
+│   └── Settings (/settings)
+└── Global
+    └── ⌘K Command Palette
 ```
+
+### Mobile Navigation
+- Bottom tab bar: Home / Projects / Tasks / Invoices
+- "More" sheet for full nav
 
 ---
 
@@ -123,33 +134,41 @@ AI Conversations / Generations ←── User
 | Stage | Meaning |
 |-------|---------|
 | `contracting` | Agreement being finalised |
-| `scheduling` | Dates being confirmed |
-| `content_development` | Materials being created |
-| `ready` | All prep complete |
-| `delivering` | Workshops in progress |
-| `evaluating` | Collecting/analysing feedback |
-| `complete` | Engagement finished |
+| `project_planning` | Scope and timeline being defined |
+| `session_planning` | Workshop sessions being designed |
+| `content_review` | Materials being reviewed |
+| `delivery` | Workshops in progress |
+| `feedback_analytics` | Collecting/analysing feedback |
+| `closed` | Engagement finished |
 
 ### Delivery Status
 | Stage | Meaning |
 |-------|---------|
 | `planning` | Workshop being scoped |
-| `confirmed` | Date/venue confirmed |
-| `materials_sent` | Pre-work distributed |
+| `scheduled` | Date/venue confirmed |
+| `in_progress` | Workshop underway or materials being prepared |
 | `delivered` | Workshop completed |
-| `feedback_collected` | All responses in |
+| `follow_up` | Post-delivery follow-up in progress |
+| `complete` | All follow-up done |
+| `cancelled` | Voided |
 
 ### Invoice Status
 | Stage | Meaning |
 |-------|---------|
 | `draft` | Being prepared |
 | `sent` | Issued to client |
+| `viewed` | Client has viewed |
 | `paid` | Payment received |
 | `overdue` | Past due date |
-| `cancelled` | Voided |
 
 ### Contract Status
-`draft → active → expired / terminated`
+| Stage | Meaning |
+|-------|---------|
+| `draft` | Being prepared |
+| `sent` | Sent for review |
+| `signed` | Fully executed |
+| `expired` | Past end date |
+| `cancelled` | Voided |
 
 ---
 
@@ -164,6 +183,7 @@ AI Conversations / Generations ←── User
 | Data Analyst | Analyse feedback trends, business metrics |
 
 ### Automated Functions
+- **AI Extract (Create from Plan):** Paste a proposal → AI extracts project structure → preview modal → scaffold
 - **Session Planner:** Generate agenda items from workshop description
 - **Impact Reporter:** Create impact reports from feedback data
 - **Daily Brief:** Surface red flags and priorities
@@ -185,17 +205,26 @@ AI Conversations / Generations ←── User
 | Authorization | Row-Level Security on every table |
 | Role separation | `user_roles` table (not in profiles) |
 | Client isolation | `client_portal_access` scopes data to org |
-| Audit trail | Automatic `activity_log` via triggers |
+| Audit trail | Automatic `activity_log` via database triggers |
 | No client-side role checks | All authorization server-side via RLS |
 
 ---
 
-## 8. Neuroscience Framework Integration
+## 8. NEURO Framework Integration
 
-NDG Hub embeds neuroscience concepts throughout:
+NDG Hub embeds the NEURO neuroscience framework throughout:
 
-- **Neuro Phases:** Sessions and deliveries tagged with neurological phases (e.g., Engage, Explore, Embed)
-- **Kirkpatrick Levels:** Forms and responses tagged with evaluation levels (1-4: Reaction → Results)
+### 5 NEURO Phases
+| Phase | Meaning |
+|-------|---------|
+| `needs` | Needs assessment and discovery |
+| `engage` | Stakeholder engagement and buy-in |
+| `understand` | Deep learning and understanding |
+| `realise` | Applying learning to realise outcomes |
+| `ongoing` | Sustained change and continuous improvement |
+
+- **Sessions and deliveries** tagged with NEURO phases
+- **Kirkpatrick Levels:** Forms and responses tagged with evaluation levels (1–4: Reaction → Results)
 - **Energy/Focus Tracking:** Daily states capture cognitive capacity
 - **Optimal Windows:** AI analyses patterns to recommend peak performance times
 - **Recovery Metrics:** Compare energy on delivery vs non-delivery days
