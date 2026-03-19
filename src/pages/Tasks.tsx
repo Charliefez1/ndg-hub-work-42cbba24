@@ -21,7 +21,7 @@ import { WorkloadView } from '@/components/tasks/WorkloadView';
 
 const TASK_STATUSES = ['todo', 'in_progress', 'review', 'done', 'blocked'];
 
-type ViewType = 'board' | 'list' | 'table' | 'timeline' | 'calendar';
+type ViewType = 'board' | 'list' | 'table' | 'timeline' | 'calendar' | 'workload';
 
 export default function Tasks() {
   const { data: tasks, isLoading } = useTasks();
