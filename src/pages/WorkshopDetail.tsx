@@ -37,7 +37,7 @@ export default function WorkshopDetail() {
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
 
   if (isLoading) return <AppShell><Skeleton className="h-8 w-64" /></AppShell>;
-  if (!delivery) return <AppShell><p className="text-text-2">Workshop not found.</p></AppShell>;
+  if (!delivery) return <AppShell><p className="text-muted-foreground">Workshop not found.</p></AppShell>;
 
   const handleAdvance = async (newStatus: string) => {
     try {
@@ -57,9 +57,9 @@ export default function WorkshopDetail() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
-        <div className="flex items-center gap-md flex-wrap">
-          <Link to="/workshops" className="text-text-3 hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
+      <div className="space-y-5">
+        <div className="flex items-center gap-3 flex-wrap">
+          <Link to="/workshops" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
           <h1 className="text-page-title">{delivery.title}</h1>
           <Badge className={getStatusBadgeClasses(delivery.status, 'delivery')}>{delivery.status.replace(/_/g, ' ')}</Badge>
           {delivery.neuro_phase && (
@@ -83,43 +83,43 @@ export default function WorkshopDetail() {
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="mt-md">
+          <TabsContent value="overview" className="mt-3">
             <Card>
-              <CardContent className="pt-6 grid grid-cols-2 gap-md text-body">
-                <div><span className="text-text-3 text-caption">Client</span><p>{(delivery as any).organisations?.name ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Project</span><p><Link to={`/projects/${delivery.project_id}`} className="text-primary hover:underline">{(delivery as any).projects?.name}</Link></p></div>
-                <div><span className="text-text-3 text-caption">Service</span><p>{(delivery as any).services?.name ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Date</span><p>{delivery.delivery_date ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Duration</span><p>{delivery.duration_minutes ? `${delivery.duration_minutes}m` : '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Delegates</span><p>{delivery.delegate_count ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Location</span><p>{delivery.location ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Satisfaction</span><p>{delivery.satisfaction_score ? `${delivery.satisfaction_score}/10` : '—'}</p></div>
+              <CardContent className="pt-6 grid grid-cols-2 gap-3 text-sm">
+                <div><span className="text-muted-foreground text-caption">Client</span><p>{(delivery as any).organisations?.name ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Project</span><p><Link to={`/projects/${delivery.project_id}`} className="text-primary hover:underline">{(delivery as any).projects?.name}</Link></p></div>
+                <div><span className="text-muted-foreground text-caption">Service</span><p>{(delivery as any).services?.name ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Date</span><p>{delivery.delivery_date ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Duration</span><p>{delivery.duration_minutes ? `${delivery.duration_minutes}m` : '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Delegates</span><p>{delivery.delegate_count ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Location</span><p>{delivery.location ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Satisfaction</span><p>{delivery.satisfaction_score ? `${delivery.satisfaction_score}/10` : '—'}</p></div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="sessions" className="mt-md space-y-md">
+          <TabsContent value="sessions" className="mt-3 space-y-3">
             <div className="flex justify-end">
               <Button size="sm" onClick={() => setSessionDialogOpen(true)}><Plus className="h-4 w-4 mr-1" /> Add Session</Button>
             </div>
             {!sessions?.length ? (
-              <p className="text-text-2 text-center py-lg">No sessions yet.</p>
+              <p className="text-muted-foreground text-center py-4">No sessions yet.</p>
             ) : (
-              <div className="space-y-xs">
+              <div className="space-y-1.5">
                 {sessions.map((s) => (
-                  <div key={s.id} className="bg-surface rounded-md border p-md">
+                  <div key={s.id} className="bg-card rounded-lg border p-3">
                     <div
                       className="flex items-center justify-between cursor-pointer"
                       onClick={() => setSelectedSession(s.id === selectedSession ? null : s.id)}
                     >
                       <div>
                         <p className="font-medium">{s.title}</p>
-                        <p className="text-caption text-text-3">{s.session_type} · {s.duration_minutes}m</p>
+                        <p className="text-caption text-muted-foreground">{s.session_type} · {s.duration_minutes}m</p>
                       </div>
                       <Badge variant="outline" className="capitalize">{s.content_status ?? 'draft'}</Badge>
                     </div>
                     {selectedSession === s.id && (
-                      <div className="mt-md border-t pt-md">
+                      <div className="mt-3 border-t pt-3">
                         <AgendaBuilder sessionId={s.id} targetMinutes={s.duration_minutes || 90} />
                       </div>
                     )}
@@ -129,11 +129,11 @@ export default function WorkshopDetail() {
             )}
           </TabsContent>
 
-          <TabsContent value="feedback" className="mt-md">
+          <TabsContent value="feedback" className="mt-3">
             <FeedbackTab deliveryId={id!} feedbackFormId={delivery.feedback_form_id} satisfactionScore={delivery.satisfaction_score} />
           </TabsContent>
 
-          <TabsContent value="documents" className="mt-md">
+          <TabsContent value="documents" className="mt-3">
             <DocumentsTab projectId={delivery.project_id} />
           </TabsContent>
         </Tabs>
@@ -162,28 +162,28 @@ function AgendaBuilder({ sessionId, targetMinutes }: { sessionId: string; target
   };
 
   return (
-    <div className="space-y-sm">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <div className={`flex items-center gap-2 text-caption font-medium ${isOver ? 'text-destructive' : 'text-text-3'}`}>
+        <div className={`flex items-center gap-2 text-caption font-medium ${isOver ? 'text-destructive' : 'text-muted-foreground'}`}>
           <Clock className="h-3.5 w-3.5" />
           {totalMinutes} / {targetMinutes} minutes planned
         </div>
         <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}><Plus className="h-3.5 w-3.5 mr-1" /> Add Block</Button>
       </div>
       {items?.map((item, idx) => (
-        <div key={item.id} className="flex items-center gap-2 bg-background rounded border p-sm">
+        <div key={item.id} className="flex items-center gap-2 bg-background rounded border p-3">
           <div className="flex flex-col shrink-0">
-            <button onClick={() => moveItem(idx, 'up')} disabled={idx === 0} className="text-text-3 hover:text-foreground disabled:opacity-20">
+            <button onClick={() => moveItem(idx, 'up')} disabled={idx === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20">
               <ChevronUp className="h-3 w-3" />
             </button>
-            <button onClick={() => moveItem(idx, 'down')} disabled={idx === (items?.length ?? 0) - 1} className="text-text-3 hover:text-foreground disabled:opacity-20">
+            <button onClick={() => moveItem(idx, 'down')} disabled={idx === (items?.length ?? 0) - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-20">
               <ChevronDown className="h-3 w-3" />
             </button>
           </div>
           <Badge className={`text-xs capitalize shrink-0 ${TYPE_COLORS[item.type] || ''}`}>{item.type}</Badge>
-          <span className="text-body flex-1 truncate">{item.title}</span>
-          {item.method && <span className="text-caption text-text-3 shrink-0">{item.method}</span>}
-          <span className="text-caption text-text-3 shrink-0 font-mono">{item.duration_minutes}m</span>
+          <span className="text-sm flex-1 truncate">{item.title}</span>
+          {item.method && <span className="text-caption text-muted-foreground shrink-0">{item.method}</span>}
+          <span className="text-caption text-muted-foreground shrink-0 font-mono">{item.duration_minutes}m</span>
           <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => deleteItem.mutate(item.id)}>
             <Trash2 className="h-3 w-3 text-destructive" />
           </Button>
@@ -208,7 +208,7 @@ function AddAgendaItemInline({ sessionId, position, onDone }: { sessionId: strin
   };
 
   return (
-    <div className="flex items-center gap-2 bg-background rounded border p-sm flex-wrap">
+    <div className="flex items-center gap-2 bg-background rounded border p-3 flex-wrap">
       <Select value={type} onValueChange={setType}>
         <SelectTrigger className="w-28 h-8"><SelectValue /></SelectTrigger>
         <SelectContent>{AGENDA_TYPES.map((t) => <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>)}</SelectContent>
@@ -238,21 +238,21 @@ function FeedbackTab({ deliveryId, feedbackFormId, satisfactionScore }: { delive
   });
 
   if (!feedbackFormId) {
-    return <p className="text-text-2 text-center py-lg">No feedback form linked to this workshop.</p>;
+    return <p className="text-muted-foreground text-center py-4">No feedback form linked to this workshop.</p>;
   }
 
   return (
-    <div className="space-y-md">
-      <div className="grid grid-cols-2 gap-md">
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
         <Card>
           <CardContent className="pt-4">
-            <p className="text-caption text-text-3">Satisfaction Score</p>
+            <p className="text-caption text-muted-foreground">Satisfaction Score</p>
             <p className="text-section-title">{satisfactionScore ? `${satisfactionScore}/10` : '—'}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-caption text-text-3">Responses</p>
+            <p className="text-caption text-muted-foreground">Responses</p>
             <p className="text-section-title">{responses?.length ?? 0}</p>
           </CardContent>
         </Card>
@@ -260,26 +260,26 @@ function FeedbackTab({ deliveryId, feedbackFormId, satisfactionScore }: { delive
 
       <Card>
         <CardContent className="pt-4">
-          <p className="text-body font-medium mb-sm">Public Form Link</p>
-          <code className="text-mono text-xs bg-background rounded border p-sm block">
+          <p className="text-sm font-medium mb-2">Public Form Link</p>
+          <code className="text-mono text-xs bg-background rounded border p-3 block">
             {window.location.origin}/form/{feedbackFormId}
           </code>
         </CardContent>
       </Card>
 
       {responses?.length ? (
-        <div className="space-y-xs">
+        <div className="space-y-1.5">
           {responses.map((r) => (
             <Card key={r.id}>
               <CardContent className="pt-4">
-                <p className="text-caption text-text-3 mb-sm">
+                <p className="text-caption text-muted-foreground mb-2">
                   {new Date(r.submitted_at!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </p>
-                <div className="space-y-xs">
+                <div className="space-y-1.5">
                   {Object.entries(typeof r.data === 'string' ? JSON.parse(r.data) : r.data).map(([key, value]) => (
                     <div key={key} className="flex justify-between">
-                      <span className="text-body text-text-2">{key}</span>
-                      <span className="text-body font-medium">{String(value)}</span>
+                      <span className="text-sm text-muted-foreground">{key}</span>
+                      <span className="text-sm font-medium">{String(value)}</span>
                     </div>
                   ))}
                 </div>
@@ -288,7 +288,7 @@ function FeedbackTab({ deliveryId, feedbackFormId, satisfactionScore }: { delive
           ))}
         </div>
       ) : (
-        <p className="text-text-2 text-center py-md">No responses yet.</p>
+        <p className="text-muted-foreground text-center py-3">No responses yet.</p>
       )}
     </div>
   );
@@ -313,10 +313,10 @@ function AddSessionDialog({ open, onOpenChange, deliveryId, projectId }: { open:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader><DialogTitle>Add Session</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-md">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div><Label>Title *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
           <div><Label>Duration (mins)</Label><Input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} /></div>
-          <div className="flex justify-end gap-sm">
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit" disabled={createSession.isPending}>Add</Button>
           </div>

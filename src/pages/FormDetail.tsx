@@ -18,7 +18,7 @@ export default function FormDetail() {
   const updateForm = useUpdateForm();
 
   if (isLoading) return <AppShell><Skeleton className="h-8 w-64" /></AppShell>;
-  if (!form) return <AppShell><p className="text-text-2">Form not found.</p></AppShell>;
+  if (!form) return <AppShell><p className="text-muted-foreground">Form not found.</p></AppShell>;
 
   const fields = (form.fields as any[]) ?? [];
 
@@ -29,12 +29,12 @@ export default function FormDetail() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
-        <div className="flex items-center gap-md">
-          <Link to="/forms" className="text-text-3 hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
+      <div className="space-y-5">
+        <div className="flex items-center gap-3">
+          <Link to="/forms" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
           <h1 className="text-page-title">{form.title}</h1>
           <Badge variant={form.active ? 'default' : 'outline'}>{form.active ? 'Active' : 'Inactive'}</Badge>
-          <div className="ml-auto flex items-center gap-sm">
+          <div className="ml-auto flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={toggleActive}>{form.active ? 'Deactivate' : 'Activate'}</Button>
             {form.active && (
               <a href={`/form/${form.id}`} target="_blank" rel="noopener">
@@ -50,25 +50,25 @@ export default function FormDetail() {
             <TabsTrigger value="responses">Responses ({responses?.length ?? 0})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="builder" className="mt-md">
-            <div className="space-y-xs">
+          <TabsContent value="builder" className="mt-3">
+            <div className="space-y-1.5">
               {fields.map((f: any, i: number) => (
-                <div key={f.id} className="bg-surface rounded-md border p-md flex items-center gap-md">
-                  <span className="text-caption text-text-3 w-6">{i + 1}</span>
+                <div key={f.id} className="bg-card rounded-lg border p-3 flex items-center gap-3">
+                  <span className="text-caption text-muted-foreground w-6">{i + 1}</span>
                   <div className="flex-1">
-                    <p className="font-medium text-body">{f.label}</p>
-                    <p className="text-caption text-text-3 capitalize">{f.type}{f.required ? ' · Required' : ''}</p>
+                    <p className="font-medium text-sm">{f.label}</p>
+                    <p className="text-caption text-muted-foreground capitalize">{f.type}{f.required ? ' · Required' : ''}</p>
                   </div>
                 </div>
               ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="responses" className="mt-md">
+          <TabsContent value="responses" className="mt-3">
             {!responses?.length ? (
-              <p className="text-text-2 text-center py-lg">No responses yet.</p>
+              <p className="text-muted-foreground text-center py-4">No responses yet.</p>
             ) : (
-              <div className="rounded-lg border bg-surface overflow-hidden">
+              <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
                 <Table>
                   <TableHeader>
                     <TableRow>

@@ -22,13 +22,13 @@ export default function Emails() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Emails</h1>
         </div>
 
         <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-3" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search emails…"
             value={search}
@@ -38,16 +38,16 @@ export default function Emails() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-xs">
+          <div className="space-y-1.5">
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full" />)}
           </div>
         ) : !filtered?.length ? (
           <div className="text-center py-xl">
-            <Mail className="h-12 w-12 mx-auto text-text-3 mb-md" strokeWidth={1.25} />
-            <p className="text-text-2">No email threads found.</p>
+            <Mail className="h-12 w-12 mx-auto text-muted-foreground mb-3" strokeWidth={1.25} />
+            <p className="text-muted-foreground">No email threads found.</p>
           </div>
         ) : (
-          <div className="rounded-lg border bg-surface overflow-hidden">
+          <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -63,7 +63,7 @@ export default function Emails() {
                     <TableCell>
                       <div className="min-w-0">
                         <p className="font-medium truncate">{email.subject ?? '(no subject)'}</p>
-                        <p className="text-caption text-text-3 truncate max-w-md">{email.snippet}</p>
+                        <p className="text-caption text-muted-foreground truncate max-w-md">{email.snippet}</p>
                       </div>
                     </TableCell>
                     <TableCell className="text-caption">{email.from_address ?? '—'}</TableCell>

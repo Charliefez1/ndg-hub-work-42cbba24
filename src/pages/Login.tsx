@@ -51,49 +51,100 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-md">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-section-title">NDG Hub</CardTitle>
-          <CardDescription>Sign in to your workspace</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-md">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-          >
-            {googleLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <GoogleIcon />}
-            Sign in with Google
-          </Button>
+    <div className="min-h-screen flex">
+      {/* Left panel — branding */}
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] relative overflow-hidden bg-gradient-to-br from-[hsl(var(--accent))] via-[hsl(var(--purple))] to-[hsl(var(--pink))]">
+        {/* Decorative shapes */}
+        <div className="absolute inset-0">
+          <div className="absolute top-[15%] left-[-10%] w-80 h-80 rounded-full bg-white/10 blur-2xl" />
+          <div className="absolute bottom-[20%] right-[-15%] w-96 h-96 rounded-full bg-white/8 blur-3xl" />
+          <div className="absolute top-[60%] left-[20%] w-48 h-48 rounded-full bg-white/5 blur-xl" />
+        </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
+        <div className="relative z-10 flex flex-col justify-between p-10 text-white w-full">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <span className="font-satoshi text-lg font-bold">N</span>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">or continue with email</span>
+            <span className="font-satoshi text-xl font-bold tracking-tight">NDG Hub</span>
+          </div>
+
+          <div className="space-y-6">
+            <h1 className="font-satoshi text-4xl font-bold leading-tight">
+              Your neurodiversity<br />practice, simplified.
+            </h1>
+            <p className="text-white/80 text-lg leading-relaxed max-w-sm">
+              Projects, workshops, invoices, and insights — all in one place. Designed for the way your brain works best.
+            </p>
+            <div className="flex gap-3">
+              {['Projects', 'Workshops', 'Invoices', 'Insights'].map((label) => (
+                <span key={label} className="px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-sm font-medium">
+                  {label}
+                </span>
+              ))}
             </div>
           </div>
 
-          <Tabs defaultValue="login">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="login">
-              <LoginForm />
-            </TabsContent>
-            <TabsContent value="signup">
-              <SignUpForm />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+          <p className="text-white/50 text-sm">Neurodiversity Group &mdash; Learning &amp; Development</p>
+        </div>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center bg-background p-6">
+        <div className="w-full max-w-md animate-fade-in-up">
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
+            <div className="h-10 w-10 rounded-xl gradient-accent flex items-center justify-center">
+              <span className="font-satoshi text-lg font-bold text-white">N</span>
+            </div>
+            <span className="font-satoshi text-xl font-bold tracking-tight">NDG Hub</span>
+          </div>
+
+          <Card className="shadow-lg border-border/50">
+            <CardHeader className="text-center pb-2">
+              <CardTitle className="text-xl font-bold">Welcome back</CardTitle>
+              <CardDescription>Sign in to your workspace</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button
+                variant="outline"
+                className="w-full h-11 gap-3 font-medium"
+                onClick={handleGoogleSignIn}
+                disabled={googleLoading}
+              >
+                {googleLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
+                Continue with Google
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-3 text-muted-foreground font-medium">or</span>
+                </div>
+              </div>
+
+              <Tabs defaultValue="login">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="login">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+                <TabsContent value="login">
+                  <LoginForm />
+                </TabsContent>
+                <TabsContent value="signup">
+                  <SignUpForm />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
+
 function LoginForm() {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
@@ -111,16 +162,16 @@ function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-md pt-md">
-      <div className="space-y-xs">
+    <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+      <div className="space-y-1.5">
         <Label htmlFor="login-email">Email</Label>
-        <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <Input id="login-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-10" />
       </div>
-      <div className="space-y-xs">
+      <div className="space-y-1.5">
         <Label htmlFor="login-password">Password</Label>
-        <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <Input id="login-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-10" />
       </div>
-      <Button type="submit" className="w-full" disabled={submitting}>
+      <Button type="submit" className="w-full h-10" disabled={submitting}>
         {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
         Sign In
       </Button>
@@ -148,20 +199,20 @@ function SignUpForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-md pt-md">
-      <div className="space-y-xs">
+    <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+      <div className="space-y-1.5">
         <Label htmlFor="signup-name">Display Name</Label>
-        <Input id="signup-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+        <Input id="signup-name" placeholder="Your name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="h-10" />
       </div>
-      <div className="space-y-xs">
+      <div className="space-y-1.5">
         <Label htmlFor="signup-email">Email</Label>
-        <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <Input id="signup-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-10" />
       </div>
-      <div className="space-y-xs">
+      <div className="space-y-1.5">
         <Label htmlFor="signup-password">Password</Label>
-        <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+        <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="h-10" />
       </div>
-      <Button type="submit" className="w-full" disabled={submitting}>
+      <Button type="submit" className="w-full h-10" disabled={submitting}>
         {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
         Sign Up
       </Button>

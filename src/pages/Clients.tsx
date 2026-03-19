@@ -26,7 +26,7 @@ export default function Clients() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Clients</h1>
           <Button onClick={() => setDialogOpen(true)} size="sm">
@@ -35,20 +35,20 @@ export default function Clients() {
         </div>
 
         <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-3" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search clients..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
 
         {isLoading ? (
-          <div className="space-y-sm">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+          <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
         ) : !filtered?.length ? (
-          <div className="bg-surface rounded-lg border p-xl text-center space-y-md">
-            <Building2 className="h-12 w-12 mx-auto text-text-3" strokeWidth={1.25} />
-            <p className="text-body text-text-2">{search ? 'No clients match your search.' : 'No clients yet. Create your first client to get started.'}</p>
+          <div className="bg-card rounded-xl border p-6 text-center space-y-3">
+            <Building2 className="h-12 w-12 mx-auto text-muted-foreground" strokeWidth={1.25} />
+            <p className="text-sm text-muted-foreground">{search ? 'No clients match your search.' : 'No clients yet. Create your first client to get started.'}</p>
             {!search && <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4 mr-1" /> New Client</Button>}
           </div>
         ) : (
-          <div className="rounded-lg border bg-surface overflow-hidden">
+          <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -102,18 +102,18 @@ function CreateOrgDialog({ open, onOpenChange, onCreate }: { open: boolean; onOp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader><DialogTitle>New Client</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-md">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div><Label>Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
-          <div className="grid grid-cols-2 gap-md">
+          <div className="grid grid-cols-2 gap-3">
             <div><Label>Sector</Label><Input value={sector} onChange={(e) => setSector(e.target.value)} /></div>
             <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
           </div>
-          <div className="grid grid-cols-2 gap-md">
+          <div className="grid grid-cols-2 gap-3">
             <div><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
             <div><Label>Website</Label><Input value={website} onChange={(e) => setWebsite(e.target.value)} /></div>
           </div>
           <div><Label>Address</Label><Textarea value={address} onChange={(e) => setAddress(e.target.value)} /></div>
-          <div className="flex justify-end gap-sm">
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit" disabled={onCreate.isPending}>{onCreate.isPending ? 'Creating...' : 'Create'}</Button>
           </div>

@@ -7,11 +7,11 @@ const projectStatusColors: StatusColorMap = {
   content_review: 'purple',
   delivery: 'success',
   feedback_analytics: 'pink',
-  closed: 'text-3',
+  closed: 'neutral',
 };
 
 const deliveryStatusColors: StatusColorMap = {
-  planning: 'text-2',
+  planning: 'neutral',
   scheduled: 'warning',
   in_progress: 'info',
   delivered: 'purple',
@@ -21,7 +21,7 @@ const deliveryStatusColors: StatusColorMap = {
 };
 
 const invoiceStatusColors: StatusColorMap = {
-  draft: 'text-3',
+  draft: 'neutral',
   sent: 'info',
   viewed: 'purple',
   paid: 'success',
@@ -29,7 +29,7 @@ const invoiceStatusColors: StatusColorMap = {
 };
 
 const taskStatusColors: StatusColorMap = {
-  todo: 'text-3',
+  todo: 'neutral',
   in_progress: 'info',
   blocked: 'destructive',
   review: 'purple',
@@ -45,7 +45,7 @@ const neuroPhaseColors: StatusColorMap = {
 };
 
 const contractStatusColors: StatusColorMap = {
-  draft: 'text-3',
+  draft: 'neutral',
   sent: 'info',
   signed: 'success',
   expired: 'warning',
@@ -65,10 +65,9 @@ export type StatusEntity = keyof typeof entityColorMaps;
 
 /**
  * Returns a semantic colour token for a given entity + status.
- * Use in badge/tag components — never hard-code colours in JSX.
  */
 export function getStatusColor(status: string, entity: StatusEntity): string {
-  return entityColorMaps[entity]?.[status] ?? 'text-3';
+  return entityColorMaps[entity]?.[status] ?? 'neutral';
 }
 
 /**
@@ -85,11 +84,10 @@ export function getStatusBadgeClasses(status: string, entity: StatusEntity): str
     purple: 'bg-purple/15 text-purple',
     cyan: 'bg-cyan/15 text-cyan',
     pink: 'bg-pink/15 text-pink',
-    'text-2': 'bg-muted text-text-2',
-    'text-3': 'bg-muted text-text-3',
+    neutral: 'bg-muted text-muted-foreground',
   };
 
-  return colorClassMap[color] ?? 'bg-muted text-text-3';
+  return colorClassMap[color] ?? 'bg-muted text-muted-foreground';
 }
 
 /** Human-readable label for a status value */

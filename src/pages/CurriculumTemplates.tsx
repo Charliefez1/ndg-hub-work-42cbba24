@@ -52,7 +52,7 @@ export default function CurriculumTemplates() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Curriculum Templates</h1>
           <Button onClick={() => setDialogOpen(true)}>
@@ -61,20 +61,20 @@ export default function CurriculumTemplates() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-3 gap-md">
+          <div className="grid grid-cols-3 gap-3">
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full" />)}
           </div>
         ) : !templates?.length ? (
           <div className="text-center py-xl">
-            <BookTemplate className="h-12 w-12 mx-auto text-text-3 mb-md" strokeWidth={1.25} />
-            <p className="text-text-2">No curriculum templates yet.</p>
+            <BookTemplate className="h-12 w-12 mx-auto text-muted-foreground mb-3" strokeWidth={1.25} />
+            <p className="text-muted-foreground">No curriculum templates yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {templates.map((t) => (
               <Card key={t.id} className="group">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-body flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center justify-between">
                     <span className="truncate">{t.title}</span>
                     <Button
                       variant="ghost"
@@ -86,15 +86,15 @@ export default function CurriculumTemplates() {
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-xs">
+                <CardContent className="space-y-1.5">
                   {(t as any).services?.name && (
-                    <p className="text-caption text-text-3">Service: {(t as any).services.name}</p>
+                    <p className="text-caption text-muted-foreground">Service: {(t as any).services.name}</p>
                   )}
                   {t.neuro_phase && (
                     <Badge variant="outline" className="text-xs">{t.neuro_phase}</Badge>
                   )}
                   {Array.isArray(t.default_agenda) && (
-                    <p className="text-caption text-text-3">{(t.default_agenda as any[]).length} agenda items</p>
+                    <p className="text-caption text-muted-foreground">{(t.default_agenda as any[]).length} agenda items</p>
                   )}
                 </CardContent>
               </Card>
@@ -105,7 +105,7 @@ export default function CurriculumTemplates() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>
             <DialogHeader><DialogTitle>New Curriculum Template</DialogTitle></DialogHeader>
-            <div className="space-y-md">
+            <div className="space-y-3">
               <div>
                 <Label>Title *</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Resilience Programme" />
@@ -132,7 +132,7 @@ export default function CurriculumTemplates() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex justify-end gap-sm">
+              <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
                 <Button onClick={handleCreate} disabled={!title.trim()}>Create</Button>
               </div>

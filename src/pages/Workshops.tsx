@@ -32,10 +32,10 @@ export default function Workshops() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Workshops</h1>
-          <div className="flex items-center gap-sm">
+          <div className="flex items-center gap-2">
             <Tabs value={view} onValueChange={(v) => setView(v as any)}>
               <TabsList className="h-8">
                 <TabsTrigger value="table" className="text-xs px-2">Table</TabsTrigger>
@@ -47,15 +47,15 @@ export default function Workshops() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-sm">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+          <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
         ) : !deliveries?.length ? (
-          <div className="bg-surface rounded-lg border p-xl text-center space-y-md">
-            <Briefcase className="h-12 w-12 mx-auto text-text-3" strokeWidth={1.25} />
-            <p className="text-body text-text-2">No workshops yet.</p>
+          <div className="bg-card rounded-xl border p-6 text-center space-y-3">
+            <Briefcase className="h-12 w-12 mx-auto text-muted-foreground" strokeWidth={1.25} />
+            <p className="text-sm text-muted-foreground">No workshops yet.</p>
             <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4 mr-1" /> New Workshop</Button>
           </div>
         ) : view === 'table' ? (
-          <div className="rounded-lg border bg-surface overflow-hidden">
+          <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -80,23 +80,38 @@ export default function Workshops() {
             </Table>
           </div>
         ) : (
-          <div className="flex gap-md overflow-x-auto pb-md">
-            {boardGroups.map((g) => (
-              <div key={g.status} className="min-w-[240px] w-[240px] shrink-0">
-                <div className="flex items-center gap-2 mb-sm">
-                  <Badge variant="outline" className="capitalize text-xs">{g.status.replace('_', ' ')}</Badge>
-                  <span className="text-caption text-text-3">{g.items.length}</span>
+          <div className="flex gap-3 overflow-x-auto pb-4">
+            {boardGroups.map((g) => {
+              const DELIVERY_COL_COLORS: Record<string, { accent: string; dot: string }> = {
+                planning: { accent: 'border-t-muted-foreground', dot: 'bg-muted-foreground' },
+                scheduled: { accent: 'border-t-warning', dot: 'bg-warning' },
+                in_progress: { accent: 'border-t-[hsl(var(--info))]', dot: 'bg-[hsl(var(--info))]' },
+                delivered: { accent: 'border-t-[hsl(var(--purple))]', dot: 'bg-[hsl(var(--purple))]' },
+                follow_up: { accent: 'border-t-[hsl(var(--cyan))]', dot: 'bg-[hsl(var(--cyan))]' },
+                complete: { accent: 'border-t-success', dot: 'bg-success' },
+                cancelled: { accent: 'border-t-destructive', dot: 'bg-destructive' },
+              };
+              const colColors = DELIVERY_COL_COLORS[g.status] ?? { accent: 'border-t-muted-foreground', dot: 'bg-muted-foreground' };
+              return (
+                <div key={g.status} className="min-w-[260px] w-[260px] shrink-0">
+                  <div className={`bg-card rounded-xl border border-t-[3px] ${colColors.accent} shadow-sm`}>
+                    <div className="flex items-center gap-2 px-3 py-2.5">
+                      <span className={`h-2.5 w-2.5 rounded-full ${colColors.dot}`} />
+                      <span className="text-xs font-semibold uppercase tracking-wide capitalize">{g.status.replace(/_/g, ' ')}</span>
+                      <span className="ml-auto text-xs text-muted-foreground font-medium bg-muted rounded-full px-2 py-0.5">{g.items.length}</span>
+                    </div>
+                    <div className="px-2 pb-2 space-y-1.5">
+                      {g.items.map((d) => (
+                        <Link key={d.id} to={`/workshops/${d.id}`} className="block bg-background rounded-lg border p-3 hover:shadow-md transition-all duration-200 cursor-pointer">
+                          <p className="text-sm font-medium truncate">{d.title}</p>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{(d as any).organisations?.name} · {d.delivery_date ?? 'TBD'}</p>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-xs">
-                  {g.items.map((d) => (
-                    <Link key={d.id} to={`/workshops/${d.id}`} className="block bg-surface rounded-md border p-sm hover:border-primary transition-colors">
-                      <p className="text-body font-medium truncate">{d.title}</p>
-                      <p className="text-caption text-text-3 truncate">{(d as any).organisations?.name} · {d.delivery_date ?? 'TBD'}</p>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -135,7 +150,7 @@ function CreateDeliveryDialog({ open, onOpenChange }: { open: boolean; onOpenCha
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader><DialogTitle>New Workshop</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-md">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div><Label>Title *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
           <div><Label>Project *</Label>
             <Select value={projectId} onValueChange={setProjectId}>
@@ -150,7 +165,7 @@ function CreateDeliveryDialog({ open, onOpenChange }: { open: boolean; onOpenCha
             </Select>
           </div>
           <div><Label>Delivery Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-          <div className="flex justify-end gap-sm">
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit" disabled={createDelivery.isPending || !projectId}>Create</Button>
           </div>

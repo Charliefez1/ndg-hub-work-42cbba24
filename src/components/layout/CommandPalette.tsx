@@ -72,7 +72,7 @@ export function CommandPalette() {
                     onSelect={() => handleSelect(page.url)}
                     className="gap-2"
                   >
-                    <page.icon className="h-4 w-4 shrink-0 text-text-3" strokeWidth={1.75} />
+                    <page.icon className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
                     <span>{page.title}</span>
                   </CommandItem>
                 ))}

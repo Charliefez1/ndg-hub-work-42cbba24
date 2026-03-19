@@ -77,7 +77,7 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
           <DialogTitle>{isEdit ? 'Edit Service' : 'New Service'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-md">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField control={form.control} name="name" render={({ field }) => (
               <FormItem>
                 <FormLabel>Name</FormLabel>
@@ -86,7 +86,7 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
               </FormItem>
             )} />
 
-            <div className="grid grid-cols-2 gap-md">
+            <div className="grid grid-cols-2 gap-3">
               <FormField control={form.control} name="category" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
@@ -111,7 +111,7 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
               )} />
             </div>
 
-            <div className="grid grid-cols-2 gap-md">
+            <div className="grid grid-cols-2 gap-3">
               <FormField control={form.control} name="default_duration_minutes" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Duration (mins)</FormLabel>
@@ -154,7 +154,7 @@ export function ServiceDialog({ open, onOpenChange, service }: ServiceDialogProp
               </FormItem>
             )} />
 
-            <div className="flex justify-end gap-sm pt-sm">
+            <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button type="submit" disabled={submitting}>
                 {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}

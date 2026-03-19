@@ -26,35 +26,35 @@ export default function Invoices() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Invoices</h1>
         </div>
 
-        <div className="grid grid-cols-3 gap-md">
+        <div className="grid grid-cols-3 gap-3">
           <Card><CardContent className="pt-4">
-            <p className="text-caption text-text-3">Revenue (Paid)</p>
+            <p className="text-caption text-muted-foreground">Revenue (Paid)</p>
             <p className="text-section-title text-green-600">£{totalRevenue.toLocaleString()}</p>
           </CardContent></Card>
           <Card><CardContent className="pt-4">
-            <p className="text-caption text-text-3">Outstanding</p>
+            <p className="text-caption text-muted-foreground">Outstanding</p>
             <p className="text-section-title text-amber-600">£{totalOutstanding.toLocaleString()}</p>
           </CardContent></Card>
           <Card><CardContent className="pt-4">
-            <p className="text-caption text-text-3">Drafts</p>
+            <p className="text-caption text-muted-foreground">Drafts</p>
             <p className="text-section-title">{totalDraft}</p>
           </CardContent></Card>
         </div>
 
         {isLoading ? (
-          <div className="space-y-sm">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+          <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
         ) : !invoices?.length ? (
-          <div className="bg-surface rounded-lg border p-xl text-center space-y-md">
-            <FileText className="h-12 w-12 mx-auto text-text-3" strokeWidth={1.25} />
-            <p className="text-body text-text-2">No invoices yet. Invoices are generated from project deliveries.</p>
+          <div className="bg-card rounded-xl border p-6 text-center space-y-3">
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground" strokeWidth={1.25} />
+            <p className="text-sm text-muted-foreground">No invoices yet. Invoices are generated from project deliveries.</p>
           </div>
         ) : (
-          <div className="rounded-lg border bg-surface overflow-hidden">
+          <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>

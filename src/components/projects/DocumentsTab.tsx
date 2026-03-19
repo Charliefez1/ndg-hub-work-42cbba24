@@ -101,8 +101,8 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
   });
 
   return (
-    <div className="space-y-md">
-      <div className="flex gap-sm">
+    <div className="space-y-3">
+      <div className="flex gap-2">
         <Button size="sm" onClick={() => setDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-1" /> Link URL
         </Button>
@@ -128,19 +128,19 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
       </div>
 
       {!documents?.length ? (
-        <div className="text-center py-lg">
-          <FileText className="h-10 w-10 mx-auto text-text-3 mb-sm" strokeWidth={1.25} />
-          <p className="text-text-2">No documents attached yet.</p>
+        <div className="text-center py-4">
+          <FileText className="h-10 w-10 mx-auto text-muted-foreground mb-2" strokeWidth={1.25} />
+          <p className="text-muted-foreground">No documents attached yet.</p>
         </div>
       ) : (
-        <div className="space-y-xs">
+        <div className="space-y-1.5">
           {documents.map((doc) => (
-            <div key={doc.id} className="bg-surface rounded-md border p-md flex items-center justify-between group">
-              <div className="flex items-center gap-sm min-w-0">
-                <FileText className="h-4 w-4 text-text-3 shrink-0" />
+            <div key={doc.id} className="bg-card rounded-lg border p-3 flex items-center justify-between group">
+              <div className="flex items-center gap-2 min-w-0">
+                <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-body font-medium truncate">{doc.name}</p>
-                  <p className="text-caption text-text-3">
+                  <p className="text-sm font-medium truncate">{doc.name}</p>
+                  <p className="text-caption text-muted-foreground">
                     {new Date(doc.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </p>
                 </div>
@@ -168,7 +168,7 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Link Document URL</DialogTitle></DialogHeader>
-          <div className="space-y-md">
+          <div className="space-y-3">
             <div>
               <Label>Name *</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Project Proposal" />
@@ -177,7 +177,7 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
               <Label>URL *</Label>
               <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." />
             </div>
-            <div className="flex justify-end gap-sm">
+            <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
               <Button onClick={() => addDocument.mutate()} disabled={!name.trim() || !url.trim()}>Add</Button>
             </div>

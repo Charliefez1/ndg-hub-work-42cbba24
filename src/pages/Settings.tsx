@@ -13,11 +13,11 @@ import { getStoredTheme, getStoredAccent, setTheme, setAccent, type Theme, type 
 import { Sun, Moon, Monitor, Check } from 'lucide-react';
 
 const ACCENT_OPTIONS: { value: Accent; label: string; color: string }[] = [
-  { value: 'steel', label: 'Steel', color: '#4A7CBA' },
+  { value: 'steel', label: 'Steel', color: '#3B82F6' },
   { value: 'sky', label: 'Sky', color: '#0EA5E9' },
-  { value: 'mint', label: 'Mint', color: '#10B981' },
+  { value: 'mint', label: 'Mint', color: '#14B8A6' },
   { value: 'amber', label: 'Amber', color: '#F59E0B' },
-  { value: 'purple', label: 'Purple', color: '#8B5CF6' },
+  { value: 'purple', label: 'Purple', color: '#7C3AED' },
 ];
 
 const THEME_OPTIONS: { value: Theme; label: string; icon: React.ReactNode }[] = [
@@ -76,7 +76,7 @@ export default function Settings() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <h1 className="text-page-title">Settings</h1>
 
         <Tabs defaultValue="profile">
@@ -86,10 +86,10 @@ export default function Settings() {
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="mt-md space-y-md">
+          <TabsContent value="profile" className="mt-3 space-y-3">
             <Card>
-              <CardHeader><CardTitle className="text-body">Profile Information</CardTitle></CardHeader>
-              <CardContent className="space-y-md">
+              <CardHeader><CardTitle className="text-sm">Profile Information</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
                 <div>
                   <Label>Email</Label>
                   <Input value={user?.email || ''} disabled className="mt-1" />
@@ -110,7 +110,7 @@ export default function Settings() {
                     placeholder="For push notifications"
                     className="mt-1"
                   />
-                  <p className="text-caption text-text-3 mt-1">Used for Telegram push notifications.</p>
+                  <p className="text-caption text-muted-foreground mt-1">Used for Telegram push notifications.</p>
                 </div>
                 <Button onClick={handleSaveProfile} disabled={saving}>
                   {saving ? 'Saving...' : 'Save Profile'}
@@ -119,11 +119,11 @@ export default function Settings() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="appearance" className="mt-md space-y-md">
+          <TabsContent value="appearance" className="mt-3 space-y-3">
             <Card>
-              <CardHeader><CardTitle className="text-body">Theme</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-sm">Theme</CardTitle></CardHeader>
               <CardContent>
-                <div className="flex gap-sm">
+                <div className="flex gap-2">
                   {THEME_OPTIONS.map((opt) => (
                     <Button
                       key={opt.value}
@@ -141,9 +141,9 @@ export default function Settings() {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle className="text-body">Accent Colour</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-sm">Accent Colour</CardTitle></CardHeader>
               <CardContent>
-                <div className="flex gap-md">
+                <div className="flex gap-3">
                   {ACCENT_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
@@ -166,10 +166,10 @@ export default function Settings() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="notifications" className="mt-md">
+          <TabsContent value="notifications" className="mt-3">
             <Card>
-              <CardHeader><CardTitle className="text-body">Notification Preferences</CardTitle></CardHeader>
-              <CardContent className="space-y-md">
+              <CardHeader><CardTitle className="text-sm">Notification Preferences</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
                 {[
                   { key: 'task_assigned', label: 'Task assigned to me' },
                   { key: 'delivery_reminder', label: 'Workshop delivery reminders' },
@@ -179,21 +179,21 @@ export default function Settings() {
                 ].map((item) => (
                   <div key={item.key} className="flex items-center justify-between">
                     <div>
-                      <p className="text-body">{item.label}</p>
+                      <p className="text-sm">{item.label}</p>
                     </div>
-                    <div className="flex gap-md items-center">
+                    <div className="flex gap-3 items-center">
                       <div className="flex items-center gap-2">
-                        <Label className="text-caption text-text-3">In-app</Label>
+                        <Label className="text-caption text-muted-foreground">In-app</Label>
                         <Switch defaultChecked />
                       </div>
                       <div className="flex items-center gap-2">
-                        <Label className="text-caption text-text-3">Telegram</Label>
+                        <Label className="text-caption text-muted-foreground">Telegram</Label>
                         <Switch />
                       </div>
                     </div>
                   </div>
                 ))}
-                <p className="text-caption text-text-3 mt-md">
+                <p className="text-caption text-muted-foreground mt-3">
                   Telegram notifications require a Telegram Chat ID in your profile settings.
                 </p>
               </CardContent>

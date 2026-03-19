@@ -44,7 +44,7 @@ export default function Insights() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <h1 className="text-page-title">Insights</h1>
 
         <Tabs defaultValue="business">
@@ -53,10 +53,10 @@ export default function Insights() {
             <TabsTrigger value="personal">Personal</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="business" className="mt-md">
-            <div className="grid grid-cols-2 gap-lg">
+          <TabsContent value="business" className="mt-3">
+            <div className="grid grid-cols-2 gap-4">
               <Card>
-                <CardHeader><CardTitle className="text-body">Projects by Status</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-sm">Projects by Status</CardTitle></CardHeader>
                 <CardContent className="h-64">
                   {projectsByStatus.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
@@ -64,12 +64,12 @@ export default function Insights() {
                         {projectsByStatus.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                       </Pie><Tooltip /></PieChart>
                     </ResponsiveContainer>
-                  ) : <p className="text-text-2 text-center pt-20">No data yet.</p>}
+                  ) : <p className="text-muted-foreground text-center pt-20">No data yet.</p>}
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader><CardTitle className="text-body">Tasks by Status</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-sm">Tasks by Status</CardTitle></CardHeader>
                 <CardContent className="h-64">
                   {tasksByStatus.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
@@ -77,38 +77,38 @@ export default function Insights() {
                         {tasksByStatus.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                       </Pie><Tooltip /></PieChart>
                     </ResponsiveContainer>
-                  ) : <p className="text-text-2 text-center pt-20">No data yet.</p>}
+                  ) : <p className="text-muted-foreground text-center pt-20">No data yet.</p>}
                 </CardContent>
               </Card>
 
               <Card className="col-span-2">
-                <CardHeader><CardTitle className="text-body">Revenue by Month</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-sm">Revenue by Month</CardTitle></CardHeader>
                 <CardContent className="h-64">
                   {revenueData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={revenueData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="month" /><YAxis /><Tooltip /><Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} /></BarChart>
                     </ResponsiveContainer>
-                  ) : <p className="text-text-2 text-center pt-20">No revenue data yet.</p>}
+                  ) : <p className="text-muted-foreground text-center pt-20">No revenue data yet.</p>}
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="personal" className="mt-md">
-            <div className="space-y-lg">
+          <TabsContent value="personal" className="mt-3">
+            <div className="space-y-5">
               {/* Optimal window insight */}
               {optimalWindow && (
                 <Card className="border-primary/30 bg-primary/5">
                   <CardContent className="pt-4">
-                    <p className="text-body font-medium">💡 {optimalWindow}</p>
+                    <p className="text-sm font-medium">💡 {optimalWindow}</p>
                   </CardContent>
                 </Card>
               )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Energy over time */}
                 <Card>
-                  <CardHeader><CardTitle className="text-body">Energy & Focus (30 days)</CardTitle></CardHeader>
+                  <CardHeader><CardTitle className="text-sm">Energy & Focus (30 days)</CardTitle></CardHeader>
                   <CardContent className="h-64">
                     {energyOverTime.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
@@ -122,13 +122,13 @@ export default function Insights() {
                           <Line type="monotone" dataKey="focus" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
                         </LineChart>
                       </ResponsiveContainer>
-                    ) : <p className="text-text-2 text-center pt-20">Log your daily energy to see trends.</p>}
+                    ) : <p className="text-muted-foreground text-center pt-20">Log your daily energy to see trends.</p>}
                   </CardContent>
                 </Card>
 
                 {/* Focus by day of week */}
                 <Card>
-                  <CardHeader><CardTitle className="text-body">Focus by Day of Week</CardTitle></CardHeader>
+                  <CardHeader><CardTitle className="text-sm">Focus by Day of Week</CardTitle></CardHeader>
                   <CardContent className="h-64">
                     {focusByDay.some((d: any) => d.avgFocus !== null) ? (
                       <ResponsiveContainer width="100%" height="100%">
@@ -142,7 +142,7 @@ export default function Insights() {
                           <Bar dataKey="avgFocus" name="Avg Focus" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
-                    ) : <p className="text-text-2 text-center pt-20">Not enough data yet.</p>}
+                    ) : <p className="text-muted-foreground text-center pt-20">Not enough data yet.</p>}
                   </CardContent>
                 </Card>
               </div>
@@ -150,16 +150,16 @@ export default function Insights() {
               {/* Recovery stats */}
               {recovery && (recovery.avgEnergyDeliveryDays !== null || recovery.avgEnergyNonDeliveryDays !== null) && (
                 <Card>
-                  <CardHeader><CardTitle className="text-body">Recovery: Delivery vs Non-Delivery Days</CardTitle></CardHeader>
+                  <CardHeader><CardTitle className="text-sm">Recovery: Delivery vs Non-Delivery Days</CardTitle></CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-md">
-                      <div className="text-center p-md bg-background rounded border">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-center p-3 bg-background rounded border">
                         <p className="text-section-title">{recovery.avgEnergyDeliveryDays ?? '—'}</p>
-                        <p className="text-caption text-text-3">Avg energy on delivery days ({recovery.deliveryDaysCount} days)</p>
+                        <p className="text-caption text-muted-foreground">Avg energy on delivery days ({recovery.deliveryDaysCount} days)</p>
                       </div>
-                      <div className="text-center p-md bg-background rounded border">
+                      <div className="text-center p-3 bg-background rounded border">
                         <p className="text-section-title">{recovery.avgEnergyNonDeliveryDays ?? '—'}</p>
-                        <p className="text-caption text-text-3">Avg energy on rest days ({recovery.nonDeliveryDaysCount} days)</p>
+                        <p className="text-caption text-muted-foreground">Avg energy on rest days ({recovery.nonDeliveryDaysCount} days)</p>
                       </div>
                     </div>
                   </CardContent>

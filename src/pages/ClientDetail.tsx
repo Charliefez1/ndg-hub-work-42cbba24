@@ -77,13 +77,13 @@ export default function ClientDetail() {
   };
 
   if (isLoading) return <AppShell><Skeleton className="h-8 w-48" /></AppShell>;
-  if (!org) return <AppShell><p className="text-text-2">Client not found.</p></AppShell>;
+  if (!org) return <AppShell><p className="text-muted-foreground">Client not found.</p></AppShell>;
 
   return (
     <AppShell>
-      <div className="space-y-lg">
-        <div className="flex items-center gap-md">
-          <Link to="/clients" className="text-text-3 hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
+      <div className="space-y-5">
+        <div className="flex items-center gap-3">
+          <Link to="/clients" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
           <h1 className="text-page-title">{org.name}</h1>
           <Badge variant={org.status === 'active' ? 'default' : 'secondary'} className="capitalize">{org.status}</Badge>
         </div>
@@ -99,27 +99,27 @@ export default function ClientDetail() {
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="mt-md">
+          <TabsContent value="profile" className="mt-3">
             <Card>
-              <CardContent className="pt-6 grid grid-cols-2 gap-md text-body">
-                <div><span className="text-text-3 text-caption">Sector</span><p>{org.sector ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Email</span><p>{org.email ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Phone</span><p>{org.phone ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Website</span><p>{org.website ?? '—'}</p></div>
-                <div className="col-span-2"><span className="text-text-3 text-caption">Address</span><p>{org.address ?? '—'}</p></div>
-                <div className="col-span-2"><span className="text-text-3 text-caption">Notes</span><p className="whitespace-pre-wrap">{org.notes ?? '—'}</p></div>
+              <CardContent className="pt-6 grid grid-cols-2 gap-3 text-sm">
+                <div><span className="text-muted-foreground text-caption">Sector</span><p>{org.sector ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Email</span><p>{org.email ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Phone</span><p>{org.phone ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Website</span><p>{org.website ?? '—'}</p></div>
+                <div className="col-span-2"><span className="text-muted-foreground text-caption">Address</span><p>{org.address ?? '—'}</p></div>
+                <div className="col-span-2"><span className="text-muted-foreground text-caption">Notes</span><p className="whitespace-pre-wrap">{org.notes ?? '—'}</p></div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="contacts" className="mt-md space-y-md">
+          <TabsContent value="contacts" className="mt-3 space-y-3">
             <div className="flex justify-end">
               <Button size="sm" onClick={() => setContactDialogOpen(true)}><Plus className="h-4 w-4 mr-1" /> Add Contact</Button>
             </div>
             {!contacts?.length ? (
-              <p className="text-text-2 text-center py-lg">No contacts yet.</p>
+              <p className="text-muted-foreground text-center py-4">No contacts yet.</p>
             ) : (
-              <div className="rounded-lg border bg-surface overflow-hidden">
+              <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -154,7 +154,7 @@ export default function ClientDetail() {
                               {invitingContact === c.id ? 'Sending…' : 'Invite'}
                             </Button>
                           ) : (
-                            <span className="text-caption text-text-3">No email</span>
+                            <span className="text-caption text-muted-foreground">No email</span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -170,34 +170,34 @@ export default function ClientDetail() {
             )}
           </TabsContent>
 
-          <TabsContent value="projects" className="mt-md">
+          <TabsContent value="projects" className="mt-3">
             {!projects.length ? (
-              <p className="text-text-2 text-center py-lg">No projects for this client.</p>
+              <p className="text-muted-foreground text-center py-4">No projects for this client.</p>
             ) : (
-              <div className="space-y-xs">
+              <div className="space-y-1.5">
                 {projects.map((p) => (
-                  <Link key={p.id} to={`/projects/${p.id}`} className="block bg-surface rounded-md border p-md hover:border-primary transition-colors">
+                  <Link key={p.id} to={`/projects/${p.id}`} className="block bg-card rounded-lg border p-3 hover:border-primary transition-colors">
                     <div className="flex items-center justify-between">
                       <p className="font-medium">{p.name}</p>
                       <Badge className={getStatusBadgeClasses(p.status, 'project')}>{formatStatus(p.status)}</Badge>
                     </div>
-                    <p className="text-caption text-text-3 mt-1">{p.start_date ?? 'No dates'}</p>
+                    <p className="text-caption text-muted-foreground mt-1">{p.start_date ?? 'No dates'}</p>
                   </Link>
                 ))}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="contracts" className="mt-md">
+          <TabsContent value="contracts" className="mt-3">
             {!contracts.length ? (
-              <p className="text-text-2 text-center py-lg">No contracts for this client.</p>
+              <p className="text-muted-foreground text-center py-4">No contracts for this client.</p>
             ) : (
-              <div className="space-y-xs">
+              <div className="space-y-1.5">
                 {contracts.map((c: any) => (
-                  <div key={c.id} className="bg-surface rounded-md border p-md flex items-center justify-between">
+                  <div key={c.id} className="bg-card rounded-lg border p-3 flex items-center justify-between">
                     <div>
                       <p className="font-medium">{c.title}</p>
-                      <p className="text-caption text-text-3">
+                      <p className="text-caption text-muted-foreground">
                         {c.type} {c.value ? `· £${Number(c.value).toLocaleString()}` : ''} {c.start_date ? `· ${c.start_date}` : ''}
                       </p>
                     </div>
@@ -208,16 +208,16 @@ export default function ClientDetail() {
             )}
           </TabsContent>
 
-          <TabsContent value="invoices" className="mt-md">
+          <TabsContent value="invoices" className="mt-3">
             {!invoices.length ? (
-              <p className="text-text-2 text-center py-lg">No invoices for this client.</p>
+              <p className="text-muted-foreground text-center py-4">No invoices for this client.</p>
             ) : (
-              <div className="space-y-xs">
+              <div className="space-y-1.5">
                 {invoices.map((inv) => (
-                  <div key={inv.id} className="bg-surface rounded-md border p-md flex items-center justify-between">
+                  <div key={inv.id} className="bg-card rounded-lg border p-3 flex items-center justify-between">
                     <div>
                       <p className="font-medium font-mono">{inv.invoice_number}</p>
-                      <p className="text-caption text-text-3">{(inv as any).projects?.name} · £{Number(inv.total).toLocaleString()}</p>
+                      <p className="text-caption text-muted-foreground">{(inv as any).projects?.name} · £{Number(inv.total).toLocaleString()}</p>
                     </div>
                     <Badge className={getStatusBadgeClasses(inv.status, 'invoice')}>{inv.status}</Badge>
                   </div>
@@ -226,38 +226,38 @@ export default function ClientDetail() {
             )}
           </TabsContent>
 
-          <TabsContent value="emails" className="mt-md">
+          <TabsContent value="emails" className="mt-3">
             {!emails.length ? (
-              <p className="text-text-2 text-center py-lg">No email threads linked to this client.</p>
+              <p className="text-muted-foreground text-center py-4">No email threads linked to this client.</p>
             ) : (
-              <div className="space-y-xs">
+              <div className="space-y-1.5">
                 {emails.map((e: any) => (
-                  <div key={e.id} className="bg-surface rounded-md border p-md">
+                  <div key={e.id} className="bg-card rounded-lg border p-3">
                     <div className="flex items-center justify-between">
                       <p className="font-medium text-sm truncate">{e.subject ?? '(no subject)'}</p>
-                      <span className="text-caption text-text-3 shrink-0 ml-2">
+                      <span className="text-caption text-muted-foreground shrink-0 ml-2">
                         {e.received_at ? new Date(e.received_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}
                       </span>
                     </div>
-                    <p className="text-caption text-text-3 truncate">{e.from_address}</p>
-                    {e.snippet && <p className="text-xs text-text-3 mt-1 line-clamp-2">{e.snippet}</p>}
+                    <p className="text-caption text-muted-foreground truncate">{e.from_address}</p>
+                    {e.snippet && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{e.snippet}</p>}
                   </div>
                 ))}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="activity" className="mt-md">
+          <TabsContent value="activity" className="mt-3">
             {!activity?.length ? (
-              <p className="text-text-2 text-center py-lg">No activity recorded yet.</p>
+              <p className="text-muted-foreground text-center py-4">No activity recorded yet.</p>
             ) : (
-              <div className="space-y-xs">
+              <div className="space-y-1.5">
                 {activity.map((a) => (
-                  <div key={a.id} className="bg-surface rounded-md border p-sm flex items-center justify-between">
+                  <div key={a.id} className="bg-card rounded-lg border p-3 flex items-center justify-between">
                     <div>
-                      <p className="text-body"><span className="font-medium">{a.action}</span> on {a.entity_type}</p>
+                      <p className="text-sm"><span className="font-medium">{a.action}</span> on {a.entity_type}</p>
                     </div>
-                    <span className="text-caption text-text-3">
+                    <span className="text-caption text-muted-foreground">
                       {new Date(a.created_at!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -294,18 +294,18 @@ function AddContactDialog({ open, onOpenChange, organisationId, onCreate }: { op
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader><DialogTitle>Add Contact</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-md">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div><Label>Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
-          <div className="grid grid-cols-2 gap-md">
+          <div className="grid grid-cols-2 gap-3">
             <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
             <div><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
           </div>
           <div><Label>Job Title</Label><Input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} /></div>
-          <label className="flex items-center gap-2 text-body cursor-pointer">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
             <input type="checkbox" checked={isPrimary} onChange={(e) => setIsPrimary(e.target.checked)} />
             Primary contact
           </label>
-          <div className="flex justify-end gap-sm">
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit" disabled={onCreate.isPending}>Add</Button>
           </div>
