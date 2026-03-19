@@ -57,6 +57,7 @@ const App = () => {
               {/* Public */}
               <Route path="/login" element={<Login />} />
               <Route path="/form/:formId" element={<PublicForm />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               {/* Admin / Team */}
               <Route path="/" element={<Guard><Home /></Guard>} />
