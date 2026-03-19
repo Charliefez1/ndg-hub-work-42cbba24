@@ -17,6 +17,7 @@ import { ListView } from '@/components/tasks/ListView';
 import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
 import { TaskDetailSheet } from '@/components/tasks/TaskDetailSheet';
 import { FocusMode } from '@/components/tasks/FocusMode';
+import { WorkloadView } from '@/components/tasks/WorkloadView';
 
 const TASK_STATUSES = ['todo', 'in_progress', 'review', 'done', 'blocked'];
 
