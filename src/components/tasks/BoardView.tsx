@@ -2,7 +2,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getStatusBadgeClasses, formatStatus } from '@/lib/status-colors';
-import { Clock, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
+import { Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 const TASK_STATUSES = ['todo', 'in_progress', 'review', 'done', 'blocked'];
@@ -87,12 +87,10 @@ function TaskCard({ task, index, subtasks, onClick, onStartFocus }: {
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`bg-surface rounded-md border p-sm transition-shadow ${snapshot.isDragging ? 'shadow-lg ring-2 ring-primary/30' : 'hover:shadow-sm'} ${isOverdue ? 'border-destructive/30' : ''}`}
+          {...provided.dragHandleProps}
+          className={`bg-surface rounded-md border p-sm transition-shadow cursor-grab active:cursor-grabbing ${snapshot.isDragging ? 'shadow-lg ring-2 ring-primary/30' : 'hover:shadow-sm'} ${isOverdue ? 'border-destructive/30' : ''}`}
         >
           <div className="flex items-start gap-1">
-            <div {...provided.dragHandleProps} className="pt-0.5 text-text-3 hover:text-text-2 cursor-grab">
-              <GripVertical className="h-3.5 w-3.5" />
-            </div>
             <div className="flex-1 min-w-0 cursor-pointer" onClick={onClick}>
               <p className="text-body font-medium truncate">{task.title}</p>
               <div className="flex items-center gap-1.5 mt-1 flex-wrap">
