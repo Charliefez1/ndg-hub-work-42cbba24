@@ -2,7 +2,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getStatusBadgeClasses, formatStatus } from '@/lib/status-colors';
-import { Clock, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
+import { Clock, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 const TASK_STATUSES = ['todo', 'in_progress', 'review', 'done', 'blocked'];
