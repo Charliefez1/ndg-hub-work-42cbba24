@@ -8,7 +8,8 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
-export function AppShell({ children }: AppShellProps) {
+export const AppShell = React.forwardRef<HTMLDivElement, AppShellProps>(
+  function AppShell({ children }, ref) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
