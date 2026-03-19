@@ -150,6 +150,7 @@ function LoginForm() {
       >
         Forgot password?
       </button>
+    </form>
   );
 }
 
