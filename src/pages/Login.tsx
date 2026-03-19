@@ -142,7 +142,14 @@ function LoginForm() {
         {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
         Sign In
       </Button>
-    </form>
+      <button
+        type="button"
+        onClick={handleForgotPassword}
+        className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+        disabled={submitting}
+      >
+        Forgot password?
+      </button>
   );
 }
 
