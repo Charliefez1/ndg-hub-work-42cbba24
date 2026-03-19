@@ -10,12 +10,24 @@ import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
 import { Link } from 'react-router-dom';
-import { ClipboardList } from 'lucide-react';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { PageSkeleton } from '@/components/shared/PageSkeleton';
+import { FolderKanban, Briefcase, FileText, ClipboardList } from 'lucide-react';
+
+function TabSkeleton({ rows = 3 }: { rows?: number }) {
+  return (
+    <div className="space-y-2 animate-pulse">
+      {Array.from({ length: rows }).map((_, i) => (
+        <Skeleton key={i} className="h-16 w-full rounded-xl" />
+      ))}
+    </div>
+  );
+}
 
 export default function Portal() {
   const { profile, signOut, user } = useAuth();
 
-  const { data: access } = useQuery({
+  const { data: access, isLoading: accessLoading, error: accessError } = useQuery({
     queryKey: ['portal-access', user?.id],
     enabled: !!user,
     queryFn: async () => {
@@ -27,7 +39,7 @@ export default function Portal() {
 
   const orgIds = access?.map((a) => a.organisation_id) ?? [];
 
-  const { data: projects } = useQuery({
+  const { data: projects, isLoading: projectsLoading, error: projectsError } = useQuery({
     queryKey: ['portal-projects', orgIds],
     enabled: orgIds.length > 0,
     queryFn: async () => {
@@ -37,7 +49,7 @@ export default function Portal() {
     },
   });
 
-  const { data: deliveries } = useQuery({
+  const { data: deliveries, isLoading: deliveriesLoading, error: deliveriesError } = useQuery({
     queryKey: ['portal-deliveries', orgIds],
     enabled: orgIds.length > 0,
     queryFn: async () => {
@@ -47,7 +59,7 @@ export default function Portal() {
     },
   });
 
-  const { data: invoices } = useQuery({
+  const { data: invoices, isLoading: invoicesLoading, error: invoicesError } = useQuery({
     queryKey: ['portal-invoices', orgIds],
     enabled: orgIds.length > 0,
     queryFn: async () => {
@@ -77,6 +89,19 @@ export default function Portal() {
 
   const canSubmitForms = access?.some((a) => (a.permissions as any)?.can_submit_forms !== false);
 
+  if (accessLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="h-14 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-30">
+          <span className="font-satoshi text-lg font-bold">NDG Hub — Client Portal</span>
+        </header>
+        <main className="max-w-5xl mx-auto p-6">
+          <PageSkeleton variant="dashboard" />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="h-14 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-30">
@@ -87,10 +112,23 @@ export default function Portal() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto p-lg space-y-5">
-        <h1 className="text-page-title">Welcome{profile?.display_name ? `, ${profile.display_name}` : ''}</h1>
+      <main className="max-w-5xl mx-auto p-6 space-y-5">
+        <div className="space-y-1">
+          <h1 className="text-page-title">Welcome{profile?.display_name ? `, ${profile.display_name}` : ''}</h1>
+          {access && access.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {access.map((a) => (a as any).organisations?.name).filter(Boolean).join(', ')}
+            </p>
+          )}
+        </div>
 
-        {!access?.length ? (
+        {accessError ? (
+          <Card>
+            <CardContent className="pt-6 text-center text-destructive">
+              <p>Failed to load portal access. Please try refreshing the page.</p>
+            </CardContent>
+          </Card>
+        ) : !access?.length ? (
           <Card>
             <CardContent className="pt-6 text-center text-muted-foreground">
               <p>No portal access configured yet. Please contact your account manager.</p>
@@ -106,7 +144,13 @@ export default function Portal() {
             </TabsList>
 
             <TabsContent value="projects" className="mt-3">
-              {!projects?.length ? <p className="text-muted-foreground text-center py-4">No projects found.</p> : (
+              {projectsError ? (
+                <Card><CardContent className="pt-6 text-center text-destructive">Failed to load projects.</CardContent></Card>
+              ) : projectsLoading ? (
+                <TabSkeleton />
+              ) : !projects?.length ? (
+                <EmptyState icon={FolderKanban} title="No projects found" description="Your projects will appear here once they're set up." />
+              ) : (
                 <div className="space-y-1.5">
                   {projects.map((p) => (
                     <Card key={p.id}>
@@ -124,7 +168,13 @@ export default function Portal() {
             </TabsContent>
 
             <TabsContent value="workshops" className="mt-3">
-              {!deliveries?.length ? <p className="text-muted-foreground text-center py-4">No workshops found.</p> : (
+              {deliveriesError ? (
+                <Card><CardContent className="pt-6 text-center text-destructive">Failed to load workshops.</CardContent></Card>
+              ) : deliveriesLoading ? (
+                <TabSkeleton />
+              ) : !deliveries?.length ? (
+                <EmptyState icon={Briefcase} title="No workshops found" description="Your upcoming workshops will appear here." />
+              ) : (
                 <div className="space-y-1.5">
                   {deliveries.map((d) => (
                     <Card key={d.id}>
@@ -142,7 +192,13 @@ export default function Portal() {
             </TabsContent>
 
             <TabsContent value="invoices" className="mt-3">
-              {!invoices?.length ? <p className="text-muted-foreground text-center py-4">No invoices found.</p> : (
+              {invoicesError ? (
+                <Card><CardContent className="pt-6 text-center text-destructive">Failed to load invoices.</CardContent></Card>
+              ) : invoicesLoading ? (
+                <TabSkeleton rows={4} />
+              ) : !invoices?.length ? (
+                <EmptyState icon={FileText} title="No invoices found" description="Your invoices will appear here." />
+              ) : (
                 <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
                   <Table>
                     <TableHeader>
@@ -173,10 +229,7 @@ export default function Portal() {
             {canSubmitForms && (
               <TabsContent value="feedback" className="mt-3">
                 {!feedbackForms?.length ? (
-                  <div className="text-center py-4">
-                    <ClipboardList className="h-10 w-10 mx-auto text-muted-foreground mb-2" strokeWidth={1.25} />
-                    <p className="text-muted-foreground">No feedback forms available at the moment.</p>
-                  </div>
+                  <EmptyState icon={ClipboardList} title="No feedback forms available" description="Feedback forms will appear here after your workshops." />
                 ) : (
                   <div className="space-y-1.5">
                     {feedbackForms.map((form) => (
