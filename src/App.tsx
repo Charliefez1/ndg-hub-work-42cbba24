@@ -7,6 +7,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { initTheme } from '@/lib/theme';
 import { AuthProvider } from '@/hooks/useAuth';
 import { RouteGuard } from '@/components/auth/RouteGuard';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 
 // Pages
 import Home from './pages/Index';
@@ -60,31 +61,31 @@ const App = () => {
               <Route path="/reset-password" element={<ResetPassword />} />
 
               {/* Admin / Team */}
-              <Route path="/" element={<Guard><Home /></Guard>} />
-              <Route path="/services" element={<Guard><Services /></Guard>} />
-              <Route path="/clients" element={<Guard><Clients /></Guard>} />
-              <Route path="/clients/:id" element={<Guard><ClientDetail /></Guard>} />
-              <Route path="/projects" element={<Guard><Projects /></Guard>} />
-              <Route path="/projects/:id" element={<Guard><ProjectDetail /></Guard>} />
-              <Route path="/workshops" element={<Guard><Workshops /></Guard>} />
-              <Route path="/workshops/:id" element={<Guard><WorkshopDetail /></Guard>} />
-              <Route path="/tasks" element={<Guard><Tasks /></Guard>} />
-              <Route path="/forms" element={<Guard><Forms /></Guard>} />
-              <Route path="/forms/:id" element={<Guard><FormDetail /></Guard>} />
-              <Route path="/invoices" element={<Guard><Invoices /></Guard>} />
-              <Route path="/daily" element={<Guard><DailyBrief /></Guard>} />
-              <Route path="/insights" element={<Guard><Insights /></Guard>} />
-              <Route path="/ai" element={<Guard><AIAssistant /></Guard>} />
-              <Route path="/settings" element={<Guard><Settings /></Guard>} />
-              <Route path="/meetings" element={<Guard><Meetings /></Guard>} />
-              <Route path="/contracts" element={<Guard><Contracts /></Guard>} />
-              <Route path="/partners" element={<Guard><Partners /></Guard>} />
-              <Route path="/knowledge" element={<Guard><KnowledgeBase /></Guard>} />
-              <Route path="/emails" element={<Guard><Emails /></Guard>} />
-              <Route path="/curriculum" element={<Guard><CurriculumTemplates /></Guard>} />
+              <Route path="/" element={<Guard><ErrorBoundary><Home /></ErrorBoundary></Guard>} />
+              <Route path="/services" element={<Guard><ErrorBoundary><Services /></ErrorBoundary></Guard>} />
+              <Route path="/clients" element={<Guard><ErrorBoundary><Clients /></ErrorBoundary></Guard>} />
+              <Route path="/clients/:id" element={<Guard><ErrorBoundary><ClientDetail /></ErrorBoundary></Guard>} />
+              <Route path="/projects" element={<Guard><ErrorBoundary><Projects /></ErrorBoundary></Guard>} />
+              <Route path="/projects/:id" element={<Guard><ErrorBoundary><ProjectDetail /></ErrorBoundary></Guard>} />
+              <Route path="/workshops" element={<Guard><ErrorBoundary><Workshops /></ErrorBoundary></Guard>} />
+              <Route path="/workshops/:id" element={<Guard><ErrorBoundary><WorkshopDetail /></ErrorBoundary></Guard>} />
+              <Route path="/tasks" element={<Guard><ErrorBoundary><Tasks /></ErrorBoundary></Guard>} />
+              <Route path="/forms" element={<Guard><ErrorBoundary><Forms /></ErrorBoundary></Guard>} />
+              <Route path="/forms/:id" element={<Guard><ErrorBoundary><FormDetail /></ErrorBoundary></Guard>} />
+              <Route path="/invoices" element={<Guard><ErrorBoundary><Invoices /></ErrorBoundary></Guard>} />
+              <Route path="/daily" element={<Guard><ErrorBoundary><DailyBrief /></ErrorBoundary></Guard>} />
+              <Route path="/insights" element={<Guard><ErrorBoundary><Insights /></ErrorBoundary></Guard>} />
+              <Route path="/ai" element={<Guard><ErrorBoundary><AIAssistant /></ErrorBoundary></Guard>} />
+              <Route path="/settings" element={<Guard><ErrorBoundary><Settings /></ErrorBoundary></Guard>} />
+              <Route path="/meetings" element={<Guard><ErrorBoundary><Meetings /></ErrorBoundary></Guard>} />
+              <Route path="/contracts" element={<Guard><ErrorBoundary><Contracts /></ErrorBoundary></Guard>} />
+              <Route path="/partners" element={<Guard><ErrorBoundary><Partners /></ErrorBoundary></Guard>} />
+              <Route path="/knowledge" element={<Guard><ErrorBoundary><KnowledgeBase /></ErrorBoundary></Guard>} />
+              <Route path="/emails" element={<Guard><ErrorBoundary><Emails /></ErrorBoundary></Guard>} />
+              <Route path="/curriculum" element={<Guard><ErrorBoundary><CurriculumTemplates /></ErrorBoundary></Guard>} />
 
               {/* Client portal */}
-              <Route path="/portal" element={<RouteGuard allowedRoles={['client']}><Portal /></RouteGuard>} />
+              <Route path="/portal" element={<RouteGuard allowedRoles={['client']}><ErrorBoundary><Portal /></ErrorBoundary></RouteGuard>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -7,13 +7,13 @@ import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTasks } from '@/hooks/useTasks';
+import { useTasks, useUpdateTask } from '@/hooks/useTasks';
 import { useDeliveries } from '@/hooks/useDeliveries';
 import { useDailyBrief } from '@/hooks/useDailyBrief';
 import { useTodayState, useUpsertDailyState } from '@/hooks/useDailyStates';
 import { useAuth } from '@/hooks/useAuth';
 import { useAIDailyCoach } from '@/hooks/useAIDailyCoach';
-import { CalendarCheck, AlertTriangle, CheckCircle2, Clock, Battery, Brain, Smile, FileWarning, Sparkles, RefreshCw } from 'lucide-react';
+import { CalendarCheck, AlertTriangle, CheckCircle2, Clock, Battery, Brain, Smile, FileWarning, Sparkles, RefreshCw, Check, CalendarClock } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
@@ -27,6 +27,7 @@ export default function DailyBrief() {
   const { data: briefData } = useDailyBrief();
   const { data: todayState } = useTodayState(user?.id);
   const upsertState = useUpsertDailyState();
+  const updateTask = useUpdateTask();
   const { data: aiCoach, isLoading: coachLoading, refetch: refetchCoach } = useAIDailyCoach();
 
   const [energy, setEnergy] = useState<number>(todayState?.energy_level ?? 5);
@@ -65,6 +66,15 @@ export default function DailyBrief() {
         onError: (e) => toast.error(e.message),
       }
     );
+  };
+
+  const handleMarkDone = async (taskId: string) => {
+    try {
+      await updateTask.mutateAsync({ id: taskId, status: 'done' });
+      toast.success('Task marked as done');
+    } catch (err: any) {
+      toast.error(err?.message ?? 'Failed to update task');
+    }
   };
 
   const kpis = [
@@ -203,9 +213,21 @@ export default function DailyBrief() {
                   {todayTasks.length === 0 ? (
                     <p className="text-muted-foreground text-sm py-3 text-center">Nothing due today — nice!</p>
                   ) : todayTasks.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between bg-background rounded-xl border px-3 py-2.5">
+                    <div key={t.id} className="flex items-center justify-between bg-background rounded-xl border px-3 py-2.5 gap-2">
                       <span className="text-sm font-medium truncate">{t.title}</span>
-                      <Badge variant="outline" className="capitalize text-xs shrink-0">{t.priority}</Badge>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="capitalize text-xs">{t.priority}</Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-green-600"
+                          onClick={() => handleMarkDone(t.id)}
+                          disabled={updateTask.isPending}
+                          title="Mark done"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </CardContent>
@@ -267,9 +289,24 @@ export default function DailyBrief() {
                 </CardHeader>
                 <CardContent className="space-y-1.5">
                   {overdueTasks.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between bg-destructive/5 rounded-lg px-3 py-2.5">
+                    <div key={t.id} className="flex items-center justify-between bg-destructive/5 rounded-lg px-3 py-2.5 gap-2">
                       <span className="text-sm font-medium truncate">{t.title}</span>
-                      <span className="text-xs text-destructive font-medium shrink-0 ml-2">{t.due_date}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1 text-xs text-destructive font-medium" title="Overdue">
+                          <CalendarClock className="h-3.5 w-3.5" />
+                          <span>{t.due_date}</span>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs gap-1"
+                          onClick={() => handleMarkDone(t.id)}
+                          disabled={updateTask.isPending}
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                          Done
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </CardContent>

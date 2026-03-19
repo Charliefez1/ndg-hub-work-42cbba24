@@ -16,18 +16,18 @@ export function NotificationBell() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative">
+        <Button variant="ghost" size="icon" className="relative h-8 w-8">
           <Bell className="h-4 w-4" />
           {(unreadCount ?? 0) > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-medium flex items-center justify-center px-1">
-              {unreadCount}
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full bg-destructive text-[10px] font-bold text-white flex items-center justify-center px-1">
+              {(unreadCount ?? 0) > 9 ? '9+' : unreadCount}
             </span>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <p className="text-sm font-medium">Notifications</p>
+          <h4 className="text-sm font-semibold">Notifications</h4>
           {(unreadCount ?? 0) > 0 && (
             <Button variant="ghost" size="sm" className="text-caption" onClick={() => markAllRead.mutate()}>
               Mark all read
@@ -36,7 +36,10 @@ export function NotificationBell() {
         </div>
         <ScrollArea className="max-h-80">
           {!notifications?.length ? (
-            <p className="text-caption text-muted-foreground text-center py-8">No notifications yet.</p>
+            <div className="p-6 text-center">
+              <Bell className="h-8 w-8 mx-auto text-muted-foreground mb-2" strokeWidth={1.25} />
+              <p className="text-xs text-muted-foreground">No notifications yet</p>
+            </div>
           ) : (
             notifications.map((n) => (
               <button
