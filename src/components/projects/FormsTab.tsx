@@ -23,32 +23,32 @@ export function FormsTab({ projectId }: FormsTabProps) {
 
   if (!projectForms.length) {
     return (
-      <div className="text-center py-lg">
-        <ClipboardList className="h-10 w-10 mx-auto text-text-3 mb-sm" strokeWidth={1.25} />
-        <p className="text-text-2">No forms linked to this project yet.</p>
-        <p className="text-caption text-text-3 mt-1">Forms are created automatically when deliveries are scaffolded.</p>
+      <div className="text-center py-4">
+        <ClipboardList className="h-10 w-10 mx-auto text-muted-foreground mb-2" strokeWidth={1.25} />
+        <p className="text-muted-foreground">No forms linked to this project yet.</p>
+        <p className="text-caption text-muted-foreground mt-1">Forms are created automatically when deliveries are scaffolded.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-xs">
+    <div className="space-y-1.5">
       {projectForms.map((form) => {
         const score = form.delivery_id ? deliveryScores[form.delivery_id] : null;
         return (
           <Link
             key={form.id}
             to={`/forms/${form.id}`}
-            className="block bg-surface rounded-md border p-md hover:border-primary transition-colors"
+            className="block bg-card rounded-lg border p-3 hover:border-primary transition-colors"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-body">{form.title}</p>
-                <p className="text-caption text-text-3 mt-0.5">
+                <p className="font-medium text-sm">{form.title}</p>
+                <p className="text-caption text-muted-foreground mt-0.5">
                   {form.type} · Kirkpatrick L{form.kirkpatrick_level || '—'}
                 </p>
               </div>
-              <div className="flex items-center gap-sm">
+              <div className="flex items-center gap-2">
                 {score !== null && score !== undefined && (
                   <Badge variant="outline" className="text-success">
                     {score}/10

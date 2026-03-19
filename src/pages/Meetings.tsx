@@ -44,7 +44,7 @@ export default function Meetings() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Meetings</h1>
           <Dialog open={open} onOpenChange={setOpen}>
@@ -53,7 +53,7 @@ export default function Meetings() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>New Meeting</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-md">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div><Label>Title</Label><Input name="title" required className="mt-1" /></div>
                 <div><Label>Type</Label>
                   <Select name="meeting_type" defaultValue="discovery">
@@ -82,23 +82,23 @@ export default function Meetings() {
         </div>
 
         {isLoading ? (
-          <p className="text-text-2 text-center py-lg">Loading…</p>
+          <p className="text-muted-foreground text-center py-4">Loading…</p>
         ) : !meetings?.length ? (
-          <p className="text-text-2 text-center py-lg">No meetings scheduled.</p>
+          <p className="text-muted-foreground text-center py-4">No meetings scheduled.</p>
         ) : (
-          <div className="space-y-xs">
+          <div className="space-y-1.5">
             {meetings.map((m) => (
               <Card key={m.id}>
-                <CardContent className="py-md flex items-center justify-between">
+                <CardContent className="py-3 flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-body">{m.title}</p>
-                    <div className="flex items-center gap-md text-caption text-text-3 mt-1">
+                    <p className="font-medium text-sm">{m.title}</p>
+                    <div className="flex items-center gap-3 text-caption text-muted-foreground mt-1">
                       <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{format(new Date(m.scheduled_at), 'dd MMM yyyy, HH:mm')}</span>
                       <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{m.duration_minutes}min</span>
                       {m.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{m.location}</span>}
                     </div>
                     {(m as any).organisations?.name && (
-                      <p className="text-caption text-text-3 mt-0.5">{(m as any).organisations.name}</p>
+                      <p className="text-caption text-muted-foreground mt-0.5">{(m as any).organisations.name}</p>
                     )}
                   </div>
                   <Badge variant="secondary">{m.meeting_type}</Badge>

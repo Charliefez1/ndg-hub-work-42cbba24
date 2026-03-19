@@ -24,22 +24,22 @@ export default function Forms() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Forms</h1>
           <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4 mr-1" /> New Form</Button>
         </div>
 
         {isLoading ? (
-          <div className="space-y-sm">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+          <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
         ) : !forms?.length ? (
-          <div className="bg-surface rounded-lg border p-xl text-center space-y-md">
-            <ClipboardList className="h-12 w-12 mx-auto text-text-3" strokeWidth={1.25} />
-            <p className="text-body text-text-2">No forms yet.</p>
+          <div className="bg-card rounded-xl border p-6 text-center space-y-3">
+            <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground" strokeWidth={1.25} />
+            <p className="text-sm text-muted-foreground">No forms yet.</p>
             <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4 mr-1" /> New Form</Button>
           </div>
         ) : (
-          <div className="rounded-lg border bg-surface overflow-hidden">
+          <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -114,7 +114,7 @@ function CreateFormDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader><DialogTitle>New Form</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-md">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div><Label>Title *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
           <div><Label>Type</Label>
             <Select value={type} onValueChange={setType}>
@@ -128,7 +128,7 @@ function CreateFormDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
               <SelectContent>{projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div className="flex justify-end gap-sm">
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit" disabled={createForm.isPending}>Create</Button>
           </div>

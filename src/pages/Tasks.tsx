@@ -23,6 +23,31 @@ const TASK_STATUSES = ['todo', 'in_progress', 'review', 'done', 'blocked'];
 
 type ViewType = 'board' | 'list' | 'table' | 'timeline' | 'calendar' | 'workload';
 
+const PRIORITY_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
+  urgent: { bg: 'bg-destructive/10', text: 'text-destructive', dot: 'bg-destructive' },
+  high: { bg: 'bg-[hsl(var(--orange)/0.1)]', text: 'text-[hsl(var(--orange))]', dot: 'bg-[hsl(var(--orange))]' },
+  medium: { bg: 'bg-warning/10', text: 'text-warning', dot: 'bg-warning' },
+  low: { bg: 'bg-muted', text: 'text-muted-foreground', dot: 'bg-muted-foreground' },
+};
+
+const STATUS_COLUMN_COLORS: Record<string, { accent: string; dot: string }> = {
+  todo: { accent: 'border-t-muted-foreground', dot: 'bg-muted-foreground' },
+  in_progress: { accent: 'border-t-[hsl(var(--info))]', dot: 'bg-[hsl(var(--info))]' },
+  review: { accent: 'border-t-[hsl(var(--purple))]', dot: 'bg-[hsl(var(--purple))]' },
+  done: { accent: 'border-t-[hsl(var(--success))]', dot: 'bg-[hsl(var(--success))]' },
+  blocked: { accent: 'border-t-destructive', dot: 'bg-destructive' },
+};
+
+export function PriorityBadge({ priority }: { priority: string }) {
+  const colors = PRIORITY_COLORS[priority] ?? PRIORITY_COLORS.low;
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${colors.bg} ${colors.text}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${colors.dot}`} />
+      <span className="capitalize">{priority}</span>
+    </span>
+  );
+}
+
 export default function Tasks() {
   const { data: tasks, isLoading } = useTasks();
   const updateTask = useUpdateTask();
@@ -62,28 +87,28 @@ export default function Tasks() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5 animate-fade-in-up">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Tasks</h1>
-          <div className="flex items-center gap-sm">
+          <div className="flex items-center gap-2">
             <Tabs value={view} onValueChange={(v) => setView(v as ViewType)}>
               <TabsList className="h-8">
                 {(['board', 'list', 'table', 'timeline', 'calendar', 'workload'] as ViewType[]).map((v) => (
-                  <TabsTrigger key={v} value={v} className="text-xs px-2 capitalize">{v}</TabsTrigger>
+                  <TabsTrigger key={v} value={v} className="text-xs px-2.5 capitalize">{v}</TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
-            <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4 mr-1" /> New Task</Button>
+            <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5"><Plus className="h-4 w-4" /> New Task</Button>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="space-y-sm">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+          <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}</div>
         ) : !tasks?.length ? (
-          <div className="bg-surface rounded-lg border p-xl text-center space-y-md">
-            <CheckSquare className="h-12 w-12 mx-auto text-text-3" strokeWidth={1.25} />
-            <p className="text-body text-text-2">All clear! No tasks to show.</p>
-            <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4 mr-1" /> New Task</Button>
+          <div className="bg-card rounded-xl border p-12 text-center space-y-3 shadow-sm">
+            <CheckSquare className="h-12 w-12 mx-auto text-muted-foreground" strokeWidth={1.25} />
+            <p className="text-muted-foreground">All clear! No tasks to show.</p>
+            <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5"><Plus className="h-4 w-4" /> New Task</Button>
           </div>
         ) : view === 'board' ? (
           <BoardView tasks={tasks} onStatusChange={handleStatusChange} onTaskClick={handleTaskClick} onStartFocus={handleStartFocus} />
@@ -115,7 +140,7 @@ export default function Tasks() {
 function TableView({ tasks, onStatusChange, onDelete, onTaskClick }: { tasks: any[]; onStatusChange: (id: string, s: string) => void; onDelete: (id: string) => void; onTaskClick: (t: any) => void }) {
   const parentTasks = tasks.filter(t => !t.parent_task_id && !t.is_template);
   return (
-    <div className="rounded-lg border bg-surface overflow-hidden">
+    <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
       <Table>
         <TableHeader>
           <TableRow>
@@ -133,18 +158,18 @@ function TableView({ tasks, onStatusChange, onDelete, onTaskClick }: { tasks: an
             const subtaskCount = tasks.filter(s => s.parent_task_id === t.id).length;
             const doneCount = tasks.filter(s => s.parent_task_id === t.id && s.status === 'done').length;
             return (
-              <TableRow key={t.id} className="cursor-pointer" onClick={() => onTaskClick(t)}>
+              <TableRow key={t.id} className="cursor-pointer hover:bg-muted/30" onClick={() => onTaskClick(t)}>
                 <TableCell className="font-medium">{t.title}</TableCell>
-                <TableCell>{(t as any).projects?.name ?? '—'}</TableCell>
-                <TableCell><Badge variant="outline" className="capitalize">{t.priority}</Badge></TableCell>
+                <TableCell className="text-muted-foreground">{(t as any).projects?.name ?? '—'}</TableCell>
+                <TableCell><PriorityBadge priority={t.priority} /></TableCell>
                 <TableCell>
                   <Select value={t.status} onValueChange={(v) => { onStatusChange(t.id, v); }}>
                     <SelectTrigger className="h-7 w-28" onClick={e => e.stopPropagation()}><SelectValue /></SelectTrigger>
                     <SelectContent>{TASK_STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{formatStatus(s)}</SelectItem>)}</SelectContent>
                   </Select>
                 </TableCell>
-                <TableCell>{t.due_date ?? '—'}</TableCell>
-                <TableCell>{subtaskCount > 0 ? `${doneCount}/${subtaskCount}` : '—'}</TableCell>
+                <TableCell className="text-muted-foreground">{t.due_date ?? '—'}</TableCell>
+                <TableCell className="text-muted-foreground">{subtaskCount > 0 ? `${doneCount}/${subtaskCount}` : '—'}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => e.stopPropagation()}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
@@ -179,25 +204,28 @@ function TimelineView({ tasks, onTaskClick }: { tasks: any[]; onTaskClick: (t: a
   }
 
   return (
-    <div className="space-y-lg">
+    <div className="space-y-6">
       {Object.entries(weeks).map(([weekStart, items]) => (
         <div key={weekStart}>
-          <div className="flex items-center gap-sm mb-sm">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <h3 className="text-section-title">Week of {new Date(weekStart).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}</h3>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+            <h3 className="text-sm font-semibold">Week of {new Date(weekStart).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}</h3>
           </div>
-          <div className="ml-3 border-l-2 border-border pl-md space-y-xs">
+          <div className="ml-3 border-l-2 border-border pl-4 space-y-1.5">
             {items.map((t) => (
               <div
                 key={t.id}
-                className={`bg-surface rounded-md border p-sm cursor-pointer hover:shadow-sm ${t.due_date! < today && t.status !== 'done' ? 'border-destructive/30' : ''}`}
+                className={`bg-card rounded-xl border p-3 shadow-xs cursor-pointer hover:shadow-sm transition-shadow ${t.due_date! < today && t.status !== 'done' ? 'border-destructive/30' : ''}`}
                 onClick={() => onTaskClick(t)}
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-body font-medium">{t.title}</p>
+                  <p className="text-sm font-medium">{t.title}</p>
                   <Badge className={getStatusBadgeClasses(t.status, 'task')}>{formatStatus(t.status)}</Badge>
                 </div>
-                <p className="text-caption text-text-3">{t.due_date} · {t.priority}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-muted-foreground">{t.due_date}</span>
+                  <PriorityBadge priority={t.priority} />
+                </div>
               </div>
             ))}
           </div>
@@ -205,12 +233,12 @@ function TimelineView({ tasks, onTaskClick }: { tasks: any[]; onTaskClick: (t: a
       ))}
       {noDates.length > 0 && (
         <div>
-          <h3 className="text-section-title mb-sm">No Due Date</h3>
-          <div className="space-y-xs">
+          <h3 className="text-sm font-semibold mb-2">No Due Date</h3>
+          <div className="space-y-1.5">
             {noDates.map((t) => (
-              <div key={t.id} className="bg-surface rounded-md border p-sm cursor-pointer hover:shadow-sm" onClick={() => onTaskClick(t)}>
+              <div key={t.id} className="bg-card rounded-xl border p-3 shadow-xs cursor-pointer hover:shadow-sm transition-shadow" onClick={() => onTaskClick(t)}>
                 <div className="flex items-center justify-between">
-                  <p className="text-body font-medium">{t.title}</p>
+                  <p className="text-sm font-medium">{t.title}</p>
                   <Badge className={getStatusBadgeClasses(t.status, 'task')}>{formatStatus(t.status)}</Badge>
                 </div>
               </div>
@@ -228,7 +256,6 @@ function CalendarView({ tasks, onStatusChange }: { tasks: any[]; onStatusChange:
   const viewDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
-
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
 
@@ -245,15 +272,15 @@ function CalendarView({ tasks, onStatusChange }: { tasks: any[]; onStatusChange:
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
-    <div className="space-y-sm">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" onClick={() => setMonthOffset((o) => o - 1)}>Prev</Button>
-        <h3 className="text-section-title">{viewDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</h3>
+        <h3 className="text-sm font-semibold">{viewDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</h3>
         <Button variant="outline" size="sm" onClick={() => setMonthOffset((o) => o + 1)}>Next</Button>
       </div>
-      <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
+      <div className="grid grid-cols-7 gap-px bg-border rounded-xl overflow-hidden shadow-sm">
         {dayNames.map((d) => (
-          <div key={d} className="bg-surface-2 p-2 text-center text-overline">{d}</div>
+          <div key={d} className="bg-muted/50 p-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">{d}</div>
         ))}
         {Array.from({ length: firstDay }).map((_, i) => (
           <div key={`pad-${i}`} className="bg-background min-h-[80px] p-1" />
@@ -264,20 +291,20 @@ function CalendarView({ tasks, onStatusChange }: { tasks: any[]; onStatusChange:
           const dayTasks = tasksByDate[dateStr] || [];
           const isToday = dateStr === todayStr;
           return (
-            <div key={day} className={`bg-surface min-h-[80px] p-1 ${isToday ? 'ring-2 ring-primary ring-inset' : ''}`}>
-              <span className={`text-caption ${isToday ? 'text-primary font-bold' : 'text-text-3'}`}>{day}</span>
+            <div key={day} className={`bg-card min-h-[80px] p-1.5 ${isToday ? 'ring-2 ring-primary ring-inset' : ''}`}>
+              <span className={`text-xs font-medium ${isToday ? 'text-primary font-bold' : 'text-muted-foreground'}`}>{day}</span>
               <div className="space-y-px mt-0.5">
                 {dayTasks.slice(0, 3).map((t) => (
                   <div
                     key={t.id}
-                    className={`text-xs px-1 py-0.5 rounded truncate cursor-pointer ${t.status === 'done' ? 'bg-success/10 text-success line-through' : 'bg-primary/10 text-primary'}`}
+                    className={`text-xs px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors ${t.status === 'done' ? 'bg-success/10 text-success line-through' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
                     onClick={() => onStatusChange(t.id, t.status === 'done' ? 'todo' : 'done')}
                     title={t.title}
                   >
                     {t.title}
                   </div>
                 ))}
-                {dayTasks.length > 3 && <span className="text-xs text-text-3 px-1">+{dayTasks.length - 3} more</span>}
+                {dayTasks.length > 3 && <span className="text-xs text-muted-foreground px-1">+{dayTasks.length - 3}</span>}
               </div>
             </div>
           );

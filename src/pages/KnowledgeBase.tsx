@@ -36,7 +36,7 @@ export default function KnowledgeBase() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Knowledge Base</h1>
           <Dialog open={open} onOpenChange={setOpen}>
@@ -45,7 +45,7 @@ export default function KnowledgeBase() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>New Article</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-md">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div><Label>Title</Label><Input name="title" required className="mt-1" /></div>
                 <div><Label>Category</Label><Input name="category" className="mt-1" /></div>
                 <div><Label>Tags (comma-separated)</Label><Input name="tags" placeholder="e.g. neuro, facilitation" className="mt-1" /></div>
@@ -57,17 +57,17 @@ export default function KnowledgeBase() {
         </div>
 
         {isLoading ? (
-          <p className="text-text-2 text-center py-lg">Loading…</p>
+          <p className="text-muted-foreground text-center py-4">Loading…</p>
         ) : !articles?.length ? (
-          <p className="text-text-2 text-center py-lg">No articles yet.</p>
+          <p className="text-muted-foreground text-center py-4">No articles yet.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {articles.map((a) => (
               <Card key={a.id}>
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
-                    <CardTitle className="text-body flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-text-3" />
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-muted-foreground" />
                       {a.title}
                     </CardTitle>
                     {a.category && <Badge variant="secondary">{a.category}</Badge>}
@@ -75,14 +75,14 @@ export default function KnowledgeBase() {
                 </CardHeader>
                 <CardContent>
                   {a.content && (
-                    <p className="text-caption text-text-2 line-clamp-3">{a.content}</p>
+                    <p className="text-caption text-muted-foreground line-clamp-3">{a.content}</p>
                   )}
                   <div className="flex items-center gap-2 mt-2">
                     {a.tags?.map((tag) => (
                       <Badge key={tag} variant="outline" className="text-[10px]">{tag}</Badge>
                     ))}
                   </div>
-                  <p className="text-caption text-text-3 mt-2">
+                  <p className="text-caption text-muted-foreground mt-2">
                     {a.updated_at ? formatDistanceToNow(new Date(a.updated_at), { addSuffix: true }) : ''}
                   </p>
                 </CardContent>

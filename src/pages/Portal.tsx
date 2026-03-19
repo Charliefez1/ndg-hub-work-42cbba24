@@ -79,20 +79,20 @@ export default function Portal() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="h-14 border-b border-border bg-surface px-6 flex items-center justify-between sticky top-0 z-30">
+      <header className="h-14 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-30">
         <span className="font-satoshi text-lg font-bold">NDG Hub — Client Portal</span>
-        <div className="flex items-center gap-md">
-          <span className="text-body text-text-2">{profile?.display_name}</span>
-          <button onClick={signOut} className="text-sm text-text-3 hover:text-foreground transition-colors">Sign Out</button>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">{profile?.display_name}</span>
+          <button onClick={signOut} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Sign Out</button>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto p-lg space-y-lg">
+      <main className="max-w-5xl mx-auto p-lg space-y-5">
         <h1 className="text-page-title">Welcome{profile?.display_name ? `, ${profile.display_name}` : ''}</h1>
 
         {!access?.length ? (
           <Card>
-            <CardContent className="pt-6 text-center text-text-2">
+            <CardContent className="pt-6 text-center text-muted-foreground">
               <p>No portal access configured yet. Please contact your account manager.</p>
             </CardContent>
           </Card>
@@ -105,15 +105,15 @@ export default function Portal() {
               {canSubmitForms && <TabsTrigger value="feedback">Feedback</TabsTrigger>}
             </TabsList>
 
-            <TabsContent value="projects" className="mt-md">
-              {!projects?.length ? <p className="text-text-2 text-center py-lg">No projects found.</p> : (
-                <div className="space-y-xs">
+            <TabsContent value="projects" className="mt-3">
+              {!projects?.length ? <p className="text-muted-foreground text-center py-4">No projects found.</p> : (
+                <div className="space-y-1.5">
                   {projects.map((p) => (
                     <Card key={p.id}>
                       <CardContent className="pt-4 flex items-center justify-between">
                         <div>
                           <p className="font-medium">{p.name}</p>
-                          <p className="text-caption text-text-3">{p.start_date ?? 'No start date'} — {p.end_date ?? 'Ongoing'}</p>
+                          <p className="text-caption text-muted-foreground">{p.start_date ?? 'No start date'} — {p.end_date ?? 'Ongoing'}</p>
                         </div>
                         <Badge className={getStatusBadgeClasses(p.status, 'project')}>{p.status.replace('_', ' ')}</Badge>
                       </CardContent>
@@ -123,15 +123,15 @@ export default function Portal() {
               )}
             </TabsContent>
 
-            <TabsContent value="workshops" className="mt-md">
-              {!deliveries?.length ? <p className="text-text-2 text-center py-lg">No workshops found.</p> : (
-                <div className="space-y-xs">
+            <TabsContent value="workshops" className="mt-3">
+              {!deliveries?.length ? <p className="text-muted-foreground text-center py-4">No workshops found.</p> : (
+                <div className="space-y-1.5">
                   {deliveries.map((d) => (
                     <Card key={d.id}>
                       <CardContent className="pt-4 flex items-center justify-between">
                         <div>
                           <p className="font-medium">{d.title}</p>
-                          <p className="text-caption text-text-3">{d.delivery_date ?? 'Date TBD'} · {d.location ?? 'Location TBD'}</p>
+                          <p className="text-caption text-muted-foreground">{d.delivery_date ?? 'Date TBD'} · {d.location ?? 'Location TBD'}</p>
                         </div>
                         <Badge className={getStatusBadgeClasses(d.status, 'delivery')}>{d.status.replace('_', ' ')}</Badge>
                       </CardContent>
@@ -141,9 +141,9 @@ export default function Portal() {
               )}
             </TabsContent>
 
-            <TabsContent value="invoices" className="mt-md">
-              {!invoices?.length ? <p className="text-text-2 text-center py-lg">No invoices found.</p> : (
-                <div className="rounded-lg border bg-surface overflow-hidden">
+            <TabsContent value="invoices" className="mt-3">
+              {!invoices?.length ? <p className="text-muted-foreground text-center py-4">No invoices found.</p> : (
+                <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -171,23 +171,23 @@ export default function Portal() {
             </TabsContent>
 
             {canSubmitForms && (
-              <TabsContent value="feedback" className="mt-md">
+              <TabsContent value="feedback" className="mt-3">
                 {!feedbackForms?.length ? (
-                  <div className="text-center py-lg">
-                    <ClipboardList className="h-10 w-10 mx-auto text-text-3 mb-sm" strokeWidth={1.25} />
-                    <p className="text-text-2">No feedback forms available at the moment.</p>
+                  <div className="text-center py-4">
+                    <ClipboardList className="h-10 w-10 mx-auto text-muted-foreground mb-2" strokeWidth={1.25} />
+                    <p className="text-muted-foreground">No feedback forms available at the moment.</p>
                   </div>
                 ) : (
-                  <div className="space-y-xs">
+                  <div className="space-y-1.5">
                     {feedbackForms.map((form) => (
                       <Card key={form.id}>
                         <CardContent className="pt-4 flex items-center justify-between">
                           <div>
                             <p className="font-medium">{form.title}</p>
-                            <p className="text-caption text-text-3">
+                            <p className="text-caption text-muted-foreground">
                               {(form as any).deliveries?.title ?? 'Workshop'} · {(form as any).deliveries?.delivery_date ?? ''}
                             </p>
-                            {form.description && <p className="text-caption text-text-3 mt-1">{form.description}</p>}
+                            {form.description && <p className="text-caption text-muted-foreground mt-1">{form.description}</p>}
                           </div>
                           <Button size="sm" asChild>
                             <Link to={`/form/${form.id}`}>Submit Feedback</Link>

@@ -37,7 +37,7 @@ export default function Partners() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Partners</h1>
           <Dialog open={open} onOpenChange={setOpen}>
@@ -46,7 +46,7 @@ export default function Partners() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>New Partner</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-md">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div><Label>Name</Label><Input name="name" required className="mt-1" /></div>
                 <div><Label>Type</Label>
                   <Select name="type" defaultValue="referral">
@@ -65,20 +65,20 @@ export default function Partners() {
         </div>
 
         {isLoading ? (
-          <p className="text-text-2 text-center py-lg">Loading…</p>
+          <p className="text-muted-foreground text-center py-4">Loading…</p>
         ) : !partners?.length ? (
-          <p className="text-text-2 text-center py-lg">No partners yet.</p>
+          <p className="text-muted-foreground text-center py-4">No partners yet.</p>
         ) : (
-          <div className="space-y-xs">
+          <div className="space-y-1.5">
             {partners.map((p) => (
               <Card key={p.id}>
-                <CardContent className="py-md flex items-center justify-between">
+                <CardContent className="py-3 flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-text-3" />
-                      <p className="font-medium text-body">{p.name}</p>
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <p className="font-medium text-sm">{p.name}</p>
                     </div>
-                    <p className="text-caption text-text-3 mt-1">
+                    <p className="text-caption text-muted-foreground mt-1">
                       {p.contact_email ?? '—'}
                       {p.commission_rate ? ` · ${p.commission_rate}% commission` : ''}
                     </p>

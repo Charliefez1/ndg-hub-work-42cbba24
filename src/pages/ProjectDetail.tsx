@@ -28,7 +28,7 @@ export default function ProjectDetail() {
   const advanceStatus = useAdvanceProjectStatus();
 
   if (isLoading) return <AppShell><Skeleton className="h-8 w-64" /></AppShell>;
-  if (!project) return <AppShell><p className="text-text-2">Project not found.</p></AppShell>;
+  if (!project) return <AppShell><p className="text-muted-foreground">Project not found.</p></AppShell>;
 
   const currentIdx = STATUS_ORDER.indexOf(project.status);
   const nextStatus = currentIdx < STATUS_ORDER.length - 1 ? STATUS_ORDER[currentIdx + 1] : null;
@@ -45,9 +45,9 @@ export default function ProjectDetail() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
-        <div className="flex items-center gap-md">
-          <Link to="/projects" className="text-text-3 hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
+      <div className="space-y-5">
+        <div className="flex items-center gap-3">
+          <Link to="/projects" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
           <h1 className="text-page-title">{project.name}</h1>
           <Badge className={getStatusBadgeClasses(project.status, 'project')}>{project.status.replace(/_/g, ' ')}</Badge>
           {nextStatus && project.status !== 'closed' && (
@@ -69,44 +69,44 @@ export default function ProjectDetail() {
             <TabsTrigger value="updates">Updates</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="mt-md">
+          <TabsContent value="overview" className="mt-3">
             <Card>
-              <CardContent className="pt-6 grid grid-cols-2 gap-md text-body">
-                <div><span className="text-text-3 text-caption">Client</span><p>{(project as any).organisations?.name ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Budget</span><p>{project.budget ? `£${Number(project.budget).toLocaleString()}` : '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Start Date</span><p>{project.start_date ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">End Date</span><p>{project.end_date ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">External Ref</span><p>{project.external_ref ?? '—'}</p></div>
-                <div><span className="text-text-3 text-caption">Neuro Phase</span><p>{project.intended_neuro_phase ?? '—'}</p></div>
-                <div className="col-span-2"><span className="text-text-3 text-caption">Notes</span><p className="whitespace-pre-wrap">{project.notes ?? '—'}</p></div>
+              <CardContent className="pt-6 grid grid-cols-2 gap-3 text-sm">
+                <div><span className="text-muted-foreground text-caption">Client</span><p>{(project as any).organisations?.name ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Budget</span><p>{project.budget ? `£${Number(project.budget).toLocaleString()}` : '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Start Date</span><p>{project.start_date ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">End Date</span><p>{project.end_date ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">External Ref</span><p>{project.external_ref ?? '—'}</p></div>
+                <div><span className="text-muted-foreground text-caption">Neuro Phase</span><p>{project.intended_neuro_phase ?? '—'}</p></div>
+                <div className="col-span-2"><span className="text-muted-foreground text-caption">Notes</span><p className="whitespace-pre-wrap">{project.notes ?? '—'}</p></div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="workshops" className="mt-md">
-            {!deliveries?.length ? <p className="text-text-2 text-center py-lg">No workshops yet.</p> : (
-              <div className="space-y-xs">
+          <TabsContent value="workshops" className="mt-3">
+            {!deliveries?.length ? <p className="text-muted-foreground text-center py-4">No workshops yet.</p> : (
+              <div className="space-y-1.5">
                 {deliveries.map((d) => (
-                  <Link key={d.id} to={`/workshops/${d.id}`} className="block bg-surface rounded-md border p-md hover:border-primary transition-colors">
+                  <Link key={d.id} to={`/workshops/${d.id}`} className="block bg-card rounded-lg border p-3 hover:border-primary transition-colors">
                     <div className="flex items-center justify-between">
                       <p className="font-medium">{d.title}</p>
                       <Badge className={getStatusBadgeClasses(d.status, 'delivery')}>{d.status}</Badge>
                     </div>
-                    <p className="text-caption text-text-3 mt-1">{d.delivery_date ?? 'No date'} · {(d as any).services?.name ?? 'No service'}</p>
+                    <p className="text-caption text-muted-foreground mt-1">{d.delivery_date ?? 'No date'} · {(d as any).services?.name ?? 'No service'}</p>
                   </Link>
                 ))}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="tasks" className="mt-md">
-            {!tasks?.length ? <p className="text-text-2 text-center py-lg">No tasks yet.</p> : (
-              <div className="space-y-xs">
+          <TabsContent value="tasks" className="mt-3">
+            {!tasks?.length ? <p className="text-muted-foreground text-center py-4">No tasks yet.</p> : (
+              <div className="space-y-1.5">
                 {tasks.map((t) => (
-                  <div key={t.id} className="bg-surface rounded-md border p-md flex items-center justify-between">
+                  <div key={t.id} className="bg-card rounded-lg border p-3 flex items-center justify-between">
                     <div>
                       <p className="font-medium">{t.title}</p>
-                      <p className="text-caption text-text-3">{t.due_date ?? 'No due date'}</p>
+                      <p className="text-caption text-muted-foreground">{t.due_date ?? 'No due date'}</p>
                     </div>
                     <Badge className={getStatusBadgeClasses(t.status, 'task')}>{t.status}</Badge>
                   </div>
@@ -115,23 +115,23 @@ export default function ProjectDetail() {
             )}
           </TabsContent>
 
-          <TabsContent value="billing" className="mt-md">
+          <TabsContent value="billing" className="mt-3">
             <BillingTab projectId={id!} budget={project.budget ? Number(project.budget) : null} />
           </TabsContent>
 
-          <TabsContent value="forms" className="mt-md">
+          <TabsContent value="forms" className="mt-3">
             <FormsTab projectId={id!} />
           </TabsContent>
 
-          <TabsContent value="notes" className="mt-md">
+          <TabsContent value="notes" className="mt-3">
             <NotesTab projectId={id!} />
           </TabsContent>
 
-          <TabsContent value="documents" className="mt-md">
+          <TabsContent value="documents" className="mt-3">
             <DocumentsTab projectId={id!} />
           </TabsContent>
 
-          <TabsContent value="updates" className="mt-md">
+          <TabsContent value="updates" className="mt-3">
             <UpdatesTab projectId={id!} projectName={project.name} projectStatus={project.status} />
           </TabsContent>
         </Tabs>

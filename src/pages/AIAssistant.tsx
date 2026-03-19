@@ -59,9 +59,9 @@ export default function AIAssistant() {
   return (
     <AppShell>
       <div className="flex flex-col h-[calc(100vh-theme(spacing.12)-theme(spacing.lg)*2)]">
-        <div className="flex items-center justify-between mb-md">
+        <div className="flex items-center justify-between mb-3">
           <h1 className="text-page-title">AI Assistant</h1>
-          <div className="flex items-center gap-sm">
+          <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-xs">{getRemainingCalls()} / 20 calls remaining</Badge>
           <Select value={agent} onValueChange={(v) => setAgent(v as Agent)}>
             <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
@@ -76,18 +76,18 @@ export default function AIAssistant() {
           </div>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-md pr-2">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-3 pr-2">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
-              <div className="text-center space-y-md max-w-md">
-                <Bot className="h-16 w-16 mx-auto text-text-3" strokeWidth={1.25} />
+              <div className="text-center space-y-3 max-w-md">
+                <Bot className="h-16 w-16 mx-auto text-muted-foreground" strokeWidth={1.25} />
                 <h2 className="text-section-title">How can I help?</h2>
-                <p className="text-body text-text-2">
+                <p className="text-sm text-muted-foreground">
                   {AGENTS.find((a) => a.value === agent)?.description}
                 </p>
                 <div className="flex flex-wrap gap-xs justify-center">
                   {['Summarise my active projects', 'Draft a workshop agenda', 'Analyse recent feedback scores'].map((q) => (
-                    <button key={q} onClick={() => { setInput(q); }} className="text-caption bg-surface border rounded-full px-3 py-1.5 hover:border-primary transition-colors">
+                    <button key={q} onClick={() => { setInput(q); }} className="text-caption bg-card border rounded-full px-3 py-1.5 hover:border-primary transition-colors">
                       {q}
                     </button>
                   ))}
@@ -96,32 +96,32 @@ export default function AIAssistant() {
             </div>
           ) : (
             messages.map((msg, i) => (
-              <div key={i} className={`flex gap-sm ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.role === 'assistant' && <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1"><Bot className="h-4 w-4 text-primary" /></div>}
-                <Card className={`max-w-[75%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-surface'}`}>
-                  <CardContent className="p-sm">
+                <Card className={`max-w-[75%] ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card'}`}>
+                  <CardContent className="p-3">
                     {msg.role === 'assistant' ? (
                       <div className="prose prose-sm dark:prose-invert max-w-none">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                       </div>
                     ) : (
-                      <p className="text-body">{msg.content}</p>
+                      <p className="text-sm">{msg.content}</p>
                     )}
                   </CardContent>
                 </Card>
-                {msg.role === 'user' && <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center shrink-0 mt-1"><User className="h-4 w-4 text-text-2" /></div>}
+                {msg.role === 'user' && <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center shrink-0 mt-1"><User className="h-4 w-4 text-muted-foreground" /></div>}
               </div>
             ))
           )}
           {loading && (
-            <div className="flex gap-sm">
+            <div className="flex gap-2">
               <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><Bot className="h-4 w-4 text-primary" /></div>
-              <Card className="bg-surface"><CardContent className="p-sm"><Loader2 className="h-4 w-4 animate-spin text-text-3" /></CardContent></Card>
+              <Card className="bg-card"><CardContent className="p-3"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></CardContent></Card>
             </div>
           )}
         </div>
 
-        <div className="mt-md flex gap-sm">
+        <div className="mt-3 flex gap-2">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}

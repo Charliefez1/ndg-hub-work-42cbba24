@@ -40,7 +40,7 @@ export default function Services() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Services</h1>
           <Button onClick={openCreate} size="sm">
@@ -49,13 +49,13 @@ export default function Services() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-sm">
+          <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
           </div>
         ) : !services?.length ? (
           <EmptyState onCreate={openCreate} />
         ) : (
-          <div className="rounded-lg border bg-surface overflow-hidden">
+          <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -120,11 +120,11 @@ export default function Services() {
 
 function EmptyState({ onCreate }: { onCreate: () => void }) {
   return (
-    <div className="bg-surface rounded-lg border p-xl text-center space-y-md">
-      <Package className="h-12 w-12 mx-auto text-text-3" strokeWidth={1.25} />
+    <div className="bg-card rounded-xl border p-6 text-center space-y-3">
+      <Package className="h-12 w-12 mx-auto text-muted-foreground" strokeWidth={1.25} />
       <div>
-        <p className="text-body font-medium text-foreground">No services yet</p>
-        <p className="text-caption text-text-2 mt-1">Create your first service to get started.</p>
+        <p className="text-sm font-medium text-foreground">No services yet</p>
+        <p className="text-caption text-muted-foreground mt-1">Create your first service to get started.</p>
       </div>
       <Button onClick={onCreate} size="sm">
         <Plus className="h-4 w-4 mr-1" /> New Service

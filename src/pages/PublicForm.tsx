@@ -19,7 +19,7 @@ export default function PublicForm() {
   const [answers, setAnswers] = useState<Record<string, any>>({});
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-background"><Skeleton className="h-96 w-full max-w-lg" /></div>;
-  if (!form || !form.active) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-text-2">Form not found or inactive.</p></div>;
+  if (!form || !form.active) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Form not found or inactive.</p></div>;
 
   const fields = (form.fields as any[]) ?? [];
 
@@ -33,12 +33,12 @@ export default function PublicForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-md">
+      <div className="min-h-screen flex items-center justify-center bg-background p-3">
         <Card className="w-full max-w-lg text-center">
-          <CardContent className="pt-8 space-y-md">
+          <CardContent className="pt-8 space-y-3">
             <CheckCircle2 className="h-16 w-16 mx-auto text-green-500" />
             <h2 className="text-section-title">Thank you!</h2>
-            <p className="text-body text-text-2">Your response has been submitted.</p>
+            <p className="text-sm text-muted-foreground">Your response has been submitted.</p>
           </CardContent>
         </Card>
       </div>
@@ -46,24 +46,24 @@ export default function PublicForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-md flex justify-center">
+    <div className="min-h-screen bg-background p-3 flex justify-center">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>{form.title}</CardTitle>
           {form.description && <CardDescription>{form.description}</CardDescription>}
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-lg">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {fields.map((field: any) => (
-              <div key={field.id} className="space-y-xs">
+              <div key={field.id} className="space-y-1.5">
                 <Label>{field.label}{field.required && ' *'}</Label>
                 {field.type === 'textarea' ? (
                   <Textarea value={answers[field.id] ?? ''} onChange={(e) => setAnswers((p) => ({ ...p, [field.id]: e.target.value }))} required={field.required} />
                 ) : field.type === 'rating' ? (
-                  <div className="flex gap-sm">
+                  <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((n) => (
                       <button key={n} type="button" onClick={() => setAnswers((p) => ({ ...p, [field.id]: n }))}
-                        className={`h-10 w-10 rounded-md border text-body font-medium transition-colors ${answers[field.id] === n ? 'bg-primary text-primary-foreground' : 'bg-surface hover:bg-accent'}`}>
+                        className={`h-10 w-10 rounded-lg border text-sm font-medium transition-colors ${answers[field.id] === n ? 'bg-primary text-primary-foreground' : 'bg-card hover:bg-accent'}`}>
                         {n}
                       </button>
                     ))}

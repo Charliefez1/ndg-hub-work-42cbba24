@@ -76,7 +76,7 @@ export function NotesTab({ projectId }: NotesTabProps) {
   });
 
   return (
-    <div className="space-y-md">
+    <div className="space-y-3">
       {!adding && (
         <Button size="sm" onClick={() => setAdding(true)}>
           <Plus className="h-4 w-4 mr-1" /> Add Note
@@ -84,10 +84,10 @@ export function NotesTab({ projectId }: NotesTabProps) {
       )}
 
       {adding && (
-        <div className="bg-surface rounded-md border p-md space-y-sm">
+        <div className="bg-card rounded-lg border p-3 space-y-2">
           <Input placeholder="Title (optional)" value={title} onChange={(e) => setTitle(e.target.value)} />
           <Textarea placeholder="Write your note..." value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
-          <div className="flex gap-sm">
+          <div className="flex gap-2">
             <Button size="sm" onClick={() => createNote.mutate()} disabled={!body.trim()}>Save</Button>
             <Button size="sm" variant="outline" onClick={() => { setAdding(false); setTitle(''); setBody(''); }}>Cancel</Button>
           </div>
@@ -95,9 +95,9 @@ export function NotesTab({ projectId }: NotesTabProps) {
       )}
 
       {!notes?.length && !adding ? (
-        <p className="text-text-2 text-center py-lg">No notes yet. Add a note to keep track of important details.</p>
+        <p className="text-muted-foreground text-center py-4">No notes yet. Add a note to keep track of important details.</p>
       ) : (
-        <div className="space-y-xs">
+        <div className="space-y-1.5">
           {notes?.map((note) => (
             <NoteCard
               key={note.id}
@@ -135,10 +135,10 @@ function NoteCard({
 
   if (isEditing) {
     return (
-      <div className="bg-surface rounded-md border p-md space-y-sm">
+      <div className="bg-card rounded-lg border p-3 space-y-2">
         <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" />
         <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} />
-        <div className="flex gap-sm">
+        <div className="flex gap-2">
           <Button size="sm" onClick={() => onSave(title, body)}><Check className="h-3.5 w-3.5 mr-1" /> Save</Button>
           <Button size="sm" variant="outline" onClick={onCancelEdit}><X className="h-3.5 w-3.5 mr-1" /> Cancel</Button>
         </div>
@@ -147,12 +147,12 @@ function NoteCard({
   }
 
   return (
-    <div className="bg-surface rounded-md border p-md group">
+    <div className="bg-card rounded-lg border p-3 group">
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          {note.title && <p className="font-medium text-body">{note.title}</p>}
-          <p className="text-body whitespace-pre-wrap mt-0.5">{note.body}</p>
-          <p className="text-caption text-text-3 mt-1">
+          {note.title && <p className="font-medium text-sm">{note.title}</p>}
+          <p className="text-sm whitespace-pre-wrap mt-0.5">{note.body}</p>
+          <p className="text-caption text-muted-foreground mt-1">
             {new Date(note.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>

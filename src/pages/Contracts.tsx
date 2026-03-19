@@ -44,7 +44,7 @@ export default function Contracts() {
 
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Contracts</h1>
           <Dialog open={open} onOpenChange={setOpen}>
@@ -53,7 +53,7 @@ export default function Contracts() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>New Contract</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-md">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div><Label>Title</Label><Input name="title" required className="mt-1" /></div>
                 <div><Label>Type</Label>
                   <Select name="type" defaultValue="project">
@@ -80,7 +80,7 @@ export default function Contracts() {
                   </Select>
                 </div>
                 <div><Label>Value (£)</Label><Input name="value" type="number" className="mt-1" /></div>
-                <div className="grid grid-cols-2 gap-sm">
+                <div className="grid grid-cols-2 gap-2">
                   <div><Label>Start Date</Label><Input name="start_date" type="date" className="mt-1" /></div>
                   <div><Label>End Date</Label><Input name="end_date" type="date" className="mt-1" /></div>
                 </div>
@@ -91,20 +91,20 @@ export default function Contracts() {
         </div>
 
         {isLoading ? (
-          <p className="text-text-2 text-center py-lg">Loading…</p>
+          <p className="text-muted-foreground text-center py-4">Loading…</p>
         ) : !contracts?.length ? (
-          <p className="text-text-2 text-center py-lg">No contracts yet.</p>
+          <p className="text-muted-foreground text-center py-4">No contracts yet.</p>
         ) : (
-          <div className="space-y-xs">
+          <div className="space-y-1.5">
             {contracts.map((c) => (
               <Card key={c.id}>
-                <CardContent className="py-md flex items-center justify-between">
+                <CardContent className="py-3 flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-text-3" />
-                      <p className="font-medium text-body">{c.title}</p>
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <p className="font-medium text-sm">{c.title}</p>
                     </div>
-                    <p className="text-caption text-text-3 mt-1">
+                    <p className="text-caption text-muted-foreground mt-1">
                       {(c as any).organisations?.name} · {c.type}
                       {c.value ? ` · £${Number(c.value).toLocaleString()}` : ''}
                       {c.start_date ? ` · ${c.start_date}` : ''}

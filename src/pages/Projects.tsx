@@ -32,32 +32,42 @@ export default function Projects() {
     items: projects?.filter((p) => p.status === s) ?? [],
   }));
 
+  const PROJECT_COLUMN_COLORS: Record<string, { accent: string; dot: string }> = {
+    contracting: { accent: 'border-t-warning', dot: 'bg-warning' },
+    project_planning: { accent: 'border-t-[hsl(var(--info))]', dot: 'bg-[hsl(var(--info))]' },
+    session_planning: { accent: 'border-t-[hsl(var(--cyan))]', dot: 'bg-[hsl(var(--cyan))]' },
+    content_review: { accent: 'border-t-[hsl(var(--purple))]', dot: 'bg-[hsl(var(--purple))]' },
+    delivery: { accent: 'border-t-success', dot: 'bg-success' },
+    feedback_analytics: { accent: 'border-t-[hsl(var(--pink))]', dot: 'bg-[hsl(var(--pink))]' },
+    closed: { accent: 'border-t-muted-foreground', dot: 'bg-muted-foreground' },
+  };
+
   return (
     <AppShell>
-      <div className="space-y-lg">
+      <div className="space-y-5 animate-fade-in-up">
         <div className="flex items-center justify-between">
           <h1 className="text-page-title">Projects</h1>
-          <div className="flex items-center gap-sm">
+          <div className="flex items-center gap-2">
             <Tabs value={view} onValueChange={(v) => setView(v as any)}>
               <TabsList className="h-8">
-                <TabsTrigger value="table" className="text-xs px-2">Table</TabsTrigger>
-                <TabsTrigger value="board" className="text-xs px-2">Board</TabsTrigger>
+                <TabsTrigger value="table" className="text-xs px-2.5">Table</TabsTrigger>
+                <TabsTrigger value="board" className="text-xs px-2.5">Board</TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4 mr-1" /> New Project</Button>
+            <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5"><Plus className="h-4 w-4" /> New Project</Button>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="space-y-sm">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+          <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}</div>
         ) : !projects?.length ? (
-          <div className="bg-surface rounded-lg border p-xl text-center space-y-md">
-            <FolderKanban className="h-12 w-12 mx-auto text-text-3" strokeWidth={1.25} />
-            <p className="text-body text-text-2">No projects yet.</p>
-            <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4 mr-1" /> New Project</Button>
+          <div className="bg-card rounded-xl border p-12 text-center space-y-3 shadow-sm">
+            <FolderKanban className="h-12 w-12 mx-auto text-muted-foreground" strokeWidth={1.25} />
+            <p className="text-muted-foreground">No projects yet.</p>
+            <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5"><Plus className="h-4 w-4" /> New Project</Button>
           </div>
         ) : view === 'table' ? (
-          <div className="rounded-lg border bg-surface overflow-hidden">
+          <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -71,36 +81,42 @@ export default function Projects() {
               </TableHeader>
               <TableBody>
                 {projects.map((p) => (
-                  <TableRow key={p.id}>
+                  <TableRow key={p.id} className="hover:bg-muted/30">
                     <TableCell><Link to={`/projects/${p.id}`} className="font-medium text-primary hover:underline">{p.name}</Link></TableCell>
-                    <TableCell>{(p as any).organisations?.name ?? '—'}</TableCell>
-                    <TableCell><Badge className={getStatusBadgeClasses(p.status, 'project')}>{p.status.replace(/_/g, ' ')}</Badge></TableCell>
+                    <TableCell className="text-muted-foreground">{(p as any).organisations?.name ?? '—'}</TableCell>
+                    <TableCell><Badge className={`${getStatusBadgeClasses(p.status, 'project')} text-xs`}>{p.status.replace(/_/g, ' ')}</Badge></TableCell>
                     <TableCell>{p.budget ? `£${Number(p.budget).toLocaleString()}` : '—'}</TableCell>
-                    <TableCell>{p.start_date ?? '—'}</TableCell>
-                    <TableCell>{p.end_date ?? '—'}</TableCell>
+                    <TableCell className="text-muted-foreground">{p.start_date ?? '—'}</TableCell>
+                    <TableCell className="text-muted-foreground">{p.end_date ?? '—'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
         ) : (
-          <div className="flex gap-md overflow-x-auto pb-md">
-            {boardGroups.map((g) => (
-              <div key={g.status} className="min-w-[240px] w-[240px] shrink-0">
-                <div className="flex items-center gap-2 mb-sm">
-                  <Badge variant="outline" className="capitalize text-xs">{g.status.replace(/_/g, ' ')}</Badge>
-                  <span className="text-caption text-text-3">{g.items.length}</span>
+          <div className="flex gap-3 overflow-x-auto pb-4">
+            {boardGroups.map((g) => {
+              const colColors = PROJECT_COLUMN_COLORS[g.status] ?? { accent: 'border-t-muted-foreground', dot: 'bg-muted-foreground' };
+              return (
+                <div key={g.status} className="min-w-[260px] w-[260px] shrink-0">
+                  <div className={`bg-card rounded-xl border border-t-[3px] ${colColors.accent} shadow-sm`}>
+                    <div className="flex items-center gap-2 px-3 py-2.5">
+                      <span className={`h-2.5 w-2.5 rounded-full ${colColors.dot}`} />
+                      <span className="text-xs font-semibold uppercase tracking-wide capitalize">{g.status.replace(/_/g, ' ')}</span>
+                      <span className="ml-auto text-xs text-muted-foreground font-medium bg-muted rounded-full px-2 py-0.5">{g.items.length}</span>
+                    </div>
+                    <div className="px-2 pb-2 space-y-1.5">
+                      {g.items.map((p) => (
+                        <Link key={p.id} to={`/projects/${p.id}`} className="block bg-background rounded-xl border p-3 hover:shadow-md transition-all duration-200 cursor-pointer">
+                          <p className="text-sm font-medium truncate">{p.name}</p>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{(p as any).organisations?.name}</p>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-xs">
-                  {g.items.map((p) => (
-                    <Link key={p.id} to={`/projects/${p.id}`} className="block bg-surface rounded-md border p-sm hover:border-primary transition-colors">
-                      <p className="text-body font-medium truncate">{p.name}</p>
-                      <p className="text-caption text-text-3 truncate">{(p as any).organisations?.name}</p>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -234,7 +250,7 @@ function CreateProjectDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 
         {/* Manual Mode */}
         {mode === 'manual' && !extracted && (
-          <form onSubmit={handleManualSubmit} className="space-y-md">
+          <form onSubmit={handleManualSubmit} className="space-y-3">
             <div><Label>Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
             <div><Label>Client *</Label>
               <Select value={orgId} onValueChange={setOrgId}>
@@ -243,7 +259,7 @@ function CreateProjectDialog({ open, onOpenChange }: { open: boolean; onOpenChan
               </Select>
             </div>
             <div><Label>Budget (£)</Label><Input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} /></div>
-            <div className="flex justify-end gap-sm">
+            <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button type="submit" disabled={createProject.isPending || !orgId}>Create</Button>
             </div>
@@ -252,7 +268,7 @@ function CreateProjectDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 
         {/* Plan Mode - Input */}
         {mode === 'plan' && !extracted && (
-          <div className="space-y-md">
+          <div className="space-y-3">
             <div>
               <Label>Paste your proposal, email, or plan</Label>
               <Textarea
@@ -262,7 +278,7 @@ function CreateProjectDialog({ open, onOpenChange }: { open: boolean; onOpenChan
                 placeholder="Paste the proposal text here and AI will extract project structure…"
               />
             </div>
-            <div className="flex justify-end gap-sm">
+            <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button onClick={handleExtract} disabled={aiExtract.isPending || !planText.trim()}>
                 {aiExtract.isPending ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Extracting…</> : <><Sparkles className="h-4 w-4 mr-1" /> Extract Plan</>}
@@ -273,7 +289,7 @@ function CreateProjectDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 
         {/* Preview extracted plan */}
         {extracted && (
-          <div className="space-y-md">
+          <div className="space-y-3">
             <Button variant="ghost" size="sm" onClick={() => setExtracted(null)} className="gap-1">
               <ArrowLeft className="h-3.5 w-3.5" /> Back
             </Button>
@@ -281,22 +297,22 @@ function CreateProjectDialog({ open, onOpenChange }: { open: boolean; onOpenChan
             <Card>
               <CardHeader className="pb-2"><CardTitle className="text-base">{extracted.projectName}</CardTitle></CardHeader>
               <CardContent className="text-sm space-y-1">
-                {extracted.organisationName && <p className="text-text-2">Client: {extracted.organisationName}</p>}
-                {extracted.budget && <p className="text-text-2">Budget: £{extracted.budget.toLocaleString()}</p>}
-                {extracted.startDate && <p className="text-text-2">Dates: {extracted.startDate} → {extracted.endDate}</p>}
-                {extracted.intendedNeuroPhase && <p className="text-text-2">NEURO Phase: {extracted.intendedNeuroPhase}</p>}
-                {extracted.notes && <p className="text-text-3 text-xs mt-2">{extracted.notes}</p>}
+                {extracted.organisationName && <p className="text-muted-foreground">Client: {extracted.organisationName}</p>}
+                {extracted.budget && <p className="text-muted-foreground">Budget: £{extracted.budget.toLocaleString()}</p>}
+                {extracted.startDate && <p className="text-muted-foreground">Dates: {extracted.startDate} → {extracted.endDate}</p>}
+                {extracted.intendedNeuroPhase && <p className="text-muted-foreground">NEURO Phase: {extracted.intendedNeuroPhase}</p>}
+                {extracted.notes && <p className="text-muted-foreground text-xs mt-2">{extracted.notes}</p>}
               </CardContent>
             </Card>
 
             {extracted.deliveries.length > 0 && (
               <div>
                 <Label className="mb-2 block">Deliveries ({extracted.deliveries.length})</Label>
-                <div className="space-y-xs">
+                <div className="space-y-1.5">
                   {extracted.deliveries.map((d, i) => (
-                    <div key={i} className="bg-muted rounded-md p-sm text-sm">
+                    <div key={i} className="bg-muted rounded-md p-3 text-sm">
                       <p className="font-medium">{d.title}</p>
-                      <p className="text-text-3 text-xs">
+                      <p className="text-muted-foreground text-xs">
                         {[d.serviceType?.replace(/_/g, ' '), d.neuroPhase, d.delegateCount && `${d.delegateCount} delegates`, d.deliveryDate].filter(Boolean).join(' · ')}
                       </p>
                     </div>
@@ -313,7 +329,7 @@ function CreateProjectDialog({ open, onOpenChange }: { open: boolean; onOpenChan
               </Select>
             </div>
 
-            <div className="flex justify-end gap-sm">
+            <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => { onOpenChange(false); resetForm(); }}>Cancel</Button>
               <Button onClick={handleScaffold} disabled={scaffoldProject.isPending || !previewOrgId}>
                 {scaffoldProject.isPending ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Scaffolding…</> : 'Scaffold Project'}

@@ -27,7 +27,7 @@ export function NotificationBell() {
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between px-4 py-3 border-b">
-          <p className="text-body font-medium">Notifications</p>
+          <p className="text-sm font-medium">Notifications</p>
           {(unreadCount ?? 0) > 0 && (
             <Button variant="ghost" size="sm" className="text-caption" onClick={() => markAllRead.mutate()}>
               Mark all read
@@ -36,7 +36,7 @@ export function NotificationBell() {
         </div>
         <ScrollArea className="max-h-80">
           {!notifications?.length ? (
-            <p className="text-caption text-text-3 text-center py-8">No notifications yet.</p>
+            <p className="text-caption text-muted-foreground text-center py-8">No notifications yet.</p>
           ) : (
             notifications.map((n) => (
               <button
@@ -49,9 +49,9 @@ export function NotificationBell() {
                 <div className="flex items-start gap-2">
                   {!n.read && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />}
                   <div className={!n.read ? '' : 'ml-4'}>
-                    <p className="text-body font-medium">{n.title}</p>
-                    {n.body && <p className="text-caption text-text-3 mt-0.5">{n.body}</p>}
-                    <p className="text-caption text-text-3 mt-1">
+                    <p className="text-sm font-medium">{n.title}</p>
+                    {n.body && <p className="text-caption text-muted-foreground mt-0.5">{n.body}</p>}
+                    <p className="text-caption text-muted-foreground mt-1">
                       {n.created_at ? formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) : ''}
                     </p>
                   </div>

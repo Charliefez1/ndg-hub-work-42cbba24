@@ -44,24 +44,24 @@ export function BillingTab({ projectId, budget }: BillingTabProps) {
   };
 
   return (
-    <div className="space-y-md">
+    <div className="space-y-3">
       {/* Financial summary */}
-      <div className="grid grid-cols-3 gap-md">
+      <div className="grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="pt-4">
-            <p className="text-caption text-text-3">Budget</p>
+            <p className="text-caption text-muted-foreground">Budget</p>
             <p className="text-section-title">{budget ? `£${Number(budget).toLocaleString()}` : '—'}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-caption text-text-3">Total Invoiced</p>
+            <p className="text-caption text-muted-foreground">Total Invoiced</p>
             <p className="text-section-title">£{totalInvoiced.toLocaleString()}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-caption text-text-3">Total Paid</p>
+            <p className="text-caption text-muted-foreground">Total Paid</p>
             <p className="text-section-title text-success">£{totalPaid.toLocaleString()}</p>
           </CardContent>
         </Card>
@@ -71,13 +71,13 @@ export function BillingTab({ projectId, budget }: BillingTabProps) {
       {deliveries?.length ? (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-body">Workshop Prices</CardTitle>
+            <CardTitle className="text-sm">Workshop Prices</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-xs">
+          <CardContent className="space-y-1.5">
             {deliveries.map((d) => (
-              <div key={d.id} className="flex items-center justify-between bg-background rounded border p-sm">
-                <span className="text-body">{d.title}</span>
-                <span className="text-body font-medium">
+              <div key={d.id} className="flex items-center justify-between bg-background rounded border p-3">
+                <span className="text-sm">{d.title}</span>
+                <span className="text-sm font-medium">
                   {(d as any).services?.name ? `£${Number((d as any).services?.price || 0).toLocaleString()}` : 'No service'}
                 </span>
               </div>
@@ -89,21 +89,21 @@ export function BillingTab({ projectId, budget }: BillingTabProps) {
       {/* Invoices list */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-body">Invoices</CardTitle>
+          <CardTitle className="text-sm">Invoices</CardTitle>
           <Button size="sm" onClick={() => setDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-1" /> Generate Invoice
           </Button>
         </CardHeader>
         <CardContent>
           {!projectInvoices.length ? (
-            <p className="text-text-2 text-center py-md">No invoices yet.</p>
+            <p className="text-muted-foreground text-center py-3">No invoices yet.</p>
           ) : (
-            <div className="space-y-xs">
+            <div className="space-y-1.5">
               {projectInvoices.map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between bg-background rounded border p-sm">
+                <div key={inv.id} className="flex items-center justify-between bg-background rounded border p-3">
                   <div>
-                    <p className="text-body font-medium">{inv.invoice_number}</p>
-                    <p className="text-caption text-text-3">
+                    <p className="text-sm font-medium">{inv.invoice_number}</p>
+                    <p className="text-caption text-muted-foreground">
                       {inv.issue_date || 'Draft'} · £{Number(inv.total).toLocaleString()}
                     </p>
                   </div>
@@ -119,13 +119,13 @@ export function BillingTab({ projectId, budget }: BillingTabProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Generate Invoice</DialogTitle></DialogHeader>
-          <p className="text-body text-text-2 mb-md">Select deliveries to include:</p>
-          <div className="space-y-sm max-h-60 overflow-y-auto">
+          <p className="text-sm text-muted-foreground mb-3">Select deliveries to include:</p>
+          <div className="space-y-2 max-h-60 overflow-y-auto">
             {uninvoicedDeliveries.length === 0 ? (
-              <p className="text-text-3 text-center py-md">No uninvoiced deliveries with services.</p>
+              <p className="text-muted-foreground text-center py-3">No uninvoiced deliveries with services.</p>
             ) : (
               uninvoicedDeliveries.map((d) => (
-                <label key={d.id} className="flex items-center gap-sm bg-background rounded border p-sm cursor-pointer hover:border-primary">
+                <label key={d.id} className="flex items-center gap-2 bg-background rounded border p-3 cursor-pointer hover:border-primary">
                   <Checkbox
                     checked={selectedDeliveries.includes(d.id)}
                     onCheckedChange={(checked) => {
@@ -135,10 +135,10 @@ export function BillingTab({ projectId, budget }: BillingTabProps) {
                     }}
                   />
                   <div className="flex-1">
-                    <p className="text-body">{d.title}</p>
-                    <p className="text-caption text-text-3">{(d as any).services?.name}</p>
+                    <p className="text-sm">{d.title}</p>
+                    <p className="text-caption text-muted-foreground">{(d as any).services?.name}</p>
                   </div>
-                  <span className="text-body font-medium">
+                  <span className="text-sm font-medium">
                     £{Number((d as any).services?.price || 0).toLocaleString()}
                   </span>
                 </label>
@@ -146,8 +146,8 @@ export function BillingTab({ projectId, budget }: BillingTabProps) {
             )}
           </div>
           {selectedDeliveries.length > 0 && (
-            <div className="border-t pt-sm mt-sm">
-              <div className="flex justify-between text-body">
+            <div className="border-t pt-2 mt-2">
+              <div className="flex justify-between text-sm">
                 <span>Subtotal</span>
                 <span className="font-medium">
                   £{uninvoicedDeliveries
@@ -158,7 +158,7 @@ export function BillingTab({ projectId, budget }: BillingTabProps) {
               </div>
             </div>
           )}
-          <div className="flex justify-end gap-sm mt-md">
+          <div className="flex justify-end gap-2 mt-3">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleGenerate} disabled={generateInvoice.isPending || !selectedDeliveries.length}>
               {generateInvoice.isPending ? 'Generating...' : 'Generate Invoice'}

@@ -67,17 +67,31 @@ export default function DailyBrief() {
     );
   };
 
+  const kpis = [
+    { label: 'Due Today', value: todayTasks.length, icon: Clock, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: 'Overdue', value: overdueTasks.length, icon: AlertTriangle, color: 'text-destructive', bg: 'bg-destructive/10' },
+    { label: 'Completed', value: completedToday, icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10' },
+    { label: 'Workshops', value: upcomingDeliveries.length, icon: CalendarCheck, color: 'text-[hsl(var(--cyan))]', bg: 'bg-[hsl(var(--cyan)/0.1)]' },
+  ];
+
   return (
     <AppShell>
-      <div className="space-y-lg">
-        <h1 className="text-page-title">Daily Brief</h1>
-        <p className="text-body text-text-2">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
+      <div className="space-y-6 animate-fade-in-up">
+        <div>
+          <h1 className="text-page-title">Daily Brief</h1>
+          <p className="text-muted-foreground mt-1">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
+        </div>
 
         {/* AI Coach Card */}
-        <Card className="border-primary/20 bg-primary/[0.02]">
-          <CardHeader>
-            <CardTitle className="text-body flex items-center justify-between">
-              <span className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> AI Daily Coach</span>
+        <Card className="border-primary/20 bg-primary/[0.02] shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                </div>
+                AI Daily Coach
+              </span>
               <Button variant="ghost" size="sm" onClick={() => refetchCoach()} disabled={coachLoading}>
                 <RefreshCw className={`h-3.5 w-3.5 ${coachLoading ? 'animate-spin' : ''}`} />
               </Button>
@@ -95,52 +109,68 @@ export default function DailyBrief() {
                 <ReactMarkdown>{aiCoach.message}</ReactMarkdown>
               </div>
             ) : (
-              <p className="text-body text-text-3">Check in first to get your personalized daily coaching brief.</p>
+              <p className="text-sm text-muted-foreground">Check in first to get your personalized daily coaching brief.</p>
             )}
           </CardContent>
         </Card>
 
         {/* KPI cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
-          <Card><CardContent className="pt-4 flex items-center gap-md">
-            <Clock className="h-8 w-8 text-primary" />
-            <div><p className="text-caption text-text-3">Due Today</p><p className="text-section-title">{todayTasks.length}</p></div>
-          </CardContent></Card>
-          <Card><CardContent className="pt-4 flex items-center gap-md">
-            <AlertTriangle className="h-8 w-8 text-destructive" />
-            <div><p className="text-caption text-text-3">Overdue</p><p className="text-section-title text-destructive">{overdueTasks.length}</p></div>
-          </CardContent></Card>
-          <Card><CardContent className="pt-4 flex items-center gap-md">
-            <CheckCircle2 className="h-8 w-8 text-green-500" />
-            <div><p className="text-caption text-text-3">Completed Today</p><p className="text-section-title">{completedToday}</p></div>
-          </CardContent></Card>
-          <Card><CardContent className="pt-4 flex items-center gap-md">
-            <CalendarCheck className="h-8 w-8 text-accent-foreground" />
-            <div><p className="text-caption text-text-3">Upcoming Workshops</p><p className="text-section-title">{upcomingDeliveries.length}</p></div>
-          </CardContent></Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 stagger-in">
+          {kpis.map((kpi) => (
+            <Card key={kpi.label} className="shadow-sm">
+              <CardContent className="pt-4 pb-3 px-4 flex items-center gap-3">
+                <div className={`h-10 w-10 rounded-lg ${kpi.bg} flex items-center justify-center shrink-0`}>
+                  <kpi.icon className={`h-5 w-5 ${kpi.color}`} strokeWidth={2} />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">{kpi.label}</p>
+                  <p className={`text-xl font-bold ${kpi.label === 'Overdue' && overdueTasks.length > 0 ? 'text-destructive' : ''}`}>{kpi.value}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-md">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Energy check-in */}
-          <Card className="lg:col-span-1">
-            <CardHeader><CardTitle className="text-body flex items-center gap-2"><Battery className="h-4 w-4" /> Daily Check-in</CardTitle></CardHeader>
-            <CardContent className="space-y-md">
+          <Card className="lg:col-span-1 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <div className="h-6 w-6 rounded-md bg-[hsl(var(--purple)/0.1)] flex items-center justify-center">
+                  <Battery className="h-3.5 w-3.5 text-[hsl(var(--purple))]" />
+                </div>
+                Daily Check-in
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
-                <Label className="flex items-center gap-2 mb-2"><Battery className="h-3.5 w-3.5" /> Energy: {energy}/10</Label>
+                <Label className="flex items-center gap-2 mb-2.5 text-xs font-medium">
+                  <Battery className="h-3.5 w-3.5 text-[hsl(var(--orange))]" /> Energy
+                  <span className="ml-auto font-bold text-sm">{energy}/10</span>
+                </Label>
                 <Slider value={[energy]} onValueChange={([v]) => setEnergy(v)} min={1} max={10} step={1} />
               </div>
               <div>
-                <Label className="flex items-center gap-2 mb-2"><Brain className="h-3.5 w-3.5" /> Focus: {focus}/10</Label>
+                <Label className="flex items-center gap-2 mb-2.5 text-xs font-medium">
+                  <Brain className="h-3.5 w-3.5 text-[hsl(var(--info))]" /> Focus
+                  <span className="ml-auto font-bold text-sm">{focus}/10</span>
+                </Label>
                 <Slider value={[focus]} onValueChange={([v]) => setFocus(v)} min={1} max={10} step={1} />
               </div>
               <div>
-                <Label className="flex items-center gap-2 mb-2"><Smile className="h-3.5 w-3.5" /> Mood</Label>
-                <div className="flex gap-sm">
+                <Label className="flex items-center gap-2 mb-2.5 text-xs font-medium">
+                  <Smile className="h-3.5 w-3.5 text-[hsl(var(--pink))]" /> Mood
+                </Label>
+                <div className="flex gap-1.5">
                   {MOODS.map((m, i) => (
                     <button
                       key={m}
                       onClick={() => setMoodIdx(i)}
-                      className={`text-2xl p-1 rounded transition-all ${moodIdx === i ? 'bg-primary/10 scale-125 ring-2 ring-primary' : 'hover:scale-110'}`}
+                      className={`text-2xl p-2 rounded-lg transition-all duration-200 cursor-pointer ${
+                        moodIdx === i
+                          ? 'bg-primary/10 scale-110 ring-2 ring-primary shadow-sm'
+                          : 'hover:bg-muted hover:scale-105'
+                      }`}
                     >
                       {m}
                     </button>
@@ -148,8 +178,8 @@ export default function DailyBrief() {
                 </div>
               </div>
               <div>
-                <Label className="mb-2">Notes</Label>
-                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="How are you feeling?" rows={2} />
+                <Label className="mb-2 text-xs font-medium">Notes</Label>
+                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="How are you feeling?" rows={2} className="mt-1.5" />
               </div>
               <Button onClick={handleCheckIn} className="w-full" disabled={upsertState.isPending}>
                 {checkedIn || todayState ? 'Update Check-in' : 'Check In'}
@@ -158,27 +188,45 @@ export default function DailyBrief() {
           </Card>
 
           {/* Focus tasks + upcoming */}
-          <div className="lg:col-span-2 space-y-md">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-              <Card>
-                <CardHeader><CardTitle className="text-body">Focus Tasks</CardTitle></CardHeader>
-                <CardContent className="space-y-xs">
-                  {todayTasks.length === 0 ? <p className="text-text-2 text-caption">Nothing due today — nice!</p> : todayTasks.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between bg-background rounded border p-sm">
-                      <span className="text-body">{t.title}</span>
-                      <Badge variant="outline" className="capitalize text-xs">{t.priority}</Badge>
+          <div className="lg:col-span-2 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-[hsl(var(--info)/0.1)] flex items-center justify-center">
+                      <Clock className="h-3.5 w-3.5 text-[hsl(var(--info))]" />
+                    </div>
+                    Focus Tasks
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1.5">
+                  {todayTasks.length === 0 ? (
+                    <p className="text-muted-foreground text-sm py-3 text-center">Nothing due today — nice!</p>
+                  ) : todayTasks.map((t) => (
+                    <div key={t.id} className="flex items-center justify-between bg-background rounded-xl border px-3 py-2.5">
+                      <span className="text-sm font-medium truncate">{t.title}</span>
+                      <Badge variant="outline" className="capitalize text-xs shrink-0">{t.priority}</Badge>
                     </div>
                   ))}
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader><CardTitle className="text-body">Upcoming Workshops</CardTitle></CardHeader>
-                <CardContent className="space-y-xs">
-                  {upcomingDeliveries.length === 0 ? <p className="text-text-2 text-caption">No upcoming workshops.</p> : upcomingDeliveries.map((d) => (
-                    <div key={d.id} className="flex items-center justify-between bg-background rounded border p-sm">
-                      <span className="text-body">{d.title}</span>
-                      <span className="text-caption text-text-3">{d.delivery_date}</span>
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-[hsl(var(--cyan)/0.1)] flex items-center justify-center">
+                      <CalendarCheck className="h-3.5 w-3.5 text-[hsl(var(--cyan))]" />
+                    </div>
+                    Upcoming Workshops
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1.5">
+                  {upcomingDeliveries.length === 0 ? (
+                    <p className="text-muted-foreground text-sm py-3 text-center">No upcoming workshops.</p>
+                  ) : upcomingDeliveries.map((d) => (
+                    <div key={d.id} className="flex items-center justify-between bg-background rounded-xl border px-3 py-2.5">
+                      <span className="text-sm font-medium truncate">{d.title}</span>
+                      <span className="text-xs text-muted-foreground shrink-0 ml-2">{d.delivery_date}</span>
                     </div>
                   ))}
                 </CardContent>
@@ -186,13 +234,20 @@ export default function DailyBrief() {
             </div>
 
             {redFlags.length > 0 && (
-              <Card className="border-destructive/30">
-                <CardHeader><CardTitle className="text-body text-destructive flex items-center gap-2"><FileWarning className="h-4 w-4" /> Red Flags</CardTitle></CardHeader>
-                <CardContent className="space-y-xs">
+              <Card className="border-destructive/20 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-destructive flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-destructive/10 flex items-center justify-center">
+                      <FileWarning className="h-3.5 w-3.5 text-destructive" />
+                    </div>
+                    Red Flags
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1.5">
                   {redFlags.map((f: any, i: number) => (
-                    <div key={i} className="flex items-center gap-sm bg-destructive/5 rounded border border-destructive/20 p-sm">
+                    <div key={i} className="flex items-center gap-2 bg-destructive/5 rounded-xl border border-destructive/20 px-3 py-2.5">
                       <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
-                      <span className="text-body">{f.label}</span>
+                      <span className="text-sm font-medium">{f.label}</span>
                     </div>
                   ))}
                 </CardContent>
@@ -200,13 +255,21 @@ export default function DailyBrief() {
             )}
 
             {overdueTasks.length > 0 && (
-              <Card className="border-destructive/30">
-                <CardHeader><CardTitle className="text-body text-destructive flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Overdue Tasks</CardTitle></CardHeader>
-                <CardContent className="space-y-xs">
+              <Card className="border-destructive/20 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-destructive flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-destructive/10 flex items-center justify-center">
+                      <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
+                    </div>
+                    Overdue Tasks
+                    <Badge variant="destructive" className="ml-auto text-xs">{overdueTasks.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1.5">
                   {overdueTasks.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between bg-background rounded border p-sm">
-                      <span className="text-body">{t.title}</span>
-                      <span className="text-caption text-destructive">{t.due_date}</span>
+                    <div key={t.id} className="flex items-center justify-between bg-destructive/5 rounded-lg px-3 py-2.5">
+                      <span className="text-sm font-medium truncate">{t.title}</span>
+                      <span className="text-xs text-destructive font-medium shrink-0 ml-2">{t.due_date}</span>
                     </div>
                   ))}
                 </CardContent>

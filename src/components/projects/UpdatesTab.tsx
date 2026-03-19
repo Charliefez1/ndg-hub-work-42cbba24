@@ -54,7 +54,7 @@ export function UpdatesTab({ projectId, projectName, projectStatus }: UpdatesTab
   });
 
   return (
-    <div className="space-y-md">
+    <div className="space-y-3">
       {!adding && (
         <Button size="sm" onClick={() => setAdding(true)}>
           <Plus className="h-4 w-4 mr-1" /> Add Update
@@ -62,14 +62,14 @@ export function UpdatesTab({ projectId, projectName, projectStatus }: UpdatesTab
       )}
 
       {adding && (
-        <div className="bg-surface rounded-md border p-md space-y-sm">
+        <div className="bg-card rounded-lg border p-3 space-y-2">
           <Textarea
             placeholder="Write a project update (supports markdown)..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={5}
           />
-          <div className="flex gap-sm">
+          <div className="flex gap-2">
             <Button size="sm" onClick={() => createUpdate.mutate()} disabled={!content.trim()}>
               Post Update
             </Button>
@@ -81,13 +81,13 @@ export function UpdatesTab({ projectId, projectName, projectStatus }: UpdatesTab
       )}
 
       {!updates?.length && !adding ? (
-        <p className="text-text-2 text-center py-lg">No updates yet. Post an update to keep stakeholders informed.</p>
+        <p className="text-muted-foreground text-center py-4">No updates yet. Post an update to keep stakeholders informed.</p>
       ) : (
-        <div className="space-y-md">
+        <div className="space-y-3">
           {updates?.map((update) => (
-            <div key={update.id} className="bg-surface rounded-md border p-md">
-              <div className="flex items-center gap-sm mb-sm">
-                <span className="text-body font-medium">
+            <div key={update.id} className="bg-card rounded-lg border p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium">
                   {(update as any).profiles?.display_name || 'Unknown'}
                 </span>
                 {update.ai_generated && (
@@ -100,7 +100,7 @@ export function UpdatesTab({ projectId, projectName, projectStatus }: UpdatesTab
                     {(update.status_snapshot as any).status?.replace(/_/g, ' ')}
                   </Badge>
                 )}
-                <span className="text-caption text-text-3 ml-auto">
+                <span className="text-caption text-muted-foreground ml-auto">
                   {new Date(update.created_at).toLocaleDateString('en-GB', {
                     day: 'numeric',
                     month: 'short',
@@ -110,7 +110,7 @@ export function UpdatesTab({ projectId, projectName, projectStatus }: UpdatesTab
                   })}
                 </span>
               </div>
-              <div className="prose prose-sm max-w-none text-body">
+              <div className="prose prose-sm max-w-none text-sm">
                 <ReactMarkdown>{update.content}</ReactMarkdown>
               </div>
             </div>
