@@ -54,3 +54,20 @@ export function useDeleteTask() {
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 }
+
+/** Get subtasks for a specific parent task */
+export function useSubtasks(parentTaskId: string | null) {
+  return useQuery({
+    queryKey: [...KEY, 'subtasks', parentTaskId],
+    enabled: !!parentTaskId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*, projects(name)')
+        .eq('parent_task_id', parentTaskId!)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
