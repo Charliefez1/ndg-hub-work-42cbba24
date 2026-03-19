@@ -68,7 +68,7 @@ export default function Tasks() {
           <div className="flex items-center gap-sm">
             <Tabs value={view} onValueChange={(v) => setView(v as ViewType)}>
               <TabsList className="h-8">
-                {(['board', 'list', 'table', 'timeline', 'calendar'] as ViewType[]).map((v) => (
+                {(['board', 'list', 'table', 'timeline', 'calendar', 'workload'] as ViewType[]).map((v) => (
                   <TabsTrigger key={v} value={v} className="text-xs px-2 capitalize">{v}</TabsTrigger>
                 ))}
               </TabsList>
