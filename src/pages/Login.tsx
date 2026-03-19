@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { lovable } from '@/integrations/lovable/index';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -100,6 +101,23 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error('Enter your email address first');
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Check your email for a password reset link');
+    }
+    setSubmitting(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -124,6 +142,14 @@ function LoginForm() {
         {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
         Sign In
       </Button>
+      <button
+        type="button"
+        onClick={handleForgotPassword}
+        className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+        disabled={submitting}
+      >
+        Forgot password?
+      </button>
     </form>
   );
 }
