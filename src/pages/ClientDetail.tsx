@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useOrganisation, useUpdateOrganisation, useContacts, useCreateContact, useDeleteContact } from '@/hooks/useOrganisations';
 import { useProjects } from '@/hooks/useProjects';
 import { useInvoices } from '@/hooks/useInvoices';
@@ -16,10 +18,12 @@ import { useContracts } from '@/hooks/useContracts';
 import { useEmails } from '@/hooks/useEmails';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Plus, Star, Trash2, Send } from 'lucide-react';
+import { ArrowLeft, Plus, Star, Trash2, Send, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStatusBadgeClasses, formatStatus } from '@/lib/status-colors';
+
+const ORG_STATUSES = ['active', 'inactive', 'prospect', 'archived'];
 
 export default function ClientDetail() {
   const { id } = useParams<{ id: string }>();
@@ -32,6 +36,7 @@ export default function ClientDetail() {
   const { data: allContracts } = useContracts({ organisationId: id });
   const { data: allEmails } = useEmails();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [editOrgOpen, setEditOrgOpen] = useState(false);
   const [invitingContact, setInvitingContact] = useState<string | null>(null);
 
   const projects = allProjects?.filter((p) => p.organisation_id === id) ?? [];
@@ -39,7 +44,6 @@ export default function ClientDetail() {
   const contracts = allContracts ?? [];
   const emails = allEmails?.filter((e: any) => e.organisation_id === id) ?? [];
 
-  // Activity log for this org
   const { data: activity } = useQuery({
     queryKey: ['activity', id],
     enabled: !!id,
@@ -69,11 +73,8 @@ export default function ClientDetail() {
       });
       if (authError) throw authError;
       toast.success(`Magic link sent to ${contactEmail}`);
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setInvitingContact(null);
-    }
+    } catch (err: any) { toast.error(err.message); }
+    finally { setInvitingContact(null); }
   };
 
   if (isLoading) return <AppShell><Skeleton className="h-8 w-48" /></AppShell>;
@@ -86,6 +87,9 @@ export default function ClientDetail() {
           <Link to="/clients" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
           <h1 className="text-page-title">{org.name}</h1>
           <Badge variant={org.status === 'active' ? 'default' : 'secondary'} className="capitalize">{org.status}</Badge>
+          <Button size="sm" variant="outline" className="ml-auto" onClick={() => setEditOrgOpen(true)}>
+            <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+          </Button>
         </div>
 
         <Tabs defaultValue="profile">
@@ -145,11 +149,7 @@ export default function ClientDetail() {
                         <TableCell>{c.phone ?? '—'}</TableCell>
                         <TableCell>
                           {c.email ? (
-                            <Button
-                              variant="outline" size="sm" className="h-7 text-xs"
-                              onClick={() => handleInviteToPortal(c.email!, c.id)}
-                              disabled={invitingContact === c.id}
-                            >
+                            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => handleInviteToPortal(c.email!, c.id)} disabled={invitingContact === c.id}>
                               <Send className="h-3 w-3 mr-1" />
                               {invitingContact === c.id ? 'Sending…' : 'Invite'}
                             </Button>
@@ -171,9 +171,7 @@ export default function ClientDetail() {
           </TabsContent>
 
           <TabsContent value="projects" className="mt-3">
-            {!projects.length ? (
-              <p className="text-muted-foreground text-center py-4">No projects for this client.</p>
-            ) : (
+            {!projects.length ? <p className="text-muted-foreground text-center py-4">No projects for this client.</p> : (
               <div className="space-y-1.5">
                 {projects.map((p) => (
                   <Link key={p.id} to={`/projects/${p.id}`} className="block bg-card rounded-lg border p-3 hover:border-primary transition-colors">
@@ -189,9 +187,7 @@ export default function ClientDetail() {
           </TabsContent>
 
           <TabsContent value="contracts" className="mt-3">
-            {!contracts.length ? (
-              <p className="text-muted-foreground text-center py-4">No contracts for this client.</p>
-            ) : (
+            {!contracts.length ? <p className="text-muted-foreground text-center py-4">No contracts for this client.</p> : (
               <div className="space-y-1.5">
                 {contracts.map((c: any) => (
                   <div key={c.id} className="bg-card rounded-lg border p-3 flex items-center justify-between">
@@ -209,9 +205,7 @@ export default function ClientDetail() {
           </TabsContent>
 
           <TabsContent value="invoices" className="mt-3">
-            {!invoices.length ? (
-              <p className="text-muted-foreground text-center py-4">No invoices for this client.</p>
-            ) : (
+            {!invoices.length ? <p className="text-muted-foreground text-center py-4">No invoices for this client.</p> : (
               <div className="space-y-1.5">
                 {invoices.map((inv) => (
                   <div key={inv.id} className="bg-card rounded-lg border p-3 flex items-center justify-between">
@@ -227,9 +221,7 @@ export default function ClientDetail() {
           </TabsContent>
 
           <TabsContent value="emails" className="mt-3">
-            {!emails.length ? (
-              <p className="text-muted-foreground text-center py-4">No email threads linked to this client.</p>
-            ) : (
+            {!emails.length ? <p className="text-muted-foreground text-center py-4">No email threads linked to this client.</p> : (
               <div className="space-y-1.5">
                 {emails.map((e: any) => (
                   <div key={e.id} className="bg-card rounded-lg border p-3">
@@ -248,15 +240,11 @@ export default function ClientDetail() {
           </TabsContent>
 
           <TabsContent value="activity" className="mt-3">
-            {!activity?.length ? (
-              <p className="text-muted-foreground text-center py-4">No activity recorded yet.</p>
-            ) : (
+            {!activity?.length ? <p className="text-muted-foreground text-center py-4">No activity recorded yet.</p> : (
               <div className="space-y-1.5">
                 {activity.map((a) => (
                   <div key={a.id} className="bg-card rounded-lg border p-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm"><span className="font-medium">{a.action}</span> on {a.entity_type}</p>
-                    </div>
+                    <div><p className="text-sm"><span className="font-medium">{a.action}</span> on {a.entity_type}</p></div>
                     <span className="text-caption text-muted-foreground">
                       {new Date(a.created_at!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </span>
@@ -269,7 +257,65 @@ export default function ClientDetail() {
       </div>
 
       <AddContactDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} organisationId={id!} onCreate={createContact} />
+      <EditOrgDialog open={editOrgOpen} onOpenChange={setEditOrgOpen} org={org} />
     </AppShell>
+  );
+}
+
+function EditOrgDialog({ open, onOpenChange, org }: { open: boolean; onOpenChange: (o: boolean) => void; org: any }) {
+  const updateOrg = useUpdateOrganisation();
+  const [name, setName] = useState(org.name);
+  const [sector, setSector] = useState(org.sector ?? '');
+  const [email, setEmail] = useState(org.email ?? '');
+  const [phone, setPhone] = useState(org.phone ?? '');
+  const [website, setWebsite] = useState(org.website ?? '');
+  const [address, setAddress] = useState(org.address ?? '');
+  const [status, setStatus] = useState(org.status ?? 'active');
+  const [notes, setNotes] = useState(org.notes ?? '');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateOrg.mutateAsync({
+        id: org.id, name, status,
+        sector: sector || null, email: email || null,
+        phone: phone || null, website: website || null,
+        address: address || null, notes: notes || null,
+      });
+      toast.success('Client updated');
+      onOpenChange(false);
+    } catch (err: any) { toast.error(err.message); }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Edit Client</DialogTitle></DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div><Label>Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
+          <div><Label>Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{ORG_STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Sector</Label><Input value={sector} onChange={(e) => setSector(e.target.value)} /></div>
+            <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label>Phone</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+            <div><Label>Website</Label><Input value={website} onChange={(e) => setWebsite(e.target.value)} /></div>
+          </div>
+          <div><Label>Address</Label><Textarea value={address} onChange={(e) => setAddress(e.target.value)} /></div>
+          <div><Label>Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="submit" disabled={updateOrg.isPending}>{updateOrg.isPending ? 'Saving…' : 'Save'}</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
