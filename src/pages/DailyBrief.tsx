@@ -6,14 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useTasks } from '@/hooks/useTasks';
 import { useDeliveries } from '@/hooks/useDeliveries';
 import { useDailyBrief } from '@/hooks/useDailyBrief';
 import { useTodayState, useUpsertDailyState } from '@/hooks/useDailyStates';
 import { useAuth } from '@/hooks/useAuth';
-import { CalendarCheck, AlertTriangle, CheckCircle2, Clock, Battery, Brain, Smile, FileWarning } from 'lucide-react';
+import { useAIDailyCoach } from '@/hooks/useAIDailyCoach';
+import { CalendarCheck, AlertTriangle, CheckCircle2, Clock, Battery, Brain, Smile, FileWarning, Sparkles, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import ReactMarkdown from 'react-markdown';
 
 const MOODS = ['😤', '😔', '😐', '😊', '🤩'];
 
@@ -24,6 +27,7 @@ export default function DailyBrief() {
   const { data: briefData } = useDailyBrief();
   const { data: todayState } = useTodayState(user?.id);
   const upsertState = useUpsertDailyState();
+  const { data: aiCoach, isLoading: coachLoading, refetch: refetchCoach } = useAIDailyCoach();
 
   const [energy, setEnergy] = useState<number>(todayState?.energy_level ?? 5);
   const [focus, setFocus] = useState<number>(todayState?.focus_level ?? 5);
@@ -31,16 +35,14 @@ export default function DailyBrief() {
   const [notes, setNotes] = useState(todayState?.notes ?? '');
   const [checkedIn, setCheckedIn] = useState(!!todayState);
 
-  // Sync state from loaded data
   const today = new Date().toISOString().split('T')[0];
-  const todayTasks = tasks?.filter((t) => t.due_date === today && t.status !== 'done') ?? [];
-  const overdueTasks = tasks?.filter((t) => t.due_date && t.due_date < today && t.status !== 'done') ?? [];
+  const todayTasks = tasks?.filter((t) => t.due_date === today && t.status !== 'done' && !t.parent_task_id) ?? [];
+  const overdueTasks = tasks?.filter((t) => t.due_date && t.due_date < today && t.status !== 'done' && !t.parent_task_id) ?? [];
   const upcomingDeliveries = deliveries?.filter((d) => d.delivery_date && d.delivery_date >= today)
     .sort((a, b) => (a.delivery_date! > b.delivery_date! ? 1 : -1))
     .slice(0, 5) ?? [];
   const completedToday = tasks?.filter((t) => t.status === 'done' && t.updated_at?.startsWith(today)).length ?? 0;
 
-  // Red flags from edge function
   const brief = briefData?.data;
   const redFlags = brief?.redFlags ?? [];
 
@@ -70,6 +72,33 @@ export default function DailyBrief() {
       <div className="space-y-lg">
         <h1 className="text-page-title">Daily Brief</h1>
         <p className="text-body text-text-2">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
+
+        {/* AI Coach Card */}
+        <Card className="border-primary/20 bg-primary/[0.02]">
+          <CardHeader>
+            <CardTitle className="text-body flex items-center justify-between">
+              <span className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> AI Daily Coach</span>
+              <Button variant="ghost" size="sm" onClick={() => refetchCoach()} disabled={coachLoading}>
+                <RefreshCw className={`h-3.5 w-3.5 ${coachLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {coachLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-5/6" />
+              </div>
+            ) : aiCoach?.message ? (
+              <div className="prose prose-sm max-w-none text-foreground dark:prose-invert">
+                <ReactMarkdown>{aiCoach.message}</ReactMarkdown>
+              </div>
+            ) : (
+              <p className="text-body text-text-3">Check in first to get your personalized daily coaching brief.</p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* KPI cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
@@ -156,7 +185,6 @@ export default function DailyBrief() {
               </Card>
             </div>
 
-            {/* Red flags */}
             {redFlags.length > 0 && (
               <Card className="border-destructive/30">
                 <CardHeader><CardTitle className="text-body text-destructive flex items-center gap-2"><FileWarning className="h-4 w-4" /> Red Flags</CardTitle></CardHeader>
