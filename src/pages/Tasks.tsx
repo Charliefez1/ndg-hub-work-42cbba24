@@ -4,23 +4,24 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
-import { useProjects } from '@/hooks/useProjects';
-import { Plus, CheckSquare, MoreHorizontal, Trash2, Check } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useTasks, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
+import { Plus, CheckSquare, MoreHorizontal, Trash2, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getStatusBadgeClasses } from '@/lib/status-colors';
+import { getStatusBadgeClasses, formatStatus } from '@/lib/status-colors';
+
+import { BoardView } from '@/components/tasks/BoardView';
+import { ListView } from '@/components/tasks/ListView';
+import { CreateTaskDialog } from '@/components/tasks/CreateTaskDialog';
+import { TaskDetailSheet } from '@/components/tasks/TaskDetailSheet';
+import { FocusMode } from '@/components/tasks/FocusMode';
+import { WorkloadView } from '@/components/tasks/WorkloadView';
 
 const TASK_STATUSES = ['todo', 'in_progress', 'review', 'done', 'blocked'];
-const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
 
-type ViewType = 'board' | 'list' | 'table' | 'timeline' | 'calendar';
+type ViewType = 'board' | 'list' | 'table' | 'timeline' | 'calendar' | 'workload';
 
 const PRIORITY_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   urgent: { bg: 'bg-destructive/10', text: 'text-destructive', dot: 'bg-destructive' },
@@ -37,7 +38,7 @@ const STATUS_COLUMN_COLORS: Record<string, { accent: string; dot: string }> = {
   blocked: { accent: 'border-t-destructive', dot: 'bg-destructive' },
 };
 
-function PriorityBadge({ priority }: { priority: string }) {
+export function PriorityBadge({ priority }: { priority: string }) {
   const colors = PRIORITY_COLORS[priority] ?? PRIORITY_COLORS.low;
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${colors.bg} ${colors.text}`}>
@@ -53,11 +54,36 @@ export default function Tasks() {
   const deleteTask = useDeleteTask();
   const [view, setView] = useState<ViewType>('board');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [focusTask, setFocusTask] = useState<any | null>(null);
 
   const handleStatusChange = async (id: string, status: string) => {
-    try { await updateTask.mutateAsync({ id, status }); }
-    catch (err: any) { toast.error(err.message); }
+    try {
+      await updateTask.mutateAsync({
+        id,
+        status,
+        completed_at: status === 'done' ? new Date().toISOString() : null,
+      });
+    } catch (err: any) { toast.error(err.message); }
   };
+
+  const handleTaskClick = (task: any) => {
+    setSelectedTask(task);
+    setDetailOpen(true);
+  };
+
+  const handleStartFocus = (task: any) => {
+    setFocusTask(task);
+  };
+
+  const subtasksForSelected = selectedTask
+    ? tasks?.filter(t => t.parent_task_id === selectedTask.id) || []
+    : [];
+
+  if (focusTask) {
+    return <FocusMode task={focusTask} onClose={() => setFocusTask(null)} />;
+  }
 
   return (
     <AppShell>
@@ -67,7 +93,7 @@ export default function Tasks() {
           <div className="flex items-center gap-2">
             <Tabs value={view} onValueChange={(v) => setView(v as ViewType)}>
               <TabsList className="h-8">
-                {(['board', 'list', 'table', 'timeline', 'calendar'] as ViewType[]).map((v) => (
+                {(['board', 'list', 'table', 'timeline', 'calendar', 'workload'] as ViewType[]).map((v) => (
                   <TabsTrigger key={v} value={v} className="text-xs px-2.5 capitalize">{v}</TabsTrigger>
                 ))}
               </TabsList>
@@ -85,94 +111,34 @@ export default function Tasks() {
             <Button onClick={() => setDialogOpen(true)} size="sm" className="gap-1.5"><Plus className="h-4 w-4" /> New Task</Button>
           </div>
         ) : view === 'board' ? (
-          <BoardView tasks={tasks} onStatusChange={handleStatusChange} />
+          <BoardView tasks={tasks} onStatusChange={handleStatusChange} onTaskClick={handleTaskClick} onStartFocus={handleStartFocus} />
         ) : view === 'list' ? (
-          <ListView tasks={tasks} onStatusChange={handleStatusChange} onDelete={(id) => deleteTask.mutateAsync(id)} />
+          <ListView tasks={tasks} onStatusChange={handleStatusChange} onDelete={(id) => deleteTask.mutateAsync(id)} onTaskClick={handleTaskClick} />
         ) : view === 'table' ? (
-          <TableView tasks={tasks} onStatusChange={handleStatusChange} onDelete={(id) => deleteTask.mutateAsync(id)} />
+          <TableView tasks={tasks} onStatusChange={handleStatusChange} onDelete={(id) => deleteTask.mutateAsync(id)} onTaskClick={handleTaskClick} />
         ) : view === 'timeline' ? (
-          <TimelineView tasks={tasks} />
+          <TimelineView tasks={tasks} onTaskClick={handleTaskClick} />
+        ) : view === 'workload' ? (
+          <WorkloadView tasks={tasks} />
         ) : (
           <CalendarView tasks={tasks} onStatusChange={handleStatusChange} />
         )}
       </div>
+
       <CreateTaskDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <TaskDetailSheet
+        task={selectedTask}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        subtasks={subtasksForSelected}
+        onStartFocus={handleStartFocus}
+      />
     </AppShell>
   );
 }
 
-function BoardView({ tasks, onStatusChange }: { tasks: any[]; onStatusChange: (id: string, s: string) => void }) {
-  return (
-    <div className="flex gap-3 overflow-x-auto pb-4">
-      {TASK_STATUSES.map((status) => {
-        const items = tasks.filter((t) => t.status === status);
-        const colColors = STATUS_COLUMN_COLORS[status] ?? STATUS_COLUMN_COLORS.todo;
-        return (
-          <div key={status} className="min-w-[260px] w-[260px] shrink-0">
-            <div className={`bg-card rounded-xl border border-t-[3px] ${colColors.accent} shadow-sm`}>
-              <div className="flex items-center gap-2 px-3 py-2.5">
-                <span className={`h-2.5 w-2.5 rounded-full ${colColors.dot}`} />
-                <span className="text-xs font-semibold uppercase tracking-wide capitalize">{status.replace('_', ' ')}</span>
-                <span className="ml-auto text-xs text-muted-foreground font-medium bg-muted rounded-full px-2 py-0.5">{items.length}</span>
-              </div>
-              <div className="px-2 pb-2 space-y-1.5">
-                {items.map((t) => (
-                  <div key={t.id} className="bg-background rounded-xl border p-3 hover:shadow-md transition-all duration-200 cursor-pointer group">
-                    <p className="text-sm font-medium truncate">{t.title}</p>
-                    {t.parent_task_id && <p className="text-xs text-muted-foreground mt-0.5">Subtask</p>}
-                    <div className="flex items-center justify-between mt-2">
-                      <PriorityBadge priority={t.priority} />
-                      {t.due_date && <span className={`text-xs font-medium ${t.due_date < new Date().toISOString().split('T')[0] && t.status !== 'done' ? 'text-destructive' : 'text-muted-foreground'}`}>{t.due_date}</span>}
-                    </div>
-                    {(t as any).projects?.name && <p className="text-xs text-muted-foreground mt-1.5 truncate">{(t as any).projects.name}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function ListView({ tasks, onStatusChange, onDelete }: { tasks: any[]; onStatusChange: (id: string, s: string) => void; onDelete: (id: string) => void }) {
-  const today = new Date().toISOString().split('T')[0];
-  const sorted = [...tasks].sort((a, b) => {
-    const pOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-    return (pOrder[a.priority as keyof typeof pOrder] ?? 2) - (pOrder[b.priority as keyof typeof pOrder] ?? 2);
-  });
-
-  return (
-    <div className="space-y-1.5 stagger-in">
-      {sorted.map((t) => {
-        const isOverdue = t.due_date && t.due_date < today && t.status !== 'done';
-        const isDone = t.status === 'done';
-        return (
-          <div key={t.id} className={`bg-card rounded-xl border p-3 flex items-center gap-3 shadow-xs hover:shadow-sm transition-shadow ${isOverdue ? 'border-destructive/30' : ''}`}>
-            <button
-              onClick={() => onStatusChange(t.id, isDone ? 'todo' : 'done')}
-              className={`w-6 h-6 rounded-lg border-2 shrink-0 flex items-center justify-center transition-all duration-200 cursor-pointer ${isDone ? 'bg-success border-success' : 'border-border hover:border-primary hover:bg-primary/5'}`}
-            >
-              {isDone && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
-            </button>
-            <div className="flex-1 min-w-0">
-              <p className={`text-sm font-medium ${isDone ? 'line-through text-muted-foreground' : ''}`}>{t.title}</p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {(t as any).projects?.name && <span className="text-xs text-muted-foreground">{(t as any).projects.name}</span>}
-                {t.due_date && <span className={`text-xs font-medium ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`}>{t.due_date}</span>}
-              </div>
-            </div>
-            <PriorityBadge priority={t.priority} />
-            <Badge className={`${getStatusBadgeClasses(t.status, 'task')} shrink-0 text-xs`}>{t.status.replace('_', ' ')}</Badge>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function TableView({ tasks, onStatusChange, onDelete }: { tasks: any[]; onStatusChange: (id: string, s: string) => void; onDelete: (id: string) => void }) {
+function TableView({ tasks, onStatusChange, onDelete, onTaskClick }: { tasks: any[]; onStatusChange: (id: string, s: string) => void; onDelete: (id: string) => void; onTaskClick: (t: any) => void }) {
+  const parentTasks = tasks.filter(t => !t.parent_task_id && !t.is_template);
   return (
     <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
       <Table>
@@ -183,42 +149,49 @@ function TableView({ tasks, onStatusChange, onDelete }: { tasks: any[]; onStatus
             <TableHead>Priority</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Due</TableHead>
+            <TableHead>Subtasks</TableHead>
             <TableHead className="w-10" />
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tasks.map((t) => (
-            <TableRow key={t.id} className="hover:bg-muted/30">
-              <TableCell className="font-medium">{t.title}</TableCell>
-              <TableCell className="text-muted-foreground">{(t as any).projects?.name ?? '—'}</TableCell>
-              <TableCell><PriorityBadge priority={t.priority} /></TableCell>
-              <TableCell>
-                <Select value={t.status} onValueChange={(v) => onStatusChange(t.id, v)}>
-                  <SelectTrigger className="h-7 w-28"><SelectValue /></SelectTrigger>
-                  <SelectContent>{TASK_STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s.replace('_', ' ')}</SelectItem>)}</SelectContent>
-                </Select>
-              </TableCell>
-              <TableCell className="text-muted-foreground">{t.due_date ?? '—'}</TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={async () => { await onDelete(t.id); toast.success('Deleted'); }} className="text-destructive"><Trash2 className="h-3.5 w-3.5 mr-2" /> Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+          {parentTasks.map((t) => {
+            const subtaskCount = tasks.filter(s => s.parent_task_id === t.id).length;
+            const doneCount = tasks.filter(s => s.parent_task_id === t.id && s.status === 'done').length;
+            return (
+              <TableRow key={t.id} className="cursor-pointer hover:bg-muted/30" onClick={() => onTaskClick(t)}>
+                <TableCell className="font-medium">{t.title}</TableCell>
+                <TableCell className="text-muted-foreground">{(t as any).projects?.name ?? '—'}</TableCell>
+                <TableCell><PriorityBadge priority={t.priority} /></TableCell>
+                <TableCell>
+                  <Select value={t.status} onValueChange={(v) => { onStatusChange(t.id, v); }}>
+                    <SelectTrigger className="h-7 w-28" onClick={e => e.stopPropagation()}><SelectValue /></SelectTrigger>
+                    <SelectContent>{TASK_STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{formatStatus(s)}</SelectItem>)}</SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell className="text-muted-foreground">{t.due_date ?? '—'}</TableCell>
+                <TableCell className="text-muted-foreground">{subtaskCount > 0 ? `${doneCount}/${subtaskCount}` : '—'}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => e.stopPropagation()}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={async (e) => { e.stopPropagation(); await onDelete(t.id); toast.success('Deleted'); }} className="text-destructive"><Trash2 className="h-3.5 w-3.5 mr-2" /> Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
   );
 }
 
-function TimelineView({ tasks }: { tasks: any[] }) {
+function TimelineView({ tasks, onTaskClick }: { tasks: any[]; onTaskClick: (t: any) => void }) {
   const today = new Date().toISOString().split('T')[0];
-  const withDates = tasks.filter((t) => t.due_date).sort((a, b) => a.due_date!.localeCompare(b.due_date!));
-  const noDates = tasks.filter((t) => !t.due_date);
+  const parentTasks = tasks.filter(t => !t.parent_task_id && !t.is_template);
+  const withDates = parentTasks.filter((t) => t.due_date).sort((a, b) => a.due_date!.localeCompare(b.due_date!));
+  const noDates = parentTasks.filter((t) => !t.due_date);
 
   const weeks: Record<string, typeof tasks> = {};
   for (const t of withDates) {
@@ -240,10 +213,14 @@ function TimelineView({ tasks }: { tasks: any[] }) {
           </div>
           <div className="ml-3 border-l-2 border-border pl-4 space-y-1.5">
             {items.map((t) => (
-              <div key={t.id} className={`bg-card rounded-xl border p-3 shadow-xs ${t.due_date! < today && t.status !== 'done' ? 'border-destructive/30' : ''}`}>
+              <div
+                key={t.id}
+                className={`bg-card rounded-xl border p-3 shadow-xs cursor-pointer hover:shadow-sm transition-shadow ${t.due_date! < today && t.status !== 'done' ? 'border-destructive/30' : ''}`}
+                onClick={() => onTaskClick(t)}
+              >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{t.title}</p>
-                  <Badge className={getStatusBadgeClasses(t.status, 'task')}>{t.status.replace('_', ' ')}</Badge>
+                  <Badge className={getStatusBadgeClasses(t.status, 'task')}>{formatStatus(t.status)}</Badge>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs text-muted-foreground">{t.due_date}</span>
@@ -259,10 +236,10 @@ function TimelineView({ tasks }: { tasks: any[] }) {
           <h3 className="text-sm font-semibold mb-2">No Due Date</h3>
           <div className="space-y-1.5">
             {noDates.map((t) => (
-              <div key={t.id} className="bg-card rounded-xl border p-3 shadow-xs">
+              <div key={t.id} className="bg-card rounded-xl border p-3 shadow-xs cursor-pointer hover:shadow-sm transition-shadow" onClick={() => onTaskClick(t)}>
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{t.title}</p>
-                  <Badge className={getStatusBadgeClasses(t.status, 'task')}>{t.status.replace('_', ' ')}</Badge>
+                  <Badge className={getStatusBadgeClasses(t.status, 'task')}>{formatStatus(t.status)}</Badge>
                 </div>
               </div>
             ))}
@@ -282,8 +259,9 @@ function CalendarView({ tasks, onStatusChange }: { tasks: any[]; onStatusChange:
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
 
+  const parentTasks = tasks.filter(t => !t.parent_task_id && !t.is_template);
   const tasksByDate: Record<string, typeof tasks> = {};
-  for (const t of tasks) {
+  for (const t of parentTasks) {
     if (t.due_date) {
       if (!tasksByDate[t.due_date]) tasksByDate[t.due_date] = [];
       tasksByDate[t.due_date].push(t);
@@ -333,56 +311,5 @@ function CalendarView({ tasks, onStatusChange }: { tasks: any[]; onStatusChange:
         })}
       </div>
     </div>
-  );
-}
-
-function CreateTaskDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
-  const createTask = useCreateTask();
-  const { data: projects } = useProjects();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [projectId, setProjectId] = useState('');
-  const [priority, setPriority] = useState('medium');
-  const [dueDate, setDueDate] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await createTask.mutateAsync({ title, description: description || null, project_id: projectId || null, priority, due_date: dueDate || null });
-      toast.success('Task created');
-      onOpenChange(false);
-      setTitle(''); setDescription(''); setProjectId(''); setPriority('medium'); setDueDate('');
-    } catch (err: any) { toast.error(err.message); }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader><DialogTitle>New Task</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5"><Label>Title *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} required className="h-10" /></div>
-          <div className="space-y-1.5"><Label>Description</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label>Project</Label>
-              <Select value={projectId} onValueChange={setProjectId}>
-                <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
-                <SelectContent>{projects?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5"><Label>Priority</Label>
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{PRIORITIES.map((p) => <SelectItem key={p} value={p} className="capitalize">{p}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="space-y-1.5"><Label>Due Date</Label><Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-10" /></div>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={createTask.isPending}>Create</Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 }

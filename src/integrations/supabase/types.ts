@@ -122,6 +122,39 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_rules: {
+        Row: {
+          action_config: Json
+          action_type: string
+          active: boolean | null
+          created_at: string | null
+          id: string
+          name: string
+          trigger_config: Json
+          trigger_type: string
+        }
+        Insert: {
+          action_config?: Json
+          action_type: string
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          name: string
+          trigger_config?: Json
+          trigger_type: string
+        }
+        Update: {
+          action_config?: Json
+          action_type?: string
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          trigger_config?: Json
+          trigger_type?: string
+        }
+        Relationships: []
+      }
       client_portal_access: {
         Row: {
           created_at: string | null
@@ -520,6 +553,47 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      focus_sessions: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          duration_minutes: number
+          ended_at: string | null
+          id: string
+          started_at: string
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          duration_minutes?: number
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          task_id?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          duration_minutes?: number
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          task_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "focus_sessions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
         ]
@@ -1263,46 +1337,156 @@ export type Database = {
           },
         ]
       }
+      task_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_custom_field_values: {
+        Row: {
+          field_id: string
+          id: string
+          task_id: string
+          value: Json | null
+        }
+        Insert: {
+          field_id: string
+          id?: string
+          task_id: string
+          value?: Json | null
+        }
+        Update: {
+          field_id?: string
+          id?: string
+          task_id?: string
+          value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_custom_field_values_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "task_custom_fields"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_custom_field_values_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_custom_fields: {
+        Row: {
+          created_at: string | null
+          field_type: string
+          id: string
+          name: string
+          options: Json | null
+          position: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          field_type: string
+          id?: string
+          name: string
+          options?: Json | null
+          position?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          field_type?: string
+          id?: string
+          name?: string
+          options?: Json | null
+          position?: number | null
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assignee: string | null
+          completed_at: string | null
           created_at: string | null
           delivery_id: string | null
           description: string | null
           due_date: string | null
           id: string
+          is_template: boolean | null
           parent_task_id: string | null
           priority: string | null
           project_id: string | null
+          recurrence: string | null
+          recurrence_rule: Json | null
           status: string
+          template_id: string | null
           title: string
           updated_at: string | null
         }
         Insert: {
           assignee?: string | null
+          completed_at?: string | null
           created_at?: string | null
           delivery_id?: string | null
           description?: string | null
           due_date?: string | null
           id?: string
+          is_template?: boolean | null
           parent_task_id?: string | null
           priority?: string | null
           project_id?: string | null
+          recurrence?: string | null
+          recurrence_rule?: Json | null
           status?: string
+          template_id?: string | null
           title: string
           updated_at?: string | null
         }
         Update: {
           assignee?: string | null
+          completed_at?: string | null
           created_at?: string | null
           delivery_id?: string | null
           description?: string | null
           due_date?: string | null
           id?: string
+          is_template?: boolean | null
           parent_task_id?: string | null
           priority?: string | null
           project_id?: string | null
+          recurrence?: string | null
+          recurrence_rule?: Json | null
           status?: string
+          template_id?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -1326,6 +1510,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
         ]
