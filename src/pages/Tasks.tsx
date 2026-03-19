@@ -93,6 +93,8 @@ export default function Tasks() {
           <TableView tasks={tasks} onStatusChange={handleStatusChange} onDelete={(id) => deleteTask.mutateAsync(id)} onTaskClick={handleTaskClick} />
         ) : view === 'timeline' ? (
           <TimelineView tasks={tasks} onTaskClick={handleTaskClick} />
+        ) : view === 'workload' ? (
+          <WorkloadView tasks={tasks} />
         ) : (
           <CalendarView tasks={tasks} onStatusChange={handleStatusChange} />
         )}
