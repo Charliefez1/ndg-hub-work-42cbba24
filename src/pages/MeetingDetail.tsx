@@ -193,47 +193,107 @@ export default function MeetingDetail() {
           </TabsContent>
 
           <TabsContent value="analysis">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">AI Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {analysis ? (
-                  <div className="space-y-4">
-                    {analysis.summary && (
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Summary</h4>
-                        <p className="text-sm">{analysis.summary}</p>
-                      </div>
-                    )}
-                    {analysis.action_items && Array.isArray(analysis.action_items) && (
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Action Items</h4>
-                        <ul className="list-disc list-inside text-sm space-y-1">
-                          {analysis.action_items.map((item: string, i: number) => <li key={i}>{item}</li>)}
-                        </ul>
-                      </div>
-                    )}
-                    {analysis.key_decisions && Array.isArray(analysis.key_decisions) && (
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Key Decisions</h4>
-                        <ul className="list-disc list-inside text-sm space-y-1">
-                          {analysis.key_decisions.map((d: string, i: number) => <li key={i}>{d}</li>)}
-                        </ul>
-                      </div>
-                    )}
-                    {analysis.sentiment && (
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Sentiment</h4>
-                        <Badge variant="outline">{analysis.sentiment}</Badge>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">No AI analysis available. Analysis is generated when a transcript is processed.</p>
-                )}
-              </CardContent>
-            </Card>
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={handleAnalyse} disabled={analysing}>
+                  {analysing ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1" />}
+                  Analyse Transcript
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleDiscoveryPrep} disabled={prepping}>
+                  {prepping ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Search className="h-3.5 w-3.5 mr-1" />}
+                  Discovery Prep
+                </Button>
+              </div>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">
+                    {analysis?.type === 'discovery_prep' ? 'Discovery Brief' : 'Post-Meeting Analysis'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analysis ? (
+                    <div className="space-y-4">
+                      {/* Common: summary / executive_summary */}
+                      {(analysis.summary || analysis.executive_summary) && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Summary</h4>
+                          <p className="text-sm">{analysis.summary || analysis.executive_summary}</p>
+                        </div>
+                      )}
+                      {/* Post-meeting: action items */}
+                      {analysis.action_items && Array.isArray(analysis.action_items) && analysis.action_items.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Action Items</h4>
+                          <ul className="list-disc list-inside text-sm space-y-1">
+                            {analysis.action_items.map((item: any, i: number) => (
+                              <li key={i}>{typeof item === 'string' ? item : item.task}{item.assignee ? ` → ${item.assignee}` : ''}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {analysis.key_decisions && Array.isArray(analysis.key_decisions) && analysis.key_decisions.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Key Decisions</h4>
+                          <ul className="list-disc list-inside text-sm space-y-1">
+                            {analysis.key_decisions.map((d: string, i: number) => <li key={i}>{d}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      {/* Discovery prep: talking points */}
+                      {analysis.talking_points && Array.isArray(analysis.talking_points) && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Talking Points</h4>
+                          <ul className="list-disc list-inside text-sm space-y-1">
+                            {analysis.talking_points.map((t: string, i: number) => <li key={i}>{t}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      {analysis.questions_to_ask && Array.isArray(analysis.questions_to_ask) && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Questions to Ask</h4>
+                          <ul className="list-disc list-inside text-sm space-y-1">
+                            {analysis.questions_to_ask.map((q: string, i: number) => <li key={i}>{q}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      {analysis.recommended_services && Array.isArray(analysis.recommended_services) && analysis.recommended_services.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Recommended Services</h4>
+                          <div className="flex flex-wrap gap-1.5">
+                            {analysis.recommended_services.map((s: string, i: number) => <Badge key={i} variant="secondary">{s}</Badge>)}
+                          </div>
+                        </div>
+                      )}
+                      {/* Sentiment + risks */}
+                      {analysis.sentiment && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Sentiment</h4>
+                          <Badge variant="outline">{analysis.sentiment}</Badge>
+                        </div>
+                      )}
+                      {analysis.risk_flags && Array.isArray(analysis.risk_flags) && analysis.risk_flags.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Risk Flags</h4>
+                          <ul className="list-disc list-inside text-sm space-y-1 text-destructive">
+                            {analysis.risk_flags.map((r: string, i: number) => <li key={i}>{r}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      {analysis.follow_ups && Array.isArray(analysis.follow_ups) && analysis.follow_ups.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Follow-ups</h4>
+                          <ul className="list-disc list-inside text-sm space-y-1">
+                            {analysis.follow_ups.map((f: string, i: number) => <li key={i}>{f}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">No analysis yet. Use the buttons above to generate one.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
