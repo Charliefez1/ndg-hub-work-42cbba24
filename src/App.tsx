@@ -87,7 +87,7 @@ const App = () => {
               <Route path="/curriculum" element={<Guard><ErrorBoundary><CurriculumTemplates /></ErrorBoundary></Guard>} />
 
               {/* Client portal */}
-              <Route path="/portal" element={<RouteGuard allowedRoles={['client']}><ErrorBoundary><Portal /></ErrorBoundary></RouteGuard>} />
+              <Route path="/portal" element={<RouteGuard allowedRoles={['admin', 'team', 'client']}><ErrorBoundary><Portal /></ErrorBoundary></RouteGuard>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
