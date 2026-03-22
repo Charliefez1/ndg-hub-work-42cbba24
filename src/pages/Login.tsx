@@ -96,9 +96,9 @@ export default function Login() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
             <div className="h-10 w-10 rounded-xl gradient-accent flex items-center justify-center">
-              <span className="font-satoshi text-lg font-bold text-white">N</span>
+              <span className="font-satoshi text-lg font-bold text-white">NQI</span>
             </div>
-            <span className="font-satoshi text-xl font-bold tracking-tight">NDG Hub</span>
+            <span className="font-satoshi text-xl font-bold tracking-tight">NQI Hub</span>
           </div>
 
           <Card className="shadow-lg border-border/50">

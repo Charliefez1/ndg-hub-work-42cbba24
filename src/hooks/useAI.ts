@@ -37,7 +37,7 @@ function incrementRate(): boolean {
   const state = getRateState();
   if (state.count >= RATE_LIMIT) return false;
   state.count++;
-  localStorage.setItem('ndg-ai-rate', JSON.stringify(state));
+  localStorage.setItem('nqi-ai-rate', JSON.stringify(state));
   return true;
 }
 

@@ -1,8 +1,8 @@
 export type Theme = 'light' | 'dark' | 'system';
 export type Accent = 'steel' | 'sky' | 'mint' | 'amber' | 'purple';
 
-const THEME_KEY = 'ndg-theme';
-const ACCENT_KEY = 'ndg-accent';
+const THEME_KEY = 'nqi-theme';
+const ACCENT_KEY = 'nqi-accent';
 
 export function getStoredTheme(): Theme {
   return (localStorage.getItem(THEME_KEY) as Theme) || 'system';
