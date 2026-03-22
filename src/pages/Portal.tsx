@@ -141,6 +141,7 @@ export default function Portal() {
               <TabsTrigger value="workshops">Workshops ({deliveries?.length ?? 0})</TabsTrigger>
               <TabsTrigger value="invoices">Invoices ({invoices?.length ?? 0})</TabsTrigger>
               {canSubmitForms && <TabsTrigger value="feedback">Feedback</TabsTrigger>}
+              <TabsTrigger value="analytics"><BarChart3 className="h-3.5 w-3.5 mr-1" />Analytics</TabsTrigger>
             </TabsList>
 
             <TabsContent value="projects" className="mt-3">
