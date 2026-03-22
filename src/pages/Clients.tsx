@@ -12,23 +12,26 @@ import { useOrganisations, useCreateOrganisation } from '@/hooks/useOrganisation
 import { Plus, Search, Users, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Pagination, usePagination } from '@/components/shared/Pagination';
 
 export default function Clients() {
   const { data: orgs, isLoading } = useOrganisations();
   const createOrg = useCreateOrganisation();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [page, setPage] = useState(1);
 
   const filtered = orgs?.filter((o) =>
     o.name.toLowerCase().includes(search.toLowerCase()) ||
     o.sector?.toLowerCase().includes(search.toLowerCase())
-  );
+  ) ?? [];
+  const { paginated, total } = usePagination(filtered, page);
 
   return (
     <AppShell>
       <div className="space-y-5">
         <div className="flex items-center justify-between">
-          <h1 className="text-page-title">Clients</h1>
+          <h1 className="text-page-title">Organisations</h1>
           <Button onClick={() => setDialogOpen(true)} size="sm">
             <Plus className="h-4 w-4 mr-1" /> New Client
           </Button>
