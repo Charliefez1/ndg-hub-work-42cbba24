@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getStoredTheme, getStoredAccent, setTheme, setAccent, type Theme, type Accent } from '@/lib/theme';
-import { Sun, Moon, Monitor, Check } from 'lucide-react';
+import { Sun, Moon, Monitor, Check, Calendar, Mail, HardDrive, Receipt, Brain, MessageCircle, ExternalLink } from 'lucide-react';
 
 const ACCENT_OPTIONS: { value: Accent; label: string; color: string }[] = [
   { value: 'steel', label: 'Steel', color: '#3B82F6' },
@@ -26,6 +27,57 @@ const THEME_OPTIONS: { value: Theme; label: string; icon: React.ReactNode }[] = 
   { value: 'system', label: 'System', icon: <Monitor className="h-4 w-4" /> },
 ];
 
+const INTEGRATIONS = [
+  {
+    id: 'google-calendar',
+    name: 'Google Calendar',
+    description: 'Sync meetings bidirectionally with Google Calendar',
+    icon: Calendar,
+    status: 'not_connected' as const,
+    color: 'text-vivid-blue',
+  },
+  {
+    id: 'gmail',
+    name: 'Gmail',
+    description: 'Send and receive client emails directly from NQI Hub',
+    icon: Mail,
+    status: 'not_connected' as const,
+    color: 'text-vivid-red',
+  },
+  {
+    id: 'google-drive',
+    name: 'Google Drive',
+    description: 'Store and link project documents in Google Drive',
+    icon: HardDrive,
+    status: 'not_connected' as const,
+    color: 'text-vivid-yellow',
+  },
+  {
+    id: 'quickbooks',
+    name: 'QuickBooks',
+    description: 'Sync invoices and payments with QuickBooks Online',
+    icon: Receipt,
+    status: 'not_connected' as const,
+    color: 'text-vivid-green',
+  },
+  {
+    id: 'clarify-crm',
+    name: 'Clarify AI CRM',
+    description: 'Import leads and deal data from Clarify',
+    icon: Brain,
+    status: 'not_connected' as const,
+    color: 'text-vivid-purple',
+  },
+  {
+    id: 'telegram',
+    name: 'Telegram',
+    description: 'Push notifications and bot commands via Telegram',
+    icon: MessageCircle,
+    status: 'not_connected' as const,
+    color: 'text-vivid-cyan',
+  },
+];
+
 export default function Settings() {
   const { profile, user } = useAuth();
   const { toast } = useToast();
@@ -39,7 +91,6 @@ export default function Settings() {
     if (profile?.display_name) setDisplayName(profile.display_name);
   }, [profile]);
 
-  // Load telegram_chat_id from profiles
   useEffect(() => {
     if (user?.id) {
       supabase.from('profiles').select('telegram_chat_id').eq('id', user.id).single()
@@ -83,6 +134,7 @@ export default function Settings() {
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
+            <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
 
@@ -164,6 +216,46 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="integrations" className="mt-3 space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Connect external services to extend NQI Hub's capabilities.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {INTEGRATIONS.map((integration) => {
+                const Icon = integration.icon;
+                return (
+                  <Card key={integration.id} className="relative overflow-hidden">
+                    <CardContent className="pt-5 pb-4 space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`h-10 w-10 rounded-lg bg-muted flex items-center justify-center ${integration.color}`}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">{integration.name}</p>
+                            <Badge variant="outline" className="text-[10px] mt-0.5 border-amber-500/30 text-amber-600 dark:text-amber-400">
+                              Not Connected
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-caption text-muted-foreground leading-relaxed">
+                        {integration.description}
+                      </p>
+                      <Button variant="outline" size="sm" className="w-full gap-1.5" disabled>
+                        <ExternalLink className="h-3 w-3" />
+                        Connect
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+            <p className="text-caption text-muted-foreground">
+              Integration connections are coming soon. Contact your administrator for early access.
+            </p>
           </TabsContent>
 
           <TabsContent value="notifications" className="mt-3">
