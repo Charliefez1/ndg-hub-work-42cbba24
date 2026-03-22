@@ -67,11 +67,11 @@ export function AppSidebar() {
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center gap-2.5">
           <div className="h-8 w-8 shrink-0 rounded-lg gradient-accent flex items-center justify-center shadow-sm">
-            <span className="font-satoshi text-sm font-bold text-white">N</span>
+            <span className="font-satoshi text-sm font-bold text-white">NQI</span>
           </div>
           {!collapsed && (
             <span className="font-satoshi text-[15px] font-bold text-sidebar-foreground tracking-tight">
-              NDG Hub
+              NQI Hub
             </span>
           )}
         </div>
