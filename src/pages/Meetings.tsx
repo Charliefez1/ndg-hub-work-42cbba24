@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,7 +49,7 @@ export default function Meetings() {
             {meetings.map((m) => (
               <Card key={m.id}>
                 <CardContent className="py-3 flex items-center justify-between">
-                  <div>
+                  <Link to={`/meetings/${m.id}`} className="flex-1 hover:opacity-80 transition-opacity">
                     <p className="font-medium text-sm">{m.title}</p>
                     <div className="flex items-center gap-3 text-caption text-muted-foreground mt-1">
                       <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{format(new Date(m.scheduled_at), 'dd MMM yyyy, HH:mm')}</span>
@@ -58,7 +59,7 @@ export default function Meetings() {
                     {(m as any).organisations?.name && (
                       <p className="text-caption text-muted-foreground mt-0.5">{(m as any).organisations.name}</p>
                     )}
-                  </div>
+                  </Link>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary">{m.meeting_type}</Badge>
                     <DropdownMenu>
