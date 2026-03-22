@@ -65,9 +65,9 @@ export default function Login() {
         <div className="relative z-10 flex flex-col justify-between p-10 text-white w-full">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <span className="font-satoshi text-lg font-bold">N</span>
+              <span className="font-satoshi text-lg font-bold">NQI</span>
             </div>
-            <span className="font-satoshi text-xl font-bold tracking-tight">NDG Hub</span>
+            <span className="font-satoshi text-xl font-bold tracking-tight">NQI Hub</span>
           </div>
 
           <div className="space-y-6">
