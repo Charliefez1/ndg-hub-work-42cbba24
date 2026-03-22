@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useUpdateMeeting, useDeleteMeeting } from '@/hooks/useMeetings';
 import { PageSkeleton } from '@/components/shared/PageSkeleton';
-import { ArrowLeft, Calendar, Clock, MapPin, Trash2, FileText, Brain, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, Trash2, FileText, Brain, MessageSquare, Sparkles, Loader2, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
