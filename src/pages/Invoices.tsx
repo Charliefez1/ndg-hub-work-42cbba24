@@ -10,14 +10,20 @@ import { FileText, Plus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
 import { toast } from 'sonner';
+import { Pagination, usePagination } from '@/components/shared/Pagination';
+import { formatDate, formatGBP } from '@/lib/format';
 
 export default function Invoices() {
   const { data: invoices, isLoading } = useInvoices();
   const updateInvoice = useUpdateInvoice();
+  const [page, setPage] = useState(1);
 
   const totalRevenue = invoices?.filter((i) => i.status === 'paid').reduce((s, i) => s + Number(i.total), 0) ?? 0;
   const totalOutstanding = invoices?.filter((i) => i.status === 'sent').reduce((s, i) => s + Number(i.total), 0) ?? 0;
   const totalDraft = invoices?.filter((i) => i.status === 'draft').length ?? 0;
+
+  const allInvoices = invoices ?? [];
+  const { paginated, total } = usePagination(allInvoices, page);
 
   const markPaid = async (id: string) => {
     await updateInvoice.mutateAsync({ id, status: 'paid', paid_date: new Date().toISOString().split('T')[0] });
