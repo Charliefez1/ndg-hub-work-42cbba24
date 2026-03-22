@@ -14,13 +14,15 @@ import { usePartners, useCreatePartner, useUpdatePartner, useDeletePartner, type
 import { Plus, Users, MoreHorizontal, Pencil, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
-const PARTNER_TYPES = ['referral', 'delivery', 'technology', 'content', 'other'] as const;
+const PARTNER_TYPES = ['referral', 'delivery', 'technology', 'content', 'edi', 'wellbeing', 'other'] as const;
 
 const TYPE_COLORS: Record<string, { border: string; bg: string; text: string; dot: string }> = {
   referral:   { border: 'border-l-vivid-cyan',    bg: 'bg-vivid-cyan/10',    text: 'text-vivid-cyan',    dot: 'bg-vivid-cyan' },
   delivery:   { border: 'border-l-vivid-purple',  bg: 'bg-vivid-purple/10',  text: 'text-vivid-purple',  dot: 'bg-vivid-purple' },
   technology: { border: 'border-l-vivid-indigo',  bg: 'bg-vivid-indigo/10',  text: 'text-vivid-indigo',  dot: 'bg-vivid-indigo' },
   content:    { border: 'border-l-vivid-pink',    bg: 'bg-vivid-pink/10',    text: 'text-vivid-pink',    dot: 'bg-vivid-pink' },
+  edi:        { border: 'border-l-vivid-teal',    bg: 'bg-vivid-teal/10',    text: 'text-vivid-teal',    dot: 'bg-vivid-teal' },
+  wellbeing:  { border: 'border-l-vivid-lime',    bg: 'bg-vivid-lime/10',    text: 'text-vivid-lime',    dot: 'bg-vivid-lime' },
   other:      { border: 'border-l-muted-foreground', bg: 'bg-muted/50', text: 'text-muted-foreground', dot: 'bg-muted-foreground' },
 };
 
