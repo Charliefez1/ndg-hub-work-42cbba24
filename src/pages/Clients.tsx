@@ -51,31 +51,33 @@ export default function Clients() {
             {!search && <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4 mr-1" /> New Client</Button>}
           </div>
         ) : (
-          <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Sector</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginated.map((o) => (
-                  <TableRow key={o.id}>
-                    <TableCell>
-                      <Link to={`/clients/${o.id}`} className="font-medium text-primary hover:underline">{o.name}</Link>
-                    </TableCell>
-                    <TableCell>{o.sector ?? '—'}</TableCell>
-                    <TableCell>{o.email ?? '—'}</TableCell>
-                    <TableCell><Badge variant={o.status === 'active' ? 'default' : 'secondary'} className="capitalize">{o.status ?? 'active'}</Badge></TableCell>
+          <>
+            <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Sector</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          <Pagination page={page} total={total} onPageChange={setPage} />
+                </TableHeader>
+                <TableBody>
+                  {paginated.map((o) => (
+                    <TableRow key={o.id}>
+                      <TableCell>
+                        <Link to={`/clients/${o.id}`} className="font-medium text-primary hover:underline">{o.name}</Link>
+                      </TableCell>
+                      <TableCell>{o.sector ?? '—'}</TableCell>
+                      <TableCell>{o.email ?? '—'}</TableCell>
+                      <TableCell><Badge variant={o.status === 'active' ? 'default' : 'secondary'} className="capitalize">{o.status ?? 'active'}</Badge></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <Pagination page={page} total={total} onPageChange={setPage} />
+          </>
         )}
       </div>
 
