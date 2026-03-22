@@ -7,11 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { getStoredTheme, getStoredAccent, setTheme, setAccent, type Theme, type Accent } from '@/lib/theme';
-import { Sun, Moon, Monitor, Check, Calendar, Mail, HardDrive, Receipt, Brain, MessageCircle, ExternalLink } from 'lucide-react';
+import { Sun, Moon, Monitor, Check, Calendar, Mail, HardDrive, Receipt, Brain, MessageCircle, ExternalLink, Zap } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 const ACCENT_OPTIONS: { value: Accent; label: string; color: string }[] = [
   { value: 'steel', label: 'Steel', color: '#3B82F6' },

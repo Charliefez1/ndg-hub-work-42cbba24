@@ -21,6 +21,120 @@ Deno.serve(async (req: Request) => {
     const todayStr = now.toISOString().split("T")[0];
     const results: string[] = [];
 
+    // ─── QUEUE PROCESSING ───
+    const { data: queueItems } = await supabase
+      .from("automation_queue")
+      .select("*")
+      .eq("processed", false)
+      .order("created_at", { ascending: true })
+      .limit(50);
+
+    for (const item of queueItems || []) {
+      try {
+        if (item.entity_type === "projects") {
+          // When project moves to delivery → trigger deal-won superagent
+          if (item.new_status === "delivery") {
+            try {
+              await supabase.functions.invoke("superagent-deal-won", {
+                body: { projectId: item.entity_id },
+              });
+              results.push(`Triggered deal-won for project ${item.entity_id}`);
+            } catch (e) {
+              results.push(`Deal-won trigger failed: ${e.message}`);
+            }
+          }
+        }
+
+        if (item.entity_type === "deliveries") {
+          // When delivery moves to delivered → auto-create feedback form if none exists
+          if (item.new_status === "delivered") {
+            const { data: delivery } = await supabase
+              .from("deliveries")
+              .select("id, title, project_id, organisation_id, feedback_form_id")
+              .eq("id", item.entity_id)
+              .single();
+
+            if (delivery && !delivery.feedback_form_id) {
+              const { data: form } = await supabase.from("forms").insert({
+                title: `Feedback: ${delivery.title}`,
+                type: "feedback",
+                delivery_id: delivery.id,
+                project_id: delivery.project_id,
+                organisation_id: delivery.organisation_id,
+                active: true,
+                fields: [
+                  { name: "rating", type: "rating", label: "Overall satisfaction (1-5)", required: true },
+                  { name: "comments", type: "textarea", label: "Any comments or suggestions?", required: false },
+                ],
+              }).select().single();
+
+              if (form) {
+                await supabase.from("deliveries").update({ feedback_form_id: form.id }).eq("id", delivery.id);
+                results.push(`Auto-created feedback form for: ${delivery.title}`);
+              }
+            }
+          }
+
+          // Check if ALL deliveries in a project are complete → advance project
+          if (item.new_status === "complete") {
+            const { data: delivery } = await supabase
+              .from("deliveries")
+              .select("project_id")
+              .eq("id", item.entity_id)
+              .single();
+
+            if (delivery?.project_id) {
+              const { data: allDeliveries } = await supabase
+                .from("deliveries")
+                .select("status")
+                .eq("project_id", delivery.project_id);
+
+              const allComplete = allDeliveries?.every(d => d.status === "complete" || d.status === "cancelled");
+              if (allComplete && allDeliveries && allDeliveries.length > 0) {
+                await supabase
+                  .from("projects")
+                  .update({ status: "feedback_analytics" })
+                  .eq("id", delivery.project_id)
+                  .in("status", ["delivery"]);
+                results.push(`Auto-advanced project ${delivery.project_id} to feedback_analytics`);
+              }
+            }
+          }
+        }
+
+        if (item.entity_type === "invoices") {
+          // When invoice sent → schedule reminder if due_date exists
+          if (item.new_status === "sent") {
+            const { data: invoice } = await supabase
+              .from("invoices")
+              .select("id, invoice_number, due_date, organisation_id")
+              .eq("id", item.entity_id)
+              .single();
+
+            if (invoice?.due_date) {
+              const dueDate = new Date(invoice.due_date);
+              const reminderDate = new Date(dueDate);
+              reminderDate.setDate(reminderDate.getDate() - 3);
+
+              if (reminderDate > now) {
+                results.push(`Invoice ${invoice.invoice_number} reminder scheduled for ${reminderDate.toISOString().split("T")[0]}`);
+              }
+            }
+          }
+        }
+
+        // Mark as processed
+        await supabase
+          .from("automation_queue")
+          .update({ processed: true })
+          .eq("id", item.id);
+      } catch (e) {
+        results.push(`Queue item ${item.id} error: ${e.message}`);
+      }
+    }
+
+    // ─── EXISTING TIME-BASED CHECKS ───
+
     // 1. Overdue task alerts
     const { data: overdueTasks } = await supabase
       .from("tasks")
@@ -31,7 +145,6 @@ Deno.serve(async (req: Request) => {
 
     for (const task of overdueTasks || []) {
       if (!task.assignee) continue;
-      // Check if notification already exists today
       const { data: existing } = await supabase
         .from("notifications")
         .select("id")
@@ -52,7 +165,7 @@ Deno.serve(async (req: Request) => {
       results.push(`Overdue alert: ${task.title}`);
     }
 
-    // 2. Stale task nudges (in_progress for >3 days without update)
+    // 2. Stale task nudges
     const threeDaysAgo = new Date(now);
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
     const { data: staleTasks } = await supabase
@@ -84,7 +197,7 @@ Deno.serve(async (req: Request) => {
       results.push(`Stale nudge: ${task.title}`);
     }
 
-    // 3. Workload balancer — notify admin if any user has >10 active tasks
+    // 3. Workload balancer
     const { data: allActiveTasks } = await supabase
       .from("tasks")
       .select("assignee")
@@ -97,7 +210,6 @@ Deno.serve(async (req: Request) => {
       if (t.assignee) taskCounts[t.assignee] = (taskCounts[t.assignee] || 0) + 1;
     }
 
-    // Find admins
     const { data: admins } = await supabase
       .from("user_roles")
       .select("user_id")
@@ -133,7 +245,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // 4. Invoice reminders — unpaid invoices past due
+    // 4. Invoice reminders
     const { data: overdueInvoices } = await supabase
       .from("invoices")
       .select("id, invoice_number, due_date, total")

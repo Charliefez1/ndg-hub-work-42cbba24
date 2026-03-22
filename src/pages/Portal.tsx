@@ -12,7 +12,9 @@ import { getStatusBadgeClasses } from '@/lib/status-colors';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PageSkeleton } from '@/components/shared/PageSkeleton';
-import { FolderKanban, Briefcase, FileText, ClipboardList, BarChart3 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { ProjectTimeline } from '@/components/portal/ProjectTimeline';
+import { FolderKanban, Briefcase, FileText, ClipboardList, BarChart3, FileDown, MapPin, Users, Calendar, FileIcon } from 'lucide-react';
 
 function TabSkeleton({ rows = 3 }: { rows?: number }) {
   return (
@@ -69,25 +71,72 @@ export default function Portal() {
     },
   });
 
-  // Get active feedback forms for the client's deliveries
+  const projectIds = projects?.map(p => p.id) ?? [];
+
+  // Documents for client
+  const canViewDocuments = access?.some((a) => (a.permissions as any)?.can_view_documents === true);
+
+  const { data: documents, isLoading: documentsLoading } = useQuery({
+    queryKey: ['portal-documents', projectIds],
+    enabled: canViewDocuments && projectIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('entity_type', 'project')
+        .in('entity_id', projectIds)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Sessions for workshop prep
+  const deliveryIds = deliveries?.map(d => d.id) ?? [];
+  const { data: sessions } = useQuery({
+    queryKey: ['portal-sessions', deliveryIds],
+    enabled: deliveryIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('id, title, delivery_id, duration_minutes, session_type, sort_order')
+        .in('delivery_id', deliveryIds)
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: feedbackForms } = useQuery({
     queryKey: ['portal-feedback-forms', orgIds],
     enabled: orgIds.length > 0,
     queryFn: async () => {
-      const deliveryIds = deliveries?.map((d) => d.id) ?? [];
-      if (!deliveryIds.length) return [];
+      const dIds = deliveries?.map((d) => d.id) ?? [];
+      if (!dIds.length) return [];
       const { data, error } = await supabase
         .from('forms')
         .select('*, deliveries(title, delivery_date)')
         .eq('type', 'feedback')
         .eq('active', true)
-        .in('delivery_id', deliveryIds);
+        .in('delivery_id', dIds);
       if (error) throw error;
       return data;
     },
   });
 
   const canSubmitForms = access?.some((a) => (a.permissions as any)?.can_submit_forms !== false);
+
+  // Satisfaction score
+  const completedDeliveries = deliveries?.filter(d => d.status === 'delivered' || d.status === 'complete') ?? [];
+  const avgSatisfaction = completedDeliveries.length > 0
+    ? completedDeliveries.filter(d => d.satisfaction_score != null).reduce((s, d) => s + Number(d.satisfaction_score), 0)
+      / (completedDeliveries.filter(d => d.satisfaction_score != null).length || 1)
+    : null;
+
+  // Prep-ready workshops
+  const prepWorkshops = deliveries?.filter(d =>
+    ['confirmed', 'scheduled', 'planning'].includes(d.status) && d.delivery_date
+  ) ?? [];
 
   if (accessLoading) {
     return (
@@ -136,14 +185,16 @@ export default function Portal() {
           </Card>
         ) : (
           <Tabs defaultValue="projects">
-            <TabsList>
+            <TabsList className="flex-wrap">
               <TabsTrigger value="projects">Projects ({projects?.length ?? 0})</TabsTrigger>
               <TabsTrigger value="workshops">Workshops ({deliveries?.length ?? 0})</TabsTrigger>
               <TabsTrigger value="invoices">Invoices ({invoices?.length ?? 0})</TabsTrigger>
+              {canViewDocuments && <TabsTrigger value="documents">Documents</TabsTrigger>}
               {canSubmitForms && <TabsTrigger value="feedback">Feedback</TabsTrigger>}
               <TabsTrigger value="analytics"><BarChart3 className="h-3.5 w-3.5 mr-1" />Analytics</TabsTrigger>
             </TabsList>
 
+            {/* Projects with Timeline */}
             <TabsContent value="projects" className="mt-3">
               {projectsError ? (
                 <Card><CardContent className="pt-6 text-center text-destructive">Failed to load projects.</CardContent></Card>
@@ -152,15 +203,18 @@ export default function Portal() {
               ) : !projects?.length ? (
                 <EmptyState icon={FolderKanban} title="No projects found" description="Your projects will appear here once they're set up." />
               ) : (
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {projects.map((p) => (
                     <Card key={p.id}>
-                      <CardContent className="pt-4 flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{p.name}</p>
-                          <p className="text-caption text-muted-foreground">{p.start_date ?? 'No start date'} — {p.end_date ?? 'Ongoing'}</p>
+                      <CardContent className="pt-4 pb-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{p.name}</p>
+                            <p className="text-caption text-muted-foreground">{p.start_date ?? 'No start date'} — {p.end_date ?? 'Ongoing'}</p>
+                          </div>
+                          <Badge className={getStatusBadgeClasses(p.status, 'project')}>{p.status.replace(/_/g, ' ')}</Badge>
                         </div>
-                        <Badge className={getStatusBadgeClasses(p.status, 'project')}>{p.status.replace('_', ' ')}</Badge>
+                        <ProjectTimeline status={p.status} />
                       </CardContent>
                     </Card>
                   ))}
@@ -168,6 +222,7 @@ export default function Portal() {
               )}
             </TabsContent>
 
+            {/* Workshops with Prep Cards */}
             <TabsContent value="workshops" className="mt-3">
               {deliveriesError ? (
                 <Card><CardContent className="pt-6 text-center text-destructive">Failed to load workshops.</CardContent></Card>
@@ -176,22 +231,48 @@ export default function Portal() {
               ) : !deliveries?.length ? (
                 <EmptyState icon={Briefcase} title="No workshops found" description="Your upcoming workshops will appear here." />
               ) : (
-                <div className="space-y-1.5">
-                  {deliveries.map((d) => (
-                    <Card key={d.id}>
-                      <CardContent className="pt-4 flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{d.title}</p>
-                          <p className="text-caption text-muted-foreground">{d.delivery_date ?? 'Date TBD'} · {d.location ?? 'Location TBD'}</p>
-                        </div>
-                        <Badge className={getStatusBadgeClasses(d.status, 'delivery')}>{d.status.replace('_', ' ')}</Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="space-y-2">
+                  {deliveries.map((d) => {
+                    const isPrepReady = ['confirmed', 'scheduled'].includes(d.status);
+                    const deliverySessions = sessions?.filter(s => s.delivery_id === d.id) ?? [];
+
+                    return (
+                      <Card key={d.id} className={isPrepReady ? 'border-primary/20' : ''}>
+                        <CardContent className="pt-4 pb-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{d.title}</p>
+                              <div className="flex items-center gap-3 mt-1 text-caption text-muted-foreground">
+                                {d.delivery_date && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{d.delivery_date}</span>}
+                                {d.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{d.location}</span>}
+                                {d.delegate_count && <span className="flex items-center gap-1"><Users className="h-3 w-3" />{d.delegate_count} delegates</span>}
+                              </div>
+                            </div>
+                            <Badge className={getStatusBadgeClasses(d.status, 'delivery')}>{d.status.replace(/_/g, ' ')}</Badge>
+                          </div>
+
+                          {isPrepReady && deliverySessions.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-border/50">
+                              <p className="text-xs font-medium text-muted-foreground mb-1.5">Session Agenda</p>
+                              <div className="space-y-1">
+                                {deliverySessions.map((s) => (
+                                  <div key={s.id} className="flex items-center justify-between text-sm bg-muted/40 rounded px-2.5 py-1.5">
+                                    <span>{s.title}</span>
+                                    {s.duration_minutes && <span className="text-xs text-muted-foreground">{s.duration_minutes}min</span>}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
 
+            {/* Invoices with Download */}
             <TabsContent value="invoices" className="mt-3">
               {invoicesError ? (
                 <Card><CardContent className="pt-6 text-center text-destructive">Failed to load invoices.</CardContent></Card>
@@ -227,6 +308,42 @@ export default function Portal() {
               )}
             </TabsContent>
 
+            {/* Documents Tab */}
+            {canViewDocuments && (
+              <TabsContent value="documents" className="mt-3">
+                {documentsLoading ? (
+                  <TabSkeleton rows={3} />
+                ) : !documents?.length ? (
+                  <EmptyState icon={FileIcon} title="No documents available" description="Project documents will appear here when shared by your team." />
+                ) : (
+                  <div className="space-y-1.5">
+                    {documents.map((doc) => (
+                      <Card key={doc.id}>
+                        <CardContent className="pt-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
+                              <FileIcon className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">{doc.name}</p>
+                              <p className="text-caption text-muted-foreground">
+                                {doc.created_at ? new Date(doc.created_at).toLocaleDateString('en-GB') : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={doc.url} target="_blank" rel="noopener noreferrer" className="gap-1.5">
+                              <FileDown className="h-3.5 w-3.5" /> Download
+                            </a>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            )}
+
             {canSubmitForms && (
               <TabsContent value="feedback" className="mt-3">
                 {!feedbackForms?.length ? (
@@ -253,8 +370,10 @@ export default function Portal() {
                 )}
               </TabsContent>
             )}
+
+            {/* Analytics with Satisfaction */}
             <TabsContent value="analytics" className="mt-3">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <Card>
                   <CardContent className="pt-4 text-center">
                     <p className="text-2xl font-bold">{projects?.length ?? 0}</p>
@@ -269,11 +388,28 @@ export default function Portal() {
                 </Card>
                 <Card>
                   <CardContent className="pt-4 text-center">
-                    <p className="text-2xl font-bold">{deliveries?.filter(d => d.status === 'delivered' || d.status === 'complete').length ?? 0}</p>
-                    <p className="text-caption text-muted-foreground">Completed Workshops</p>
+                    <p className="text-2xl font-bold">{completedDeliveries.length}</p>
+                    <p className="text-caption text-muted-foreground">Completed</p>
+                  </CardContent>
+                </Card>
+                <Card className={avgSatisfaction != null ? 'border-primary/20' : ''}>
+                  <CardContent className="pt-4 text-center">
+                    {avgSatisfaction != null ? (
+                      <>
+                        <p className="text-2xl font-bold text-primary">{avgSatisfaction.toFixed(1)}<span className="text-sm text-muted-foreground">/5</span></p>
+                        <Progress value={(avgSatisfaction / 5) * 100} className="h-1.5 mt-2" />
+                        <p className="text-caption text-muted-foreground mt-1">Avg Satisfaction</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold text-muted-foreground">—</p>
+                        <p className="text-caption text-muted-foreground">Avg Satisfaction</p>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                 <Card>
                   <CardHeader className="pb-2"><CardTitle className="text-sm">Projects by Status</CardTitle></CardHeader>
@@ -284,7 +420,7 @@ export default function Portal() {
                           projects.reduce((acc, p) => { acc[p.status] = (acc[p.status] || 0) + 1; return acc; }, {} as Record<string, number>)
                         ).map(([status, count]) => (
                           <div key={status} className="flex justify-between items-center">
-                            <Badge className="capitalize">{status.replace(/_/g, ' ')}</Badge>
+                            <Badge className={getStatusBadgeClasses(status, 'project')}>{status.replace(/_/g, ' ')}</Badge>
                             <span className="text-sm font-medium">{count}</span>
                           </div>
                         ))}
