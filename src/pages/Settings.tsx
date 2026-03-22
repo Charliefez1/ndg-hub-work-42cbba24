@@ -90,6 +90,20 @@ export default function Settings() {
   const [currentAccent, setCurrentAccent] = useState<Accent>(getStoredAccent());
   const [saving, setSaving] = useState(false);
 
+  // Automation log
+  const { data: automationLog } = useQuery({
+    queryKey: ['automation-log'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('automation_queue')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(30);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (profile?.display_name) setDisplayName(profile.display_name);
   }, [profile]);
