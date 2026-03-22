@@ -65,6 +65,38 @@ export default function MeetingDetail() {
     toast.success('Transcript saved');
   };
 
+  const handleAnalyse = async () => {
+    setAnalysing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('superagent-post-meeting', {
+        body: { meetingId: meeting.id },
+      });
+      if (error) throw error;
+      toast.success(`Analysis complete — ${data.analysis?.action_items?.length || 0} action items created`);
+      queryClient.invalidateQueries({ queryKey: ['meeting', id] });
+    } catch (err: any) {
+      toast.error(err.message || 'Analysis failed');
+    } finally {
+      setAnalysing(false);
+    }
+  };
+
+  const handleDiscoveryPrep = async () => {
+    setPrepping(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('superagent-discovery-prep', {
+        body: { meetingId: meeting.id },
+      });
+      if (error) throw error;
+      toast.success('Discovery brief generated');
+      queryClient.invalidateQueries({ queryKey: ['meeting', id] });
+    } catch (err: any) {
+      toast.error(err.message || 'Prep failed');
+    } finally {
+      setPrepping(false);
+    }
+  };
+
   const analysis = meeting.analysis as Record<string, any> | null;
 
   return (
