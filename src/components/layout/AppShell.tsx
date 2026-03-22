@@ -11,11 +11,11 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-background relative grain">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Top bar */}
-          <header className="h-12 flex items-center justify-between px-4 md:px-6 sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border/50">
+          {/* Top bar — frosted glass */}
+          <header className="h-12 flex items-center justify-between px-4 md:px-6 sticky top-0 z-30 glass border-b border-border/40">
             <SidebarTrigger className="md:hidden" />
             <div className="flex-1" />
             <NotificationBell />
