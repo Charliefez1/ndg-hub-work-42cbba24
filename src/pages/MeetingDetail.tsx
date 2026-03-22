@@ -18,8 +18,11 @@ import ReactMarkdown from 'react-markdown';
 export default function MeetingDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const updateMeeting = useUpdateMeeting();
   const deleteMeeting = useDeleteMeeting();
+  const [analysing, setAnalysing] = useState(false);
+  const [prepping, setPrepping] = useState(false);
 
   const { data: meeting, isLoading } = useQuery({
     queryKey: ['meeting', id],
