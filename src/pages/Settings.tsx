@@ -134,11 +134,12 @@ export default function Settings() {
         <h1 className="text-page-title">Settings</h1>
 
         <Tabs defaultValue="profile">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="automations"><Zap className="h-3.5 w-3.5 mr-1" />Automations</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="mt-3 space-y-3">
