@@ -93,7 +93,7 @@ export default function Portal() {
     return (
       <div className="min-h-screen bg-background">
         <header className="h-14 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-30">
-          <span className="font-satoshi text-lg font-bold">NDG Hub — Client Portal</span>
+          <span className="font-satoshi text-lg font-bold">NQI Hub — Client Portal</span>
         </header>
         <main className="max-w-5xl mx-auto p-6">
           <PageSkeleton variant="dashboard" />
