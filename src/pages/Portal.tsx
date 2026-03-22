@@ -12,7 +12,7 @@ import { getStatusBadgeClasses } from '@/lib/status-colors';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PageSkeleton } from '@/components/shared/PageSkeleton';
-import { FolderKanban, Briefcase, FileText, ClipboardList } from 'lucide-react';
+import { FolderKanban, Briefcase, FileText, ClipboardList, BarChart3 } from 'lucide-react';
 
 function TabSkeleton({ rows = 3 }: { rows?: number }) {
   return (
@@ -141,6 +141,7 @@ export default function Portal() {
               <TabsTrigger value="workshops">Workshops ({deliveries?.length ?? 0})</TabsTrigger>
               <TabsTrigger value="invoices">Invoices ({invoices?.length ?? 0})</TabsTrigger>
               {canSubmitForms && <TabsTrigger value="feedback">Feedback</TabsTrigger>}
+              <TabsTrigger value="analytics"><BarChart3 className="h-3.5 w-3.5 mr-1" />Analytics</TabsTrigger>
             </TabsList>
 
             <TabsContent value="projects" className="mt-3">
@@ -252,6 +253,68 @@ export default function Portal() {
                 )}
               </TabsContent>
             )}
+            <TabsContent value="analytics" className="mt-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className="text-2xl font-bold">{projects?.length ?? 0}</p>
+                    <p className="text-caption text-muted-foreground">Total Projects</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className="text-2xl font-bold">{deliveries?.length ?? 0}</p>
+                    <p className="text-caption text-muted-foreground">Total Workshops</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className="text-2xl font-bold">{deliveries?.filter(d => d.status === 'delivered' || d.status === 'complete').length ?? 0}</p>
+                    <p className="text-caption text-muted-foreground">Completed Workshops</p>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                <Card>
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Projects by Status</CardTitle></CardHeader>
+                  <CardContent>
+                    {projects?.length ? (
+                      <div className="space-y-2">
+                        {Object.entries(
+                          projects.reduce((acc, p) => { acc[p.status] = (acc[p.status] || 0) + 1; return acc; }, {} as Record<string, number>)
+                        ).map(([status, count]) => (
+                          <div key={status} className="flex justify-between items-center">
+                            <Badge className="capitalize">{status.replace(/_/g, ' ')}</Badge>
+                            <span className="text-sm font-medium">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : <p className="text-sm text-muted-foreground">No data</p>}
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2"><CardTitle className="text-sm">Invoice Summary</CardTitle></CardHeader>
+                  <CardContent>
+                    {invoices?.length ? (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Total Invoiced</span>
+                          <span className="text-sm font-medium">£{invoices.reduce((s, i) => s + Number(i.total), 0).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Paid</span>
+                          <span className="text-sm font-medium">£{invoices.filter(i => i.status === 'paid').reduce((s, i) => s + Number(i.total), 0).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Outstanding</span>
+                          <span className="text-sm font-medium">£{invoices.filter(i => i.status !== 'paid').reduce((s, i) => s + Number(i.total), 0).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    ) : <p className="text-sm text-muted-foreground">No data</p>}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
           </Tabs>
         )}
       </main>

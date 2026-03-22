@@ -30,6 +30,7 @@ import Insights from './pages/Insights';
 import AIAssistant from './pages/AIAssistant';
 import Settings from './pages/Settings';
 import Meetings from './pages/Meetings';
+import MeetingDetail from './pages/MeetingDetail';
 import Contracts from './pages/Contracts';
 import Partners from './pages/Partners';
 import KnowledgeBase from './pages/KnowledgeBase';
@@ -78,6 +79,7 @@ const App = () => {
               <Route path="/ai" element={<Guard><ErrorBoundary><AIAssistant /></ErrorBoundary></Guard>} />
               <Route path="/settings" element={<Guard><ErrorBoundary><Settings /></ErrorBoundary></Guard>} />
               <Route path="/meetings" element={<Guard><ErrorBoundary><Meetings /></ErrorBoundary></Guard>} />
+              <Route path="/meetings/:id" element={<Guard><ErrorBoundary><MeetingDetail /></ErrorBoundary></Guard>} />
               <Route path="/contracts" element={<Guard><ErrorBoundary><Contracts /></ErrorBoundary></Guard>} />
               <Route path="/partners" element={<Guard><ErrorBoundary><Partners /></ErrorBoundary></Guard>} />
               <Route path="/knowledge" element={<Guard><ErrorBoundary><KnowledgeBase /></ErrorBoundary></Guard>} />
