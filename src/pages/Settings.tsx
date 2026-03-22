@@ -309,6 +309,55 @@ export default function Settings() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="automations" className="mt-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-warning" />
+                  Automation Log
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!automationLog?.length ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No automation events yet. Status changes on projects, workshops, and invoices will appear here.</p>
+                ) : (
+                  <div className="rounded-xl border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Entity</TableHead>
+                          <TableHead>Change</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>When</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {automationLog.map((item: any) => (
+                          <TableRow key={item.id}>
+                            <TableCell className="capitalize text-sm">{item.entity_type}</TableCell>
+                            <TableCell className="text-sm">
+                              <span className="text-muted-foreground">{item.old_status ?? '—'}</span>
+                              <span className="mx-1.5">→</span>
+                              <span className="font-medium">{item.new_status}</span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={item.processed ? 'secondary' : 'default'} className="text-xs">
+                                {item.processed ? 'Processed' : 'Pending'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {item.created_at ? formatDistanceToNow(new Date(item.created_at), { addSuffix: true }) : ''}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </AppShell>
