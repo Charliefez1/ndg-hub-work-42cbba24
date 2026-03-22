@@ -30,6 +30,7 @@ import Insights from './pages/Insights';
 import AIAssistant from './pages/AIAssistant';
 import Settings from './pages/Settings';
 import Meetings from './pages/Meetings';
+import MeetingDetail from './pages/MeetingDetail';
 import Contracts from './pages/Contracts';
 import Partners from './pages/Partners';
 import KnowledgeBase from './pages/KnowledgeBase';
