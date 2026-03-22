@@ -122,6 +122,36 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_queue: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          new_status: string
+          old_status: string | null
+          processed: boolean
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          new_status: string
+          old_status?: string | null
+          processed?: boolean
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          new_status?: string
+          old_status?: string | null
+          processed?: boolean
+        }
+        Relationships: []
+      }
       automation_rules: {
         Row: {
           action_config: Json

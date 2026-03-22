@@ -7,11 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { getStoredTheme, getStoredAccent, setTheme, setAccent, type Theme, type Accent } from '@/lib/theme';
-import { Sun, Moon, Monitor, Check, Calendar, Mail, HardDrive, Receipt, Brain, MessageCircle, ExternalLink } from 'lucide-react';
+import { Sun, Moon, Monitor, Check, Calendar, Mail, HardDrive, Receipt, Brain, MessageCircle, ExternalLink, Zap } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 const ACCENT_OPTIONS: { value: Accent; label: string; color: string }[] = [
   { value: 'steel', label: 'Steel', color: '#3B82F6' },
@@ -87,6 +90,20 @@ export default function Settings() {
   const [currentAccent, setCurrentAccent] = useState<Accent>(getStoredAccent());
   const [saving, setSaving] = useState(false);
 
+  // Automation log
+  const { data: automationLog } = useQuery({
+    queryKey: ['automation-log'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('automation_queue')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(30);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (profile?.display_name) setDisplayName(profile.display_name);
   }, [profile]);
@@ -131,11 +148,12 @@ export default function Settings() {
         <h1 className="text-page-title">Settings</h1>
 
         <Tabs defaultValue="profile">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="automations"><Zap className="h-3.5 w-3.5 mr-1" />Automations</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="mt-3 space-y-3">
@@ -288,6 +306,55 @@ export default function Settings() {
                 <p className="text-caption text-muted-foreground mt-3">
                   Telegram notifications require a Telegram Chat ID in your profile settings.
                 </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="automations" className="mt-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-warning" />
+                  Automation Log
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!automationLog?.length ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No automation events yet. Status changes on projects, workshops, and invoices will appear here.</p>
+                ) : (
+                  <div className="rounded-xl border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Entity</TableHead>
+                          <TableHead>Change</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>When</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {automationLog.map((item: any) => (
+                          <TableRow key={item.id}>
+                            <TableCell className="capitalize text-sm">{item.entity_type}</TableCell>
+                            <TableCell className="text-sm">
+                              <span className="text-muted-foreground">{item.old_status ?? '—'}</span>
+                              <span className="mx-1.5">→</span>
+                              <span className="font-medium">{item.new_status}</span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={item.processed ? 'secondary' : 'default'} className="text-xs">
+                                {item.processed ? 'Processed' : 'Pending'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {item.created_at ? formatDistanceToNow(new Date(item.created_at), { addSuffix: true }) : ''}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

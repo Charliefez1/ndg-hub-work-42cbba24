@@ -8,12 +8,16 @@ import { useProjects } from '@/hooks/useProjects';
 import { useDeliveries } from '@/hooks/useDeliveries';
 import { useTasks } from '@/hooks/useTasks';
 import { useInvoices } from '@/hooks/useInvoices';
-import { FolderKanban, CheckSquare, Briefcase, FileText, Plus, AlertTriangle, TrendingUp, ArrowRight, Sparkles } from 'lucide-react';
+import { useDailyStates } from '@/hooks/useDailyStates';
+import { FolderKanban, CheckSquare, Briefcase, FileText, Plus, AlertTriangle, ArrowRight, Sparkles } from 'lucide-react';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
-import { formatGBP } from '@/lib/format';
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
+import { PipelineStrip } from '@/components/dashboard/PipelineStrip';
+import { RevenueSparkline } from '@/components/dashboard/RevenueSparkline';
+import { FocusQuickStart } from '@/components/dashboard/FocusQuickStart';
 
 export default function Home() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { data: projects } = useProjects();
   const { data: deliveries } = useDeliveries();
   const { data: tasks } = useTasks();
@@ -24,7 +28,10 @@ export default function Home() {
   const pendingTasks = tasks?.filter((t) => t.status !== 'done').length ?? 0;
   const overdueTasks = tasks?.filter((t) => t.due_date && t.due_date < today && t.status !== 'done') ?? [];
   const upcomingWorkshops = deliveries?.filter((d) => d.delivery_date && d.delivery_date >= today).slice(0, 3) ?? [];
-  const totalRevenue = invoices?.filter((i) => i.status === 'paid').reduce((s, i) => s + Number(i.total), 0) ?? 0;
+
+  const moodEmojis: Record<string, string> = {
+    great: '🔥', good: '😊', okay: '😐', low: '😔', stressed: '😰',
+  };
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -58,14 +65,6 @@ export default function Home() {
       textColor: 'text-[hsl(var(--cyan))]',
       ring: 'ring-[hsl(var(--cyan)/0.15)]',
     },
-    {
-      label: 'Revenue (Paid)',
-      value: formatGBP(totalRevenue),
-      icon: TrendingUp,
-      bgColor: 'bg-[hsl(var(--success)/0.1)]',
-      textColor: 'text-[hsl(var(--success))]',
-      ring: 'ring-[hsl(var(--success)/0.15)]',
-    },
   ];
 
   return (
@@ -88,7 +87,7 @@ export default function Home() {
           <Link to="/invoices"><Button variant="outline" size="sm" className="gap-1.5 shadow-xs hover:shadow-sm transition-all"><FileText className="h-3.5 w-3.5" /> Invoices</Button></Link>
         </div>
 
-        {/* KPI cards */}
+        {/* KPI cards + Revenue sparkline */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger-in">
           {kpis.map((kpi) => (
             <Card key={kpi.label} className="shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-border/50">
@@ -105,7 +104,17 @@ export default function Home() {
               </CardContent>
             </Card>
           ))}
+
+          {/* Revenue Sparkline KPI */}
+          <Card className="shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-border/50">
+            <CardContent className="pt-5 pb-4 px-5">
+              <RevenueSparkline invoices={invoices} />
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Pipeline Strip */}
+        <PipelineStrip projects={projects} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Overdue alerts */}
@@ -130,6 +139,12 @@ export default function Home() {
               </CardContent>
             </Card>
           )}
+
+          {/* Focus Quick Start */}
+          <FocusQuickStart />
+
+          {/* Activity Feed */}
+          <ActivityFeed />
 
           {/* Upcoming workshops */}
           <Card className="shadow-sm animate-fade-in-up" style={{ animationDelay: '100ms' }}>
@@ -159,7 +174,7 @@ export default function Home() {
           </Card>
 
           {/* Recent projects */}
-          <Card className={`shadow-sm animate-fade-in-up ${overdueTasks.length === 0 ? 'lg:col-span-2' : ''}`} style={{ animationDelay: '150ms' }}>
+          <Card className={`shadow-sm animate-fade-in-up ${overdueTasks.length === 0 ? '' : ''}`} style={{ animationDelay: '150ms' }}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
