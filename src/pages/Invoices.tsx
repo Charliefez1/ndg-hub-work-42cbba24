@@ -40,11 +40,11 @@ export default function Invoices() {
         <div className="grid grid-cols-3 gap-3">
           <Card><CardContent className="pt-4">
             <p className="text-caption text-muted-foreground">Revenue (Paid)</p>
-            <p className="text-section-title text-green-600">£{totalRevenue.toLocaleString()}</p>
+            <p className="text-section-title text-green-600">{formatGBP(totalRevenue)}</p>
           </CardContent></Card>
           <Card><CardContent className="pt-4">
             <p className="text-caption text-muted-foreground">Outstanding</p>
-            <p className="text-section-title text-amber-600">£{totalOutstanding.toLocaleString()}</p>
+            <p className="text-section-title text-amber-600">{formatGBP(totalOutstanding)}</p>
           </CardContent></Card>
           <Card><CardContent className="pt-4">
             <p className="text-caption text-muted-foreground">Drafts</p>
