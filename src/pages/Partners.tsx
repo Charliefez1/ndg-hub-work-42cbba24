@@ -14,7 +14,7 @@ import { usePartners, useCreatePartner, useUpdatePartner, useDeletePartner, type
 import { Plus, Users, MoreHorizontal, Pencil, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
-const PARTNER_TYPES = ['referral', 'delivery', 'technology', 'content', 'other'] as const;
+const PARTNER_TYPES = ['referral', 'delivery', 'technology', 'content', 'edi', 'wellbeing', 'other'] as const;
 
 const TYPE_COLORS: Record<string, { border: string; bg: string; text: string; dot: string }> = {
   referral:   { border: 'border-l-vivid-cyan',    bg: 'bg-vivid-cyan/10',    text: 'text-vivid-cyan',    dot: 'bg-vivid-cyan' },
