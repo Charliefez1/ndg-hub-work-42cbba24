@@ -12,7 +12,7 @@ import { getStatusBadgeClasses } from '@/lib/status-colors';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { PageSkeleton } from '@/components/shared/PageSkeleton';
-import { FolderKanban, Briefcase, FileText, ClipboardList } from 'lucide-react';
+import { FolderKanban, Briefcase, FileText, ClipboardList, BarChart3 } from 'lucide-react';
 
 function TabSkeleton({ rows = 3 }: { rows?: number }) {
   return (
