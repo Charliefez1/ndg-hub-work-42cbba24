@@ -62,7 +62,7 @@ export default function Clients() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((o) => (
+                {paginated.map((o) => (
                   <TableRow key={o.id}>
                     <TableCell>
                       <Link to={`/clients/${o.id}`} className="font-medium text-primary hover:underline">{o.name}</Link>
@@ -75,6 +75,7 @@ export default function Clients() {
               </TableBody>
             </Table>
           </div>
+          <Pagination page={page} total={total} onPageChange={setPage} />
         )}
       </div>
 
