@@ -10,14 +10,20 @@ import { FileText, Plus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getStatusBadgeClasses } from '@/lib/status-colors';
 import { toast } from 'sonner';
+import { Pagination, usePagination } from '@/components/shared/Pagination';
+import { formatDate, formatGBP } from '@/lib/format';
 
 export default function Invoices() {
   const { data: invoices, isLoading } = useInvoices();
   const updateInvoice = useUpdateInvoice();
+  const [page, setPage] = useState(1);
 
   const totalRevenue = invoices?.filter((i) => i.status === 'paid').reduce((s, i) => s + Number(i.total), 0) ?? 0;
   const totalOutstanding = invoices?.filter((i) => i.status === 'sent').reduce((s, i) => s + Number(i.total), 0) ?? 0;
   const totalDraft = invoices?.filter((i) => i.status === 'draft').length ?? 0;
+
+  const allInvoices = invoices ?? [];
+  const { paginated, total } = usePagination(allInvoices, page);
 
   const markPaid = async (id: string) => {
     await updateInvoice.mutateAsync({ id, status: 'paid', paid_date: new Date().toISOString().split('T')[0] });
@@ -34,11 +40,11 @@ export default function Invoices() {
         <div className="grid grid-cols-3 gap-3">
           <Card><CardContent className="pt-4">
             <p className="text-caption text-muted-foreground">Revenue (Paid)</p>
-            <p className="text-section-title text-green-600">£{totalRevenue.toLocaleString()}</p>
+            <p className="text-section-title text-green-600">{formatGBP(totalRevenue)}</p>
           </CardContent></Card>
           <Card><CardContent className="pt-4">
             <p className="text-caption text-muted-foreground">Outstanding</p>
-            <p className="text-section-title text-amber-600">£{totalOutstanding.toLocaleString()}</p>
+            <p className="text-section-title text-amber-600">{formatGBP(totalOutstanding)}</p>
           </CardContent></Card>
           <Card><CardContent className="pt-4">
             <p className="text-caption text-muted-foreground">Drafts</p>
@@ -54,38 +60,41 @@ export default function Invoices() {
             <p className="text-sm text-muted-foreground">No invoices yet. Invoices are generated from project deliveries.</p>
           </div>
         ) : (
-          <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Invoice #</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Due</TableHead>
-                  <TableHead className="w-24" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invoices.map((inv) => (
-                  <TableRow key={inv.id}>
-                    <TableCell className="font-mono font-medium">{inv.invoice_number}</TableCell>
-                    <TableCell>{(inv as any).organisations?.name ?? '—'}</TableCell>
-                    <TableCell>{(inv as any).projects?.name ?? '—'}</TableCell>
-                    <TableCell>£{Number(inv.total).toLocaleString()}</TableCell>
-                    <TableCell><Badge className={getStatusBadgeClasses(inv.status, 'invoice')}>{inv.status}</Badge></TableCell>
-                    <TableCell>{inv.due_date ?? '—'}</TableCell>
-                    <TableCell>
-                      {inv.status === 'sent' && (
-                        <Button size="sm" variant="outline" onClick={() => markPaid(inv.id)}>Mark Paid</Button>
-                      )}
-                    </TableCell>
+          <>
+            <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Invoice #</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Due</TableHead>
+                    <TableHead className="w-24" />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {paginated.map((inv) => (
+                    <TableRow key={inv.id}>
+                      <TableCell className="font-mono font-medium">{inv.invoice_number}</TableCell>
+                      <TableCell>{(inv as any).organisations?.name ?? '—'}</TableCell>
+                      <TableCell>{(inv as any).projects?.name ?? '—'}</TableCell>
+                      <TableCell>{formatGBP(inv.total)}</TableCell>
+                      <TableCell><Badge className={getStatusBadgeClasses(inv.status, 'invoice')}>{inv.status}</Badge></TableCell>
+                      <TableCell>{formatDate(inv.due_date)}</TableCell>
+                      <TableCell>
+                        {inv.status === 'sent' && (
+                          <Button size="sm" variant="outline" onClick={() => markPaid(inv.id)}>Mark Paid</Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <Pagination page={page} total={total} onPageChange={setPage} />
+          </>
         )}
       </div>
     </AppShell>

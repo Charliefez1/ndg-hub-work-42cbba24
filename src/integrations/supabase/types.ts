@@ -194,9 +194,12 @@ export type Database = {
         Row: {
           created_at: string | null
           email: string | null
+          first_name: string | null
           id: string
           is_primary: boolean | null
           job_title: string | null
+          last_name: string | null
+          linkedin_url: string | null
           name: string
           notes: string | null
           organisation_id: string
@@ -205,9 +208,12 @@ export type Database = {
         Insert: {
           created_at?: string | null
           email?: string | null
+          first_name?: string | null
           id?: string
           is_primary?: boolean | null
           job_title?: string | null
+          last_name?: string | null
+          linkedin_url?: string | null
           name: string
           notes?: string | null
           organisation_id: string
@@ -216,9 +222,12 @@ export type Database = {
         Update: {
           created_at?: string | null
           email?: string | null
+          first_name?: string | null
           id?: string
           is_primary?: boolean | null
           job_title?: string | null
+          last_name?: string | null
+          linkedin_url?: string | null
           name?: string
           notes?: string | null
           organisation_id?: string
@@ -237,8 +246,10 @@ export type Database = {
       contracts: {
         Row: {
           created_at: string | null
+          document_url: string | null
           end_date: string | null
           id: string
+          notes: string | null
           organisation_id: string
           parent_contract_id: string | null
           project_id: string | null
@@ -251,8 +262,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          document_url?: string | null
           end_date?: string | null
           id?: string
+          notes?: string | null
           organisation_id: string
           parent_contract_id?: string | null
           project_id?: string | null
@@ -265,8 +278,10 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          document_url?: string | null
           end_date?: string | null
           id?: string
+          notes?: string | null
           organisation_id?: string
           parent_contract_id?: string | null
           project_id?: string | null
@@ -305,6 +320,7 @@ export type Database = {
         Row: {
           created_at: string | null
           default_agenda: Json | null
+          description: string | null
           id: string
           materials: Json | null
           neuro_phase: string | null
@@ -315,6 +331,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           default_agenda?: Json | null
+          description?: string | null
           id?: string
           materials?: Json | null
           neuro_phase?: string | null
@@ -325,6 +342,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           default_agenda?: Json | null
+          description?: string | null
           id?: string
           materials?: Json | null
           neuro_phase?: string | null
@@ -502,6 +520,8 @@ export type Database = {
       }
       emails: {
         Row: {
+          body: string | null
+          contact_id: string | null
           created_at: string | null
           from_address: string | null
           gmail_id: string | null
@@ -509,12 +529,16 @@ export type Database = {
           organisation_id: string | null
           project_id: string | null
           received_at: string | null
+          sent_at: string | null
           snippet: string | null
+          status: string | null
           subject: string | null
           thread_id: string | null
           to_addresses: string[] | null
         }
         Insert: {
+          body?: string | null
+          contact_id?: string | null
           created_at?: string | null
           from_address?: string | null
           gmail_id?: string | null
@@ -522,12 +546,16 @@ export type Database = {
           organisation_id?: string | null
           project_id?: string | null
           received_at?: string | null
+          sent_at?: string | null
           snippet?: string | null
+          status?: string | null
           subject?: string | null
           thread_id?: string | null
           to_addresses?: string[] | null
         }
         Update: {
+          body?: string | null
+          contact_id?: string | null
           created_at?: string | null
           from_address?: string | null
           gmail_id?: string | null
@@ -535,12 +563,21 @@ export type Database = {
           organisation_id?: string | null
           project_id?: string | null
           received_at?: string | null
+          sent_at?: string | null
           snippet?: string | null
+          status?: string | null
           subject?: string | null
           thread_id?: string | null
           to_addresses?: string[] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "emails_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "emails_organisation_id_fkey"
             columns: ["organisation_id"]
@@ -604,21 +641,27 @@ export type Database = {
           form_id: string
           id: string
           kirkpatrick_level: number | null
+          satisfaction_score: number | null
           submitted_at: string | null
+          submitted_by: string | null
         }
         Insert: {
           data: Json
           form_id: string
           id?: string
           kirkpatrick_level?: number | null
+          satisfaction_score?: number | null
           submitted_at?: string | null
+          submitted_by?: string | null
         }
         Update: {
           data?: Json
           form_id?: string
           id?: string
           kirkpatrick_level?: number | null
+          satisfaction_score?: number | null
           submitted_at?: string | null
+          submitted_by?: string | null
         }
         Relationships: [
           {
@@ -639,7 +682,9 @@ export type Database = {
           fields: Json
           id: string
           kirkpatrick_level: number | null
+          organisation_id: string | null
           project_id: string | null
+          public_token: string | null
           title: string
           type: string
           updated_at: string | null
@@ -652,7 +697,9 @@ export type Database = {
           fields?: Json
           id?: string
           kirkpatrick_level?: number | null
+          organisation_id?: string | null
           project_id?: string | null
+          public_token?: string | null
           title: string
           type: string
           updated_at?: string | null
@@ -665,7 +712,9 @@ export type Database = {
           fields?: Json
           id?: string
           kirkpatrick_level?: number | null
+          organisation_id?: string | null
           project_id?: string | null
+          public_token?: string | null
           title?: string
           type?: string
           updated_at?: string | null
@@ -676,6 +725,13 @@ export type Database = {
             columns: ["delivery_id"]
             isOneToOne: false
             referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forms_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
           {
@@ -826,36 +882,54 @@ export type Database = {
       }
       knowledge_articles: {
         Row: {
+          author_id: string | null
           category: string | null
           content: string | null
           created_at: string | null
           id: string
+          is_published: boolean | null
+          organisation_id: string | null
           tags: string[] | null
           title: string
           updated_at: string | null
         }
         Insert: {
+          author_id?: string | null
           category?: string | null
           content?: string | null
           created_at?: string | null
           id?: string
+          is_published?: boolean | null
+          organisation_id?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string | null
         }
         Update: {
+          author_id?: string | null
           category?: string | null
           content?: string | null
           created_at?: string | null
           id?: string
+          is_published?: boolean | null
+          organisation_id?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_articles_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meetings: {
         Row: {
+          analysis: Json | null
           attendees: Json | null
           contact_id: string | null
           created_at: string | null
@@ -869,8 +943,10 @@ export type Database = {
           project_id: string | null
           scheduled_at: string
           title: string
+          transcript: string | null
         }
         Insert: {
+          analysis?: Json | null
           attendees?: Json | null
           contact_id?: string | null
           created_at?: string | null
@@ -884,8 +960,10 @@ export type Database = {
           project_id?: string | null
           scheduled_at: string
           title: string
+          transcript?: string | null
         }
         Update: {
+          analysis?: Json | null
           attendees?: Json | null
           contact_id?: string | null
           created_at?: string | null
@@ -899,6 +977,7 @@ export type Database = {
           project_id?: string | null
           scheduled_at?: string
           title?: string
+          transcript?: string | null
         }
         Relationships: [
           {
@@ -1004,6 +1083,7 @@ export type Database = {
           created_at: string | null
           email: string | null
           id: string
+          logo_url: string | null
           name: string
           notes: string | null
           phone: string | null
@@ -1017,6 +1097,7 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          logo_url?: string | null
           name: string
           notes?: string | null
           phone?: string | null
@@ -1030,6 +1111,7 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
@@ -1047,6 +1129,7 @@ export type Database = {
           created_at: string | null
           id: string
           name: string
+          notes: string | null
           type: string | null
         }
         Insert: {
@@ -1055,6 +1138,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name: string
+          notes?: string | null
           type?: string | null
         }
         Update: {
@@ -1063,6 +1147,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
+          notes?: string | null
           type?: string | null
         }
         Relationships: []
@@ -1283,6 +1368,7 @@ export type Database = {
           facilitator_id: string | null
           id: string
           neuro_phase: string | null
+          notes: string | null
           project_id: string
           session_date: string | null
           session_type: string | null
@@ -1298,6 +1384,7 @@ export type Database = {
           facilitator_id?: string | null
           id?: string
           neuro_phase?: string | null
+          notes?: string | null
           project_id: string
           session_date?: string | null
           session_type?: string | null
@@ -1313,6 +1400,7 @@ export type Database = {
           facilitator_id?: string | null
           id?: string
           neuro_phase?: string | null
+          notes?: string | null
           project_id?: string
           session_date?: string | null
           session_type?: string | null
@@ -1442,6 +1530,7 @@ export type Database = {
           due_date: string | null
           id: string
           is_template: boolean | null
+          organisation_id: string | null
           parent_task_id: string | null
           priority: string | null
           project_id: string | null
@@ -1461,6 +1550,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_template?: boolean | null
+          organisation_id?: string | null
           parent_task_id?: string | null
           priority?: string | null
           project_id?: string | null
@@ -1480,6 +1570,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           is_template?: boolean | null
+          organisation_id?: string | null
           parent_task_id?: string | null
           priority?: string | null
           project_id?: string | null
@@ -1496,6 +1587,13 @@ export type Database = {
             columns: ["delivery_id"]
             isOneToOne: false
             referencedRelation: "deliveries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
           {

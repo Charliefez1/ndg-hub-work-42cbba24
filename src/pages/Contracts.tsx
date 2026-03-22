@@ -14,6 +14,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { Plus, FileText, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getStatusBadgeClasses, formatStatus } from '@/lib/status-colors';
+import { formatDate, formatGBP } from '@/lib/format';
 
 const CONTRACT_TYPES = ['master', 'project', 'sow', 'amendment'];
 const CONTRACT_STATUSES = ['draft', 'sent', 'signed', 'active', 'expired', 'terminated', 'cancelled'];
@@ -54,9 +55,9 @@ export default function Contracts() {
                     </div>
                     <p className="text-caption text-muted-foreground mt-1">
                       {(c as any).organisations?.name} · {c.type}
-                      {c.value ? ` · £${Number(c.value).toLocaleString()}` : ''}
-                      {c.start_date ? ` · ${c.start_date}` : ''}
-                      {c.end_date ? ` → ${c.end_date}` : ''}
+                      {c.value ? ` · ${formatGBP(c.value)}` : ''}
+                      {c.start_date ? ` · ${formatDate(c.start_date)}` : ''}
+                      {c.end_date ? ` → ${formatDate(c.end_date)}` : ''}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

@@ -93,7 +93,7 @@ export default function Portal() {
     return (
       <div className="min-h-screen bg-background">
         <header className="h-14 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-30">
-          <span className="font-satoshi text-lg font-bold">NDG Hub — Client Portal</span>
+          <span className="font-satoshi text-lg font-bold">NQI Hub — Client Portal</span>
         </header>
         <main className="max-w-5xl mx-auto p-6">
           <PageSkeleton variant="dashboard" />
@@ -105,7 +105,7 @@ export default function Portal() {
   return (
     <div className="min-h-screen bg-background">
       <header className="h-14 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-30">
-        <span className="font-satoshi text-lg font-bold">NDG Hub — Client Portal</span>
+        <span className="font-satoshi text-lg font-bold">NQI Hub — Client Portal</span>
         <div className="flex items-center gap-3">
           <span className="text-sm text-muted-foreground">{profile?.display_name}</span>
           <button onClick={signOut} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Sign Out</button>
