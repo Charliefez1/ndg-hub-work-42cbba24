@@ -44,7 +44,7 @@ export default function Clients() {
 
         {isLoading ? (
           <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
-        ) : !filtered?.length ? (
+        ) : !paginated.length ? (
           <div className="bg-card rounded-xl border p-6 text-center space-y-3">
             <Building2 className="h-12 w-12 mx-auto text-muted-foreground" strokeWidth={1.25} />
             <p className="text-sm text-muted-foreground">{search ? 'No clients match your search.' : 'No clients yet. Create your first client to get started.'}</p>
