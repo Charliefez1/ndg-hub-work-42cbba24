@@ -55,9 +55,9 @@ export default function Contracts() {
                     </div>
                     <p className="text-caption text-muted-foreground mt-1">
                       {(c as any).organisations?.name} · {c.type}
-                      {c.value ? ` · £${Number(c.value).toLocaleString()}` : ''}
-                      {c.start_date ? ` · ${c.start_date}` : ''}
-                      {c.end_date ? ` → ${c.end_date}` : ''}
+                      {c.value ? ` · ${formatGBP(c.value)}` : ''}
+                      {c.start_date ? ` · ${formatDate(c.start_date)}` : ''}
+                      {c.end_date ? ` → ${formatDate(c.end_date)}` : ''}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

@@ -18,20 +18,20 @@ const tabs = [
 
 const moreItems = [
   { title: 'Daily Brief', url: '/daily', icon: CalendarCheck, color: 'text-[hsl(var(--success))]', bg: 'bg-[hsl(var(--success)/0.1)]' },
-  { title: 'Clients', url: '/clients', icon: Users, color: 'text-[hsl(var(--orange))]', bg: 'bg-[hsl(var(--orange)/0.1)]' },
-  { title: 'Insights', url: '/insights', icon: BarChart3, color: 'text-[hsl(var(--pink))]', bg: 'bg-[hsl(var(--pink)/0.1)]' },
   { title: 'Workshops', url: '/workshops', icon: Briefcase, color: 'text-[hsl(var(--teal))]', bg: 'bg-[hsl(var(--teal)/0.1)]' },
   { title: 'Meetings', url: '/meetings', icon: CalendarDays, color: 'text-[hsl(var(--warning))]', bg: 'bg-[hsl(var(--warning)/0.1)]' },
-  { title: 'Curriculum', url: '/curriculum', icon: BookTemplate, color: 'text-[hsl(var(--purple))]', bg: 'bg-[hsl(var(--purple)/0.1)]' },
+  { title: 'Organisations', url: '/clients', icon: Users, color: 'text-[hsl(var(--orange))]', bg: 'bg-[hsl(var(--orange)/0.1)]' },
   { title: 'Contracts', url: '/contracts', icon: FileSignature, color: 'text-[hsl(var(--indigo))]', bg: 'bg-[hsl(var(--indigo)/0.1)]' },
-  { title: 'Forms', url: '/forms', icon: ClipboardList, color: 'text-[hsl(var(--cyan))]', bg: 'bg-[hsl(var(--cyan)/0.1)]' },
   { title: 'Emails', url: '/emails', icon: Mail, color: 'text-[hsl(var(--pink))]', bg: 'bg-[hsl(var(--pink)/0.1)]' },
-  { title: 'Portal', url: '/portal', icon: Globe, color: 'text-[hsl(var(--info))]', bg: 'bg-[hsl(var(--info)/0.1)]' },
+  { title: 'Forms', url: '/forms', icon: ClipboardList, color: 'text-[hsl(var(--cyan))]', bg: 'bg-[hsl(var(--cyan)/0.1)]' },
+  { title: 'Insights', url: '/insights', icon: BarChart3, color: 'text-[hsl(var(--pink))]', bg: 'bg-[hsl(var(--pink)/0.1)]' },
+  { title: 'AI', url: '/ai', icon: Bot, color: 'text-[hsl(var(--indigo))]', bg: 'bg-[hsl(var(--indigo)/0.1)]' },
+  { title: 'Knowledge', url: '/knowledge', icon: BookOpen, color: 'text-[hsl(var(--warning))]', bg: 'bg-[hsl(var(--warning)/0.1)]' },
   { title: 'Services', url: '/services', icon: Package, color: 'text-[hsl(var(--orange))]', bg: 'bg-[hsl(var(--orange)/0.1)]' },
   { title: 'Partners', url: '/partners', icon: Handshake, color: 'text-[hsl(var(--teal))]', bg: 'bg-[hsl(var(--teal)/0.1)]' },
-  { title: 'Knowledge', url: '/knowledge', icon: BookOpen, color: 'text-[hsl(var(--warning))]', bg: 'bg-[hsl(var(--warning)/0.1)]' },
-  { title: 'AI', url: '/ai', icon: Bot, color: 'text-[hsl(var(--indigo))]', bg: 'bg-[hsl(var(--indigo)/0.1)]' },
+  { title: 'Templates', url: '/curriculum', icon: BookTemplate, color: 'text-[hsl(var(--purple))]', bg: 'bg-[hsl(var(--purple)/0.1)]' },
   { title: 'Settings', url: '/settings', icon: Settings, color: 'text-muted-foreground', bg: 'bg-muted' },
+  { title: 'Portal', url: '/portal', icon: Globe, color: 'text-[hsl(var(--info))]', bg: 'bg-[hsl(var(--info)/0.1)]' },
 ];
 
 export function MobileTabBar() {
