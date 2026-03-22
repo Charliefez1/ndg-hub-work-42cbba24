@@ -14,6 +14,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { Plus, FileText, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getStatusBadgeClasses, formatStatus } from '@/lib/status-colors';
+import { formatDate, formatGBP } from '@/lib/format';
 
 const CONTRACT_TYPES = ['master', 'project', 'sow', 'amendment'];
 const CONTRACT_STATUSES = ['draft', 'sent', 'signed', 'active', 'expired', 'terminated', 'cancelled'];
