@@ -48,7 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          try {
+            await fetchProfile(session.user.id);
+          } catch (e) {
+            console.error('Failed to fetch profile:', e);
+          }
         } else {
           setProfile(null);
           setRoles([]);
@@ -61,7 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        try {
+          await fetchProfile(session.user.id);
+        } catch (e) {
+          console.error('Failed to fetch profile:', e);
+        }
       }
       setLoading(false);
     });
